@@ -1,0 +1,82 @@
+name: NewsHub CI
+
+# Kích hoạt pipeline khi push hoặc tạo PR vào nhánh main
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# Hủy các pipeline cũ đang chạy dang dở nếu có commit mới được đẩy lên
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Kiểm tra Frontend
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Cài Node.js và thiết lập bộ nhớ đệm (cache) cho npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      # Dùng npm ci thay cho npm install để đảm bảo tính nhất quán của thư viện trong CI/CD
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+  # Kiểm tra Backend
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.400"
+
+      - name: Restore Dependencies
+        working-directory: ./backend
+        run: dotnet restore NewsHub.sln
+
+      - name: Build Solution
+        working-directory: ./backend
+        run: dotnet build NewsHub.sln --configuration Release --no-restore
+
+  # Quét bảo mật toàn bộ dự án
+  security-scan:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Cài đặt .NET vào job này để Snyk có môi trường đọc các file .csproj của backend
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.400"
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects
