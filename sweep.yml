@@ -1,0 +1,13 @@
+# Cấu hình nhánh mặc định
+branch: main
+
+model: "claude-3-5-sonnet"
+
+rules:
+  - "Dự án sử dụng C# ASP.NET Core Clean Architecture cho Backend tại thư mục ./backend."
+  - "Frontend sử dụng React, TypeScript và Tailwind CSS tại thư mục ./frontend."
+  - "Luôn viết code có xử lý ngoại lệ (Exception Handling) và đúng chuẩn Naming Convention của C# / TypeScript."
+  - "Không chỉnh sửa file ci-cd.yml trừ khi được yêu cầu cụ thể."
+
+# Tự động xóa nhanh sau khi merge
+draft: false
