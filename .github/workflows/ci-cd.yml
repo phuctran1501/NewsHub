@@ -53,7 +53,7 @@ jobs:
 
       - name: Restore Dependencies
         working-directory: ./backend
-        run: dotnet restore NewsHub.sln
+        run: dotnet restore NewsHub.slnx
 
       - name: Build Solution
         working-directory: ./backend
