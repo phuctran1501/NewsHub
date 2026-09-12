@@ -57,7 +57,7 @@ jobs:
 
       - name: Build Solution
         working-directory: ./backend
-        run: dotnet build NewsHub.sln --configuration Release --no-restore
+        run: dotnet build NewsHub.slnx --configuration Release --no-restore
 
   # Quét bảo mật toàn bộ dự án
   security-scan:
