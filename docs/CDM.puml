@@ -1,0 +1,91 @@
+@startuml NewsHub_Conceptual_Data_Model
+
+hide circle
+skinparam linetype ortho
+skinparam roundcorner 5
+skinparam shadowing false
+skinparam entity {
+    BackgroundColor White
+    BorderColor #2C3E50
+    HeaderBackgroundColor #2C3E50
+    HeaderFontColor White
+    FontName Arial
+}
+
+entity "User" as user {
+    + id : UUID [PK]
+    --
+    email : String
+    password_hash : String
+    full_name : String
+    role : Enum (Admin, Journalist, User)
+    created_at : DateTime
+}
+
+entity "Article" as article {
+    + id : UUID [PK]
+    --
+    author_id : UUID [FK]
+    title : String
+    slug : String
+    content_html : Text (Rich Text)
+    status : Enum (Draft, Published, Archived)
+    published_at : DateTime
+    created_at : DateTime
+}
+
+entity "Category" as category {
+    + id : UUID [PK]
+    --
+    name : String
+    slug : String
+    description : String
+}
+
+entity "ArticleCategory" as art_cat {
+    + article_id : UUID [PK, FK]
+    + category_id : UUID [PK, FK]
+    --
+    is_ai_assigned : Boolean
+}
+
+entity "AISummary" as ai_summary {
+    + id : UUID [PK]
+    --
+    article_id : UUID [FK, UK]
+    bullet_points : JSON (Bulleted List)
+    sentiment : String
+    extracted_tags : JSON
+    ai_model : String
+    confidence_score : Float (Tagging Success Rate)
+    processed_at : DateTime
+}
+
+entity "UserBookmark" as bookmark {
+    + user_id : UUID [PK, FK]
+    + article_id : UUID [PK, FK]
+    --
+    saved_at : DateTime
+}
+
+entity "ReadingHistory" as history {
+    + id : UUID [PK]
+    --
+    user_id : UUID [FK]
+    article_id : UUID [FK]
+    read_at : DateTime
+}
+
+' Relationships
+user ||..|{ article : "writes / publishes (1:N)"
+article ||..|{ art_cat : "has (1:N)"
+category ||..|{ art_cat : "belongs to (1:N)"
+article ||..|| ai_summary : "analyzed by AI (1:1)"
+
+user ||..|{ bookmark : "bookmarks (1:N)"
+article ||..|{ bookmark : "bookmarked in (1:N)"
+
+user ||..|{ history : "tracks (1:N)"
+article ||..|{ history : "recorded in (1:N)"
+
+@enduml

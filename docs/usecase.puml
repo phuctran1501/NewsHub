@@ -1,0 +1,71 @@
+@startuml NewsHub_UseCase_Diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam actor {
+    BackgroundColor White
+    BorderColor #2C3E50
+}
+
+actor "User" as user
+actor "Journalist" as journalist
+actor "Admin" as admin
+actor "AI Engine (Gemini)" as ai
+
+' Role Inheritance
+user <|-- journalist
+journalist <|-- admin
+
+rectangle "NewsHub Enterprise Platform" {
+    
+    package "Authentication & Profile" {
+        usecase "UC-01: Register & Login (JWT)" as UC_Auth
+        usecase "UC-02: Manage Profile" as UC_Profile
+    }
+
+    package "Article Management (CRUD)" {
+        usecase "UC-03: Create Article (Rich Text)" as UC_CreateArticle
+        usecase "UC-04: Update / Delete Article" as UC_EditArticle
+        usecase "UC-05: Browse & Read Article" as UC_ReadArticle
+    }
+
+    package "User Dashboard" {
+        usecase "UC-06: Bookmark Article" as UC_Bookmark
+        usecase "UC-07: View Reading History" as UC_History
+    }
+
+    package "System Dashboard & Admin" {
+        usecase "UC-08: View System Analytics" as UC_Analytics
+        usecase "UC-09: Manage Users & Roles" as UC_UserMgmt
+    }
+
+    package "AI-Powered Services" {
+        usecase "UC-10: Auto-Categorization" as UC_AutoCat
+        usecase "UC-11: Smart Summarization" as UC_SmartSum
+        usecase "UC-12: Intelligent NLP Search" as UC_NLPSearch
+    }
+}
+
+' User Relations
+user --> UC_Auth
+user --> UC_Profile
+user --> UC_ReadArticle
+user --> UC_Bookmark
+user --> UC_History
+user --> UC_NLPSearch
+
+' Journalist Relations
+journalist --> UC_CreateArticle
+journalist --> UC_EditArticle
+
+' Admin Relations
+admin --> UC_Analytics
+admin --> UC_UserMgmt
+
+' AI Engine Relations
+UC_CreateArticle ..> UC_AutoCat : <<include>>
+UC_ReadArticle ..> UC_SmartSum : <<extend>>
+UC_NLPSearch <-- ai
+UC_AutoCat <-- ai
+UC_SmartSum <-- ai
+
+@enduml
