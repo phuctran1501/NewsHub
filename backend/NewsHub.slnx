@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NewsHub.API/NewsHub.API.csproj" />
+    <Project Path="src/NewsHub.Application/NewsHub.Application.csproj" />
+    <Project Path="src/NewsHub.Domain/NewsHub.Domain.csproj" />
+    <Project Path="src/NewsHub.Infrastructure/NewsHub.Infrastructure.csproj" />
+  </Folder>
+</Solution>
