@@ -10,6 +10,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// ── CORS ──────────────────────────────────────────────────────────────────────
+const string FrontendCorsPolicy = "FrontendCorsPolicy";
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173", "https://localhost:5173"];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCorsPolicy, policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // ── Health Checks ─────────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
     .AddNpgSql(
@@ -34,6 +51,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// 2. CORS phải đứng trước Authentication, Authorization và Endpoint mapping
+//    để các preflight OPTIONS request được phản hồi sớm với header hợp lệ
+app.UseCors(FrontendCorsPolicy);
 
 // ── Endpoints ─────────────────────────────────────────────────────────────────
 // GET /health → 200 Healthy | 503 Unhealthy
