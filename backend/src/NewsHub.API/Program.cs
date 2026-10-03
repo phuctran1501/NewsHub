@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using NewsHub.API.Middleware;
 using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── Exception Handling ────────────────────────────────────────────────────────
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // ── Health Checks ─────────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
@@ -14,12 +19,15 @@ builder.Services.AddHealthChecks()
         failureStatus: HealthStatus.Unhealthy,
         tags: ["db", "postgresql"]);
 
-// ── OpenAPI (Scalar) ──────────────────────────────────────────────────────────
+// ── OpenAPI ───────────────────────────────────────────────────────────────────
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// ── Development tools ─────────────────────────────────────────────────────────
+// ── Middleware Pipeline (thứ tự rất quan trọng) ───────────────────────────────
+// 1. Exception handler phải đứng ĐẦU TIÊN để bắt lỗi từ toàn bộ pipeline bên dưới
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -27,7 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ── Health Check Endpoint ─────────────────────────────────────────────────────
+// ── Endpoints ─────────────────────────────────────────────────────────────────
 // GET /health → 200 Healthy | 503 Unhealthy
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
@@ -36,7 +44,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 
 app.Run();
 
-// ── Response Writer ───────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 static Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
 {
     context.Response.ContentType = "application/json; charset=utf-8";
