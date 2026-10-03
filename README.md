@@ -16,7 +16,6 @@
 ![PostgreSQL](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white)
 <br>
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
 ![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)
@@ -68,7 +67,7 @@ NewsHub is an intelligent news aggregator and reading platform designed to comba
 
 - Frontend: TypeScript, React, TailwindCSS.
 - Backend: C# ASP.NET 10.
-- Database: PostgreSQL.
+- Database: PostgreSQL (Supabase).
 - AI Integration: Google Gemini API.
 - Architecture: Clean Architecture (Backend).
 
@@ -78,8 +77,8 @@ NewsHub is an intelligent news aggregator and reading platform designed to comba
 - Project Management: Linear.
 - Source Control: GitHub.
 - AI Code Review: CodeRabbit AI integrated into GitHub PRs.
-- CI/CD & Containerization: GitHub Actions, Docker.
-- Deployment: Vercel (Frontend), Render (Backend & Database).
+- CI/CD: GitHub Actions.
+- Deployment: Vercel (Frontend), Render (Backend).
 
 ---
 
@@ -98,18 +97,49 @@ newshub/
 │       ├── hooks/              # Custom React hooks
 │       ├── pages/              # Page components (Routing)
 │       ├── services/           # API integration (Axios/Fetch)
-│       ├── store/              # State management
+│       ├── store/              # State management (Zustand)
 │       ├── types/              # TypeScript interfaces/types
 │       └── utils/              # Helper functions
 ├── backend/                    # ASP.NET 10 Solution
-│   ├── NewsHub.sln             # Visual Studio Solution File
-│   ├── src/                    # Backend source code
-│   │   ├── NewsHub.Domain/         # Entities, Value Objects, Domain Interfaces
-│   │   ├── NewsHub.Application/    # Use Cases, CQRS, DTOs, Validation
-│   │   ├── NewsHub.Infrastructure/ # EF Core, DB Context, Gemini API Service
-│   │   └── NewsHub.API/            # Controllers, Middlewares, Program.cs
-│   ├── tests/                  # Unit and Integration Tests
-│   └── Dockerfile              # Backend containerization configuration
-├── docker-compose.yml          # Local development environment setup
+│   ├── NewsHub.slnx            # Visual Studio Solution File
+│   └── src/                    # Backend source code
+│       ├── NewsHub.Domain/         # Entities, Value Objects, Domain Interfaces
+│       ├── NewsHub.Application/    # Use Cases, DTOs, Validation
+│       ├── NewsHub.Infrastructure/ # EF Core, DB Context, Gemini API Service
+│       └── NewsHub.API/            # Controllers, Middlewares, Program.cs
 └── README.md                   # Project documentation
+```
+
+## 5. Prerequisites & Local Development
+
+### Requirements
+
+| Tool | Version |
+|---|---|
+| .NET SDK | 10.x |
+| Node.js | 22.x LTS |
+| PostgreSQL | Cloud via [Supabase](https://supabase.com) |
+
+### Backend Setup
+
+```bash
+# 1. Configure database connection (never commit this!)
+cd backend
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=...;Database=...;Username=...;Password=..." --project src/NewsHub.API
+
+# 2. Apply EF Core migrations
+dotnet ef database update --project src/NewsHub.Infrastructure --startup-project src/NewsHub.API
+
+# 3. Run the API
+dotnet run --project src/NewsHub.API
+# API available at: https://localhost:5001
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+# App available at: http://localhost:5173
 ```

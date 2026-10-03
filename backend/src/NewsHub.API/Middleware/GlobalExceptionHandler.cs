@@ -88,7 +88,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             ForbiddenException ex =>
                 (StatusCodes.Status403Forbidden, "Forbidden", ex.Message),
 
-            UnauthorizedException =>
+            UnauthorizedAccessException =>
                 (StatusCodes.Status401Unauthorized, "Unauthorized",
                     "Authentication is required to access this resource."),
 
