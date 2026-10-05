@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ── Hero Section ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/40 via-surface-primary to-surface-primary px-6 py-20 text-center sm:py-28 animate-fade-in">
+      <section className="relative overflow-hidden bg-linear-to-b from-brand-50/40 via-surface-primary to-surface-primary px-6 py-20 text-center sm:py-28 animate-fade-in">
         <div className="mx-auto max-w-4xl">
           <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand-700 uppercase">
             <span>✨</span> Powered by Google Gemini AI
@@ -12,7 +12,7 @@ export default function HomePage() {
           <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-text-primary sm:text-5xl lg:text-6xl font-sans">
             Tin tức thông minh,
             <br />
-            <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-accent-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-brand-600 via-brand-500 to-accent-600 bg-clip-text text-transparent">
               được cá nhân hóa cho bạn
             </span>
           </h1>

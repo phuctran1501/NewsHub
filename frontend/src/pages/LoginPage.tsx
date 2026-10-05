@@ -16,7 +16,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 rounded-2xl border border-border-default bg-surface-elevated p-8 shadow-card sm:p-10">
         {/* Header */}
         <div className="text-center">
-          <Link to="/" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 text-xl font-bold text-white shadow-md">
+          <Link to="/" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-brand-600 to-accent-600 text-xl font-bold text-white shadow-md">
             N
           </Link>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-text-primary sm:text-3xl font-sans">
