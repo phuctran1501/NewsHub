@@ -16,7 +16,7 @@ export default function RootLayout() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
           {/* Brand Logo */}
           <Link to="/" className="group flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-600 text-base font-extrabold text-white shadow-md transition-transform duration-200 group-hover:scale-105">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-brand-600 to-accent-600 text-base font-extrabold text-white shadow-md transition-transform duration-200 group-hover:scale-105">
               N
             </span>
             <span className="text-xl font-bold tracking-tight text-text-primary">
