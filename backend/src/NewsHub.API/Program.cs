@@ -1,14 +1,22 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using NewsHub.API;
 using NewsHub.API.Middleware;
+using NewsHub.Infrastructure;
 using System.Text;
 using System.Text.Json;
+
+// Tự động load file .env nếu có ở thư mục gốc hoặc backend (Local Dev)
+DotEnvLoader.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Exception Handling ────────────────────────────────────────────────────────
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+// ── Database & Infrastructure (EF Core PostgreSQL Supabase) ───────────────────
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const string FrontendCorsPolicy = "FrontendCorsPolicy";

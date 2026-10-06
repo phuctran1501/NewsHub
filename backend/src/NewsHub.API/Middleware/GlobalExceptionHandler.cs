@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using NewsHub.Domain.Exceptions;
-using System.ComponentModel.DataAnnotations;
 
 namespace NewsHub.API.Middleware;
 

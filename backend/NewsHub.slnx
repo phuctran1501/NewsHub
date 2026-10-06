@@ -5,4 +5,7 @@
     <Project Path="src/NewsHub.Domain/NewsHub.Domain.csproj" />
     <Project Path="src/NewsHub.Infrastructure/NewsHub.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NewsHub.Domain.Tests/NewsHub.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
