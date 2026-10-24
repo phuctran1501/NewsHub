@@ -12,7 +12,6 @@ dist/
 docs/
 backend/.agents/skills/
 .agents/
-tests/
 # IDE
 .vscode/
 .idea/
