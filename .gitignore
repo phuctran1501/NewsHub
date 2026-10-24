@@ -9,7 +9,9 @@ dist/
 .env
 .env.*
 !.env.example
-
+docs/
+backend/.agents/skills/
+.agents/
 # IDE
 .vscode/
 .idea/
