@@ -59,6 +59,10 @@ jobs:
         working-directory: ./backend
         run: dotnet build NewsHub.slnx --configuration Release --no-restore
 
+      - name: Run Tests
+        working-directory: ./backend
+        run: dotnet test NewsHub.slnx --configuration Release --no-build --verbosity normal
+
   # Quét bảo mật toàn bộ dự án
   security-scan:
     name: Snyk Security Scan
