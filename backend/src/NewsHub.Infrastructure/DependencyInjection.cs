@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NewsHub.Application.Common.Interfaces;
 using NewsHub.Infrastructure.Persistence;
+using NewsHub.Infrastructure.Repositories;
 
 namespace NewsHub.Infrastructure;
 
@@ -25,6 +27,8 @@ public static class DependencyInjection
                     errorCodesToAdd: null);
             });
         });
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
