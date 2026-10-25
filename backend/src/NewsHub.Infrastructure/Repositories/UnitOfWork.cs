@@ -94,7 +94,14 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             }
             catch
             {
-                await transaction.RollbackAsync(cancellationToken);
+                try
+                {
+                    await transaction.RollbackAsync(CancellationToken.None);
+                }
+                catch
+                {
+                    // Bỏ qua lỗi rollback thứ cấp để không che lỗi gốc (cần inject ILogger để ghi log).
+                }
                 throw;
             }
             finally
