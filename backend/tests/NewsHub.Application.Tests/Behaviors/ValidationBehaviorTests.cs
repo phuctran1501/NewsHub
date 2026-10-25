@@ -1,73 +1,101 @@
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
+using Moq;
 using NewsHub.Application.Common.Behaviors;
 using NewsHub.Application.Common.Exceptions;
-using Xunit;
 
 namespace NewsHub.Application.Tests.Behaviors;
 
 public class ValidationBehaviorTests
 {
-    public record SampleCommand(string Title) : IRequest<string>;
+    public record TestCommand(string Title) : IRequest<string>;
 
-    public class SampleCommandValidator : AbstractValidator<SampleCommand>
+    [Fact]
+    public async Task Handle_WhenNoValidatorsExist_ShouldCallNextAndReturnResponse()
     {
-        public SampleCommandValidator()
+        // Arrange
+        var validators = Enumerable.Empty<IValidator<TestCommand>>();
+        var behavior = new ValidationBehavior<TestCommand, string>(validators);
+        var command = new TestCommand("Valid Title");
+
+        var nextCalled = false;
+        RequestHandlerDelegate<string> next = (ct) =>
         {
-            RuleFor(x => x.Title)
-                .NotEmpty().WithMessage("Tiêu đề không được để trống.")
-                .MinimumLength(5).WithMessage("Tiêu đề phải có ít nhất 5 ký tự.");
-        }
-    }
-
-    [Fact]
-    public async Task Handle_WhenNoValidatorsExist_ShouldProceedToNext()
-    {
-        // Arrange
-        var behavior = new ValidationBehavior<SampleCommand, string>(Enumerable.Empty<IValidator<SampleCommand>>());
-        var command = new SampleCommand("Valid Title");
-        RequestHandlerDelegate<string> next = (ct) => Task.FromResult("Success");
+            nextCalled = true;
+            return Task.FromResult("Success");
+        };
 
         // Act
         var result = await behavior.Handle(command, next, CancellationToken.None);
 
         // Assert
-        result.Should().Be("Success");
+        Assert.True(nextCalled);
+        Assert.Equal("Success", result);
     }
 
     [Fact]
-    public async Task Handle_WhenValidationPasses_ShouldProceedToNext()
+    public async Task Handle_WhenValidationPasses_ShouldCallNextAndReturnResponse()
     {
         // Arrange
-        var validators = new List<IValidator<SampleCommand>> { new SampleCommandValidator() };
-        var behavior = new ValidationBehavior<SampleCommand, string>(validators);
-        var command = new SampleCommand("Valid Title");
-        RequestHandlerDelegate<string> next = (ct) => Task.FromResult("Success");
+        var mockValidator = new Mock<IValidator<TestCommand>>();
+        mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestCommand>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        var validators = new[] { mockValidator.Object };
+        var behavior = new ValidationBehavior<TestCommand, string>(validators);
+        var command = new TestCommand("Valid Title");
+
+        var nextCalled = false;
+        RequestHandlerDelegate<string> next = (ct) =>
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        };
 
         // Act
-        var result = await behavior.Handle(command, next, CancellationToken.None);
+https://github.com/phuctran1501/NewsHub/pull/54/conflict?name=backend%252Ftests%252FNewsHub.Application.Tests%252FBehaviors%252FLoggingBehaviorTests.cs&base_oid=88dfc84fc6413ada48da9452c55d1e8eaf7446e5&head_oid=cfae72d260bfddbd25df97c7f5e5a3794e99a88b        var result = await behavior.Handle(command, next, CancellationToken.None);
 
         // Assert
-        result.Should().Be("Success");
+        Assert.True(nextCalled);
+        Assert.Equal("Success", result);
     }
 
     [Fact]
-    public async Task Handle_WhenValidationFails_ShouldThrowAppValidationException()
+    public async Task Handle_WhenValidationFails_ShouldThrowAppValidationException_AndNotCallNext()
     {
         // Arrange
-        var validators = new List<IValidator<SampleCommand>> { new SampleCommandValidator() };
-        var behavior = new ValidationBehavior<SampleCommand, string>(validators);
-        var command = new SampleCommand(""); // invalid
-        RequestHandlerDelegate<string> next = (ct) => Task.FromResult("Success");
+        var failures = new List<ValidationFailure>
+        {
+            new("Title", "Title is required."),
+            new("Title", "Title must be at least 5 characters.")
+        };
 
-        // Act
-        var act = () => behavior.Handle(command, next, CancellationToken.None);
+        var mockValidator = new Mock<IValidator<TestCommand>>();
+        mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestCommand>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(failures));
 
-        // Assert
-        var exception = await act.Should().ThrowAsync<AppValidationException>();
-        exception.Which.Errors.Should().ContainKey("Title");
-        exception.Which.Errors["Title"].Should().Contain("Tiêu đề không được để trống.");
+        var validators = new[] { mockValidator.Object };
+        var behavior = new ValidationBehavior<TestCommand, string>(validators);
+        var command = new TestCommand("");
+
+        var nextCalled = false;
+        RequestHandlerDelegate<string> next = (ct) =>
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<AppValidationException>(() =>
+            behavior.Handle(command, next, CancellationToken.None));
+
+        Assert.False(nextCalled);
+        Assert.True(exception.Errors.ContainsKey("Title"));
+        Assert.Equal(2, exception.Errors["Title"].Length);
+        Assert.Contains("Title is required.", exception.Errors["Title"]);
+        Assert.Contains("Title must be at least 5 characters.", exception.Errors["Title"]);
     }
 }
