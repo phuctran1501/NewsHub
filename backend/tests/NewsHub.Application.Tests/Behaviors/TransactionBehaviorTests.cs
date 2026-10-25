@@ -1,24 +1,23 @@
-using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Moq;
 using NewsHub.Application.Common.Behaviors;
 using NewsHub.Application.Common.Interfaces;
-using NSubstitute;
 using Xunit;
 
 namespace NewsHub.Application.Tests.Behaviors;
 
 public class TransactionBehaviorTests
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<TransactionBehavior<NonTransactionalCommand, string>> _nonTransactionalLogger;
-    private readonly ILogger<TransactionBehavior<TransactionalCommand, string>> _transactionalLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly Mock<ILogger<TransactionBehavior<NonTransactionalCommand, string>>> _mockNonTransactionalLogger;
+    private readonly Mock<ILogger<TransactionBehavior<TransactionalCommand, string>>> _mockTransactionalLogger;
 
     public TransactionBehaviorTests()
     {
-        _unitOfWork = Substitute.For<IUnitOfWork>();
-        _nonTransactionalLogger = Substitute.For<ILogger<TransactionBehavior<NonTransactionalCommand, string>>>();
-        _transactionalLogger = Substitute.For<ILogger<TransactionBehavior<TransactionalCommand, string>>>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
+        _mockNonTransactionalLogger = new Mock<ILogger<TransactionBehavior<NonTransactionalCommand, string>>>();
+        _mockTransactionalLogger = new Mock<ILogger<TransactionBehavior<TransactionalCommand, string>>>();
     }
 
     public record NonTransactionalCommand : IRequest<string>;
@@ -29,19 +28,26 @@ public class TransactionBehaviorTests
     {
         // Arrange
         var behavior = new TransactionBehavior<NonTransactionalCommand, string>(
-            _unitOfWork,
-            _nonTransactionalLogger);
+            _mockUnitOfWork.Object,
+            _mockNonTransactionalLogger.Object);
 
         var request = new NonTransactionalCommand();
-        RequestHandlerDelegate<string> next = (ct) => Task.FromResult("Success");
+        var nextCalled = false;
+        RequestHandlerDelegate<string> next = (ct) =>
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        };
 
         // Act
         var result = await behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
-        result.Should().Be("Success");
-        await _unitOfWork.DidNotReceiveWithAnyArgs()
-            .ExecuteInTransactionAsync<string>(default!, default);
+        Assert.True(nextCalled);
+        Assert.Equal("Success", result);
+        _mockUnitOfWork.Verify(
+            u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task<string>>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -49,30 +55,28 @@ public class TransactionBehaviorTests
     {
         // Arrange
         var behavior = new TransactionBehavior<TransactionalCommand, string>(
-            _unitOfWork,
-            _transactionalLogger);
+            _mockUnitOfWork.Object,
+            _mockTransactionalLogger.Object);
 
         var request = new TransactionalCommand();
         RequestHandlerDelegate<string> next = (ct) => Task.FromResult("TransactedSuccess");
 
-        _unitOfWork.ExecuteInTransactionAsync(
-            Arg.Any<Func<CancellationToken, Task<string>>>(),
-            Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
-            {
-                var action = callInfo.Arg<Func<CancellationToken, Task<string>>>();
-                var ct = callInfo.Arg<CancellationToken>();
-                return action(ct);
-            });
+        _mockUnitOfWork
+            .Setup(u => u.ExecuteInTransactionAsync(
+                It.IsAny<Func<CancellationToken, Task<string>>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task<string>>, CancellationToken>((action, ct) => action(ct));
 
         // Act
         var result = await behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
-        result.Should().Be("TransactedSuccess");
-        await _unitOfWork.Received(1).ExecuteInTransactionAsync(
-            Arg.Any<Func<CancellationToken, Task<string>>>(),
-            Arg.Any<CancellationToken>());
+        Assert.Equal("TransactedSuccess", result);
+        _mockUnitOfWork.Verify(
+            u => u.ExecuteInTransactionAsync(
+                It.IsAny<Func<CancellationToken, Task<string>>>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -80,28 +84,23 @@ public class TransactionBehaviorTests
     {
         // Arrange
         var behavior = new TransactionBehavior<TransactionalCommand, string>(
-            _unitOfWork,
-            _transactionalLogger);
+            _mockUnitOfWork.Object,
+            _mockTransactionalLogger.Object);
 
         var request = new TransactionalCommand();
         var expectedException = new InvalidOperationException("DB Failure");
         RequestHandlerDelegate<string> next = (ct) => throw expectedException;
 
-        _unitOfWork.ExecuteInTransactionAsync(
-            Arg.Any<Func<CancellationToken, Task<string>>>(),
-            Arg.Any<CancellationToken>())
-            .Returns(async callInfo =>
-            {
-                var action = callInfo.Arg<Func<CancellationToken, Task<string>>>();
-                var ct = callInfo.Arg<CancellationToken>();
-                return await action(ct);
-            });
+        _mockUnitOfWork
+            .Setup(u => u.ExecuteInTransactionAsync(
+                It.IsAny<Func<CancellationToken, Task<string>>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task<string>>, CancellationToken>((action, ct) => action(ct));
 
-        // Act
-        var act = () => behavior.Handle(request, next, CancellationToken.None);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => behavior.Handle(request, next, CancellationToken.None));
 
-        // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("DB Failure");
+        Assert.Equal("DB Failure", exception.Message);
     }
 }

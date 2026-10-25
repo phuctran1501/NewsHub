@@ -55,7 +55,7 @@ public class ValidationBehaviorTests
         };
 
         // Act
-https://github.com/phuctran1501/NewsHub/pull/54/conflict?name=backend%252Ftests%252FNewsHub.Application.Tests%252FBehaviors%252FLoggingBehaviorTests.cs&base_oid=88dfc84fc6413ada48da9452c55d1e8eaf7446e5&head_oid=cfae72d260bfddbd25df97c7f5e5a3794e99a88b        var result = await behavior.Handle(command, next, CancellationToken.None);
+        var result = await behavior.Handle(command, next, CancellationToken.None);
 
         // Assert
         Assert.True(nextCalled);
