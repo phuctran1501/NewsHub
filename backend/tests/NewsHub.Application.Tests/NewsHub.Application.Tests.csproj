@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\NewsHub.Application\NewsHub.Application.csproj" />
     <ProjectReference Include="..\..\src\NewsHub.Infrastructure\NewsHub.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\NewsHub.API\NewsHub.API.csproj" />
   </ItemGroup>
 
 </Project>
