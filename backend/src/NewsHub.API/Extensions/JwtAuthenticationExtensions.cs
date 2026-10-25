@@ -13,8 +13,12 @@ public static class JwtAuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var secretKey = configuration["Jwt:SecretKey"]
-            ?? "";
+        var secretKey = configuration["Jwt:SecretKey"];
+        if (string.IsNullOrWhiteSpace(secretKey) || Encoding.UTF8.GetByteCount(secretKey) < 32)
+        {
+            throw new InvalidOperationException(
+                "Jwt:SecretKey must be configured and be at least 32 bytes long.");
+        }
         var issuer = configuration["Jwt:Issuer"] ?? "NewsHubAPI";
         var audience = configuration["Jwt:Audience"] ?? "NewsHubClients";
 
