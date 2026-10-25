@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Infrastructure.Persistence;
 using NewsHub.Infrastructure.Repositories;
+using NewsHub.Infrastructure.Services;
 
 namespace NewsHub.Infrastructure;
 
@@ -29,6 +30,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();
 
         return services;
     }
