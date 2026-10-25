@@ -21,9 +21,12 @@ builder.Services.AddSingleton<ICorrelationIdProvider, CorrelationIdProvider>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Web Features (CORS, Health Checks, OpenAPI)
+// Web Features (CORS, Authentication, SignalR, Health Checks, OpenAPI, Hangfire)
 builder.Services.AddCorsPolicy(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSignalRServices();
 builder.Services.AddAppHealthChecks(builder.Configuration);
+builder.Services.AddHangfireServices(builder.Configuration);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -42,7 +45,15 @@ app.UseHttpsRedirection();
 // CORS đứng trước Auth và Endpoint mapping để phản hồi sớm preflight OPTIONS
 app.UseCorsPolicy();
 
-// Endpoints
+// Authentication & Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Hangfire Dashboard
+app.UseHangfireDashboardCustom(app.Configuration);
+
+// Endpoints & SignalR Hubs
+app.MapSignalRHubs();
 app.MapAppHealthChecks();
 
 app.Run();

@@ -1,6 +1,6 @@
 <div align="center">
 
-# NewsHub - AI-Powered News Platform
+# NewsHub - AI-Powered Multi-Tenant Digital Press & Editorial Platform
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -114,10 +114,10 @@ newshub/
 
 ### Requirements
 
-| Tool | Version |
-|---|---|
-| .NET SDK | 10.x |
-| Node.js | 22.x LTS |
+| Tool       | Version                                    |
+| ---------- | ------------------------------------------ |
+| .NET SDK   | 10.x                                       |
+| Node.js    | 22.x LTS                                   |
 | PostgreSQL | Cloud via [Supabase](https://supabase.com) |
 
 ### Backend Setup
