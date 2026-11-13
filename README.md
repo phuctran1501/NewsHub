@@ -119,27 +119,3 @@ newshub/
 | .NET SDK   | 10.x                                       |
 | Node.js    | 22.x LTS                                   |
 | PostgreSQL | Cloud via [Supabase](https://supabase.com) |
-
-### Backend Setup
-
-```bash
-# 1. Configure database connection (never commit this!)
-cd backend
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=...;Database=...;Username=...;Password=..." --project src/NewsHub.API
-
-# 2. Apply EF Core migrations
-dotnet ef database update --project src/NewsHub.Infrastructure --startup-project src/NewsHub.API
-
-# 3. Run the API
-dotnet run --project src/NewsHub.API
-# API available at: https://localhost:5001
-```
-
-### Frontend Setup
-
-```bash
-cd frontend
-npm install
-npm run dev
-# App available at: http://localhost:5173
-```

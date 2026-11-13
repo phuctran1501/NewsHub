@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T19:28:30.000Z",
+  "title": "Design System: NewsHub",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Editorial Navy",
+        "canonical": "#0f172a",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#f8fafc"]
+      },
+      "accent-ai": {
+        "role": "secondary",
+        "displayName": "AI Accent Indigo",
+        "canonical": "#6366f1",
+        "tonalRamp": ["#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#818cf8", "#c7d2fe", "#e0e7ff"]
+      },
+      "accent-action": {
+        "role": "tertiary",
+        "displayName": "Editorial Emerald",
+        "canonical": "#0d9488",
+        "tonalRamp": ["#134e4a", "#115e59", "#0f766e", "#0d9488", "#14b8a6", "#2dd4bf", "#5eead4", "#ccfbf1"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Pure Paper White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#020617", "#0f172a", "#334155", "#64748b", "#cbd5e1", "#e2e8f0", "#f8fafc", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Heading",
+        "purpose": "Tiêu đề trang chủ và bài viết đinh (Hero Headline)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Tiêu đề bài viết trong trang đọc chi tiết."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Tiêu đề bài viết trên danh sách lưới thẻ tin tức."
+      },
+      "body": {
+        "displayName": "Body Text",
+        "purpose": "Nội dung văn bản chính, line-height 1.7 chống mỏi mắt."
+      },
+      "label": {
+        "displayName": "Label / Metadata",
+        "purpose": "Nhãn danh mục, số thẻ nhà báo, thời gian đọc ước tính."
+      }
+    },
+    "shadows": [
+      {
+        "name": "none",
+        "value": "none",
+        "purpose": "Tuyệt đối không dùng đổ bóng ở trạng thái tĩnh; chỉ dùng đường viền mảnh 1px để phân cách."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-editorial",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Chuyển đổi trạng thái nút bấm, hover và viền (150ms)."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Nút bấm hành động tiêu chuẩn, nền xanh đen Navy sắc cạnh.",
+      "html": "<button class=\"ds-btn-primary\">ĐỌC BÀI VIẾT</button>",
+      "css": ".ds-btn-primary { background: #0f172a; color: #ffffff; padding: 10px 20px; font-family: Inter, sans-serif; font-size: 14px; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: background 150ms ease; } .ds-btn-primary:hover { background: #1e293b; }"
+    },
+    {
+      "name": "Action Emerald Button",
+      "kind": "button",
+      "refersTo": "button-action",
+      "description": "Nút bấm kêu gọi hành động quyết định (Xuất bản, Theo dõi tòa soạn).",
+      "html": "<button class=\"ds-btn-action\">+ THEO DÕI TÒA SOẠN</button>",
+      "css": ".ds-btn-action { background: #0d9488; color: #ffffff; padding: 10px 20px; font-family: Inter, sans-serif; font-size: 14px; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: background 150ms ease; } .ds-btn-action:hover { background: #0f766e; }"
+    },
+    {
+      "name": "AI Badge",
+      "kind": "chip",
+      "refersTo": "badge-ai",
+      "description": "Huy hiệu nhỏ chỉ thị tính năng tóm tắt hoặc gợi ý bằng AI.",
+      "html": "<span class=\"ds-badge-ai\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z\"/></svg> TÓM TẮT AI</span>",
+      "css": ".ds-badge-ai { display: inline-flex; align-items: center; gap: 4px; background: #f5f3ff; color: #6366f1; padding: 4px 8px; font-family: Inter, sans-serif; font-size: 11px; font-weight: 700; border: 1px solid #ddd6fe; border-radius: 2px; letter-spacing: 0.05em; }"
+    },
+    {
+      "name": "Article Card",
+      "kind": "card",
+      "refersTo": "card-article",
+      "description": "Thẻ bài viết phẳng, góc vuông vức 0px, phân cách bằng đường viền đáy 1px.",
+      "html": "<article class=\"ds-article-card\"><div class=\"ds-card-meta\">THỜI SỰ • ⏱️ 4 PHÚT ĐỌC</div><h3 class=\"ds-card-title\">Đổi Mới Cơ Chế Hoạt Động Tòa Soạn Báo Chí Kỹ Thuật Số</h3><p class=\"ds-card-desc\">Phân tích xu hướng phát triển của các cơ quan thông tấn báo chí khi áp dụng mô hình phân phối tin tức đa đơn vị kết hợp trí tuệ nhân tạo.</p></article>",
+      "css": ".ds-article-card { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 16px 0; font-family: Inter, sans-serif; } .ds-card-meta { font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 6px; letter-spacing: 0.05em; } .ds-card-title { font-family: Merriweather, Georgia, serif; font-size: 18px; font-weight: 700; color: #0f172a; line-height: 1.35; margin: 0 0 8px 0; } .ds-card-desc { font-size: 14px; color: #475569; line-height: 1.6; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Tòa Soạn Số Chuẩn Mực & Tinh Tế",
+    "overview": "NewsHub là nền tảng báo điện tử thế hệ mới, lấy chuẩn mực uy tín và sự trang trọng của báo chí in ấn truyền thống làm trọng tâm, đồng thời dung hòa tinh tế các tiện ích trí tuệ nhân tạo (AI). Ngôn ngữ thiết kế tôn vinh sự mạch lạc, trang trọng và tĩnh lặng; loại bỏ triệt để các yếu tố màu mè, xao nhãng hoặc phô trương công nghệ không cần thiết.",
+    "keyCharacteristics": [
+      "Nghệ thuật xếp chữ dẫn lối (Typography-first): Tiêu đề serif cổ điển trang trọng, thân bài sans-serif rõ nét với nhịp thở thoáng đạt (line-height 1.7).",
+      "Mặt phẳng tinh giản & Đường viền Hairline: Phân chia nội dung bằng đường kẻ 1px dứt khoát hoặc tương phản sắc độ nền thay cho bóng đổ.",
+      "Điểm nhấn AI tiết chế: Sắc tím indigo chỉ xuất hiện ở tỷ lệ cực nhỏ (<5% bề mặt), đóng vai trò chỉ thị thông minh thay vì lấn át trang báo.",
+      "Trải nghiệm đọc chống mỏi mắt: Tối ưu hóa độ tương phản cao đạt chuẩn WCAG AAA trên cả giao diện Sáng và Tối."
+    ],
+    "rules": [
+      {
+        "name": "The Restrained AI Spark Rule",
+        "body": "Sắc tím AI (#6366f1) tuyệt đối không chiếm quá 5% diện tích bất kỳ màn hình nào. Sự xuất hiện hiếm hoi và tinh tế của nó chính là dấu hiệu bảo chứng cho tính năng thông minh.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Loud-Gradients Rule",
+        "body": "Không áp dụng hiệu ứng chuyển màu (gradient) lên toàn bộ nền trang, thanh tiêu đề (Header) hay thẻ bài viết. Gradient chỉ được phép dùng ở dạng đường viền hairline 1px hoặc biểu tượng icon nhỏ.",
+        "section": "colors"
+      },
+      {
+        "name": "The Editorial Cadence Rule",
+        "body": "Tiêu đề bài viết bắt buộc phải dùng font Serif có chân. Toàn bộ thông tin bổ trợ (tác giả, ngày giờ, danh mục) phải dùng font Sans-Serif với cỡ nhỏ hơn ít nhất 2 cấp để tạo nhịp phân cấp thị giác dứt khoát.",
+        "section": "typography"
+      },
+      {
+        "name": "The Reading Comfort Rule",
+        "body": "Nội dung văn bản bài báo (Body text) không bao giờ được có line-height nhỏ hơn 1.7. Khoảng thở giữa các dòng là yêu cầu bắt buộc để chống mỏi mắt.",
+        "section": "typography"
+      },
+      {
+        "name": "The Zero-Shadow Rule",
+        "body": "Toàn bộ thẻ bài viết, thanh điều hướng, ô nhập liệu và khối nội dung ở trạng thái nghỉ (at rest) đều có box-shadow: none. Chỉ khi người dùng rê chuột (hover) vào thẻ có tương tác, một đường viền đổi màu nhẹ (border-color shift) mới được kích hoạt.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Zero-Glassmorphism Rule",
+        "body": "Tuyệt đối không sử dụng hiệu ứng làm mờ hậu cảnh (backdrop-filter: blur(...)) hay nền bán trong suốt kiểu mặt kính (glassmorphism). Mọi lớp phủ phải sử dụng màu nền đặc (solid color) hoặc nền mờ tối có độ cản quang cao, đảm bảo văn bản luôn tương phản tuyệt đối và không bị lẫn màu nền ảnh phía sau.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Crisp Edge Rule",
+        "body": "Cấm tuyệt đối việc sử dụng bo góc lớn (rounded-xl, rounded-2xl, rounded-3xl hoặc rounded-full cho nút/card). Mọi khối thông tin phải duy trì các góc dứt khoát chuẩn chỉnh của một bản in kỹ thuật số.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do sử dụng đường viền mảnh 1px (#e2e8f0 / #1e293b) làm công cụ chính để chia tách thông tin thay vì bóng đổ.",
+      "Do giữ khoảng cách dòng (line-height) từ 1.7 trở lên cho mọi đoạn văn bản bài báo để độc giả đọc lâu không mỏi mắt.",
+      "Do sử dụng font Serif có chân cho tiêu đề bài báo để duy trì phong thái trang nghiêm, uy tín.",
+      "Do kiểm soát dải màu tím AI (#6366f1) ở mức tối giản (<5%), chỉ dùng làm điểm nhấn chỉ thị.",
+      "Do giữ cho góc bo của khối bài viết phẳng hoàn toàn (0px) và nút bấm tối đa 4px.",
+      "Do bảo đảm độ tương phản giữa màu chữ và màu nền đạt chuẩn WCAG AAA trên cả Light và Dark mode."
+    ],
+    "donts": [
+      "Don't sử dụng bóng đổ nhiều lớp (box-shadow: 0 10px 25px rgba(...)) gây rối rắm và nặng nề cho giao diện báo chí.",
+      "Don't sử dụng hiệu ứng kính mờ (backdrop-filter: blur(...)) hay nền xuyên thấu làm nhòe chữ khi người dùng cuộn trang.",
+      "Don't áp dụng dải màu chuyển tiếp (Gradients) lớn lên thanh điều hướng hoặc toàn bộ nền trang.",
+      "Don't bo tròn các góc thẻ bài viết thành dạng bong bóng (rounded-2xl hoặc rounded-3xl).",
+      "Don't sử dụng font chữ ngẫu hứng không rõ ràng hoặc lạm dụng font viết tay, font trang trí uốn lượn.",
+      "Don't giấu trạng thái xử lý AI trong các hiệu ứng động phức tạp; hãy thể hiện bằng nhãn chữ hoặc spinner mảnh gãy gọn."
+    ]
+  }
+}
+

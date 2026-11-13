@@ -499,3 +499,8 @@ $RECYCLE.BIN/
 *.swp
 .agent/skills/impeccable/reference/
 .agent/skills/impeccable/scripts/
+
+# Markdown
+DESIGN.md
+PRODUCT.md
+.agent/
