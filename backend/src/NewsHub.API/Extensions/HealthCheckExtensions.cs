@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using StackExchange.Redis;
 
 namespace NewsHub.API.Extensions;
 
@@ -18,7 +19,8 @@ public static class HealthCheckExtensions
                     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured."),
                 name: "postgresql",
                 failureStatus: HealthStatus.Unhealthy,
-                tags: ["ready", "db", "postgresql"]);
+                tags: ["ready", "db", "postgresql"])
+            .AddCheck<RedisHealthCheck>("redis", failureStatus: HealthStatus.Degraded, tags: ["ready", "cache", "redis"]);
 
         return services;
     }
@@ -71,5 +73,31 @@ public static class HealthCheckExtensions
         });
 
         return context.Response.WriteAsync(json, Encoding.UTF8);
+    }
+}
+
+/// <summary>
+/// Health Check kiểm tra kết nối Redis.
+/// Nếu Redis offline, trả về Degraded thay vì Unhealthy do hệ thống có cơ chế Fallback sang Database.
+/// </summary>
+public class RedisHealthCheck(IConnectionMultiplexer? multiplexer = null) : IHealthCheck
+{
+    public Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (multiplexer is not null && multiplexer.IsConnected)
+            {
+                return Task.FromResult(HealthCheckResult.Healthy("Redis connection is active."));
+            }
+
+            return Task.FromResult(HealthCheckResult.Degraded("Redis is not connected. Application operating in database-fallback mode."));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(HealthCheckResult.Degraded($"Redis check failed: {ex.Message}. Operating in database-fallback mode."));
+        }
     }
 }
