@@ -8,13 +8,15 @@ public interface ICacheService
 {
     /// <summary>
     /// Lấy dữ liệu từ cache theo khóa. Trả về null nếu không tìm thấy hoặc Redis offline.
+    /// Ràng buộc where T : class để đảm bảo cache miss luôn trả về null thay vì giá trị mặc định của value type.
     /// </summary>
-    Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
+    Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class;
 
     /// <summary>
     /// Lưu dữ liệu vào cache kèm thời gian hết hạn (TTL).
+    /// Trả về true nếu ghi cache thành công, false nếu Redis offline hoặc lỗi serialization.
     /// </summary>
-    Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, CancellationToken cancellationToken = default);
+    Task<bool> SetAsync<T>(string key, T value, TimeSpan? expiration = null, CancellationToken cancellationToken = default) where T : class;
 
     /// <summary>
     /// Mẫu Cache-Aside: Lấy dữ liệu từ cache nếu có; nếu không, gọi factory để lấy dữ liệu gốc và nạp vào cache.
@@ -23,17 +25,19 @@ public interface ICacheService
         string key,
         Func<CancellationToken, Task<T>> factory,
         TimeSpan? expiration = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default) where T : class;
 
     /// <summary>
     /// Xóa một khóa cụ thể khỏi cache.
+    /// Trả về true nếu xóa thành công, false nếu Redis offline hoặc key không tồn tại.
     /// </summary>
-    Task RemoveAsync(string key, CancellationToken cancellationToken = default);
+    Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Xóa hàng loạt khóa khớp với tiền tố (Prefix Invalidation).
+    /// Trả về true nếu hoàn tất quét và xóa, false nếu Redis offline.
     /// </summary>
-    Task RemoveByPrefixAsync(string prefixKey, CancellationToken cancellationToken = default);
+    Task<bool> RemoveByPrefixAsync(string prefixKey, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Kiểm tra xem khóa có tồn tại trong cache không.
@@ -54,4 +58,3 @@ public interface ICacheService
         TimeSpan? timeout = null,
         CancellationToken cancellationToken = default);
 }
-

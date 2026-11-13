@@ -85,6 +85,21 @@ public class RedisCacheServiceTests
     }
 
     [Fact]
+    public async Task GetAsync_WhenMalformedJsonStored_ReturnsNullAndLogsWarning()
+    {
+        // Arrange - CodeRabbit Review 2: Treat unreadable cache entry as a miss
+        _mockDatabase
+            .Setup(d => d.StringGetAsync("NewsHubTest:corrupted", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(new RedisValue("{not-valid-json"));
+
+        // Act
+        var result = await _service.GetAsync<TestCacheModel>("corrupted");
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
     public async Task GetAsync_WhenRedisThrowsException_ReturnsNullAndLogsWarning()
     {
         // Arrange
@@ -131,9 +146,10 @@ public class RedisCacheServiceTests
             .ReturnsAsync(true);
 
         // Act
-        await _service.SetAsync("articles:1", model, customTtl);
+        var success = await _service.SetAsync("articles:1", model, customTtl);
 
         // Assert
+        Assert.True(success);
         _mockDatabase.Verify(d => d.StringSetAsync(
             "NewsHubTest:articles:1",
             It.Is<RedisValue>(v => v.ToString().Contains("Articles")),
@@ -158,9 +174,9 @@ public class RedisCacheServiceTests
                 It.IsAny<CommandFlags>()))
             .ThrowsAsync(new RedisTimeoutException("Timeout", CommandStatus.WaitingToBeSent));
 
-        // Act & Assert (Should not throw)
-        var exception = await Record.ExceptionAsync(() => _service.SetAsync("fail:key", model));
-        Assert.Null(exception);
+        // Act & Assert (Should not throw and return false)
+        var success = await _service.SetAsync("fail:key", model);
+        Assert.False(success);
     }
 
     [Fact]
@@ -234,21 +250,35 @@ public class RedisCacheServiceTests
             .ReturnsAsync(true);
 
         // Act
-        await _service.RemoveAsync("article:delete");
+        var success = await _service.RemoveAsync("article:delete");
 
         // Assert
+        Assert.True(success);
         _mockDatabase.Verify(d => d.KeyDeleteAsync("NewsHubTest:article:delete", It.IsAny<CommandFlags>()), Times.Once);
     }
 
     [Fact]
-    public async Task RemoveByPrefixAsync_ScansKeysAndDeletesInBatches()
+    public async Task RemoveAsync_WhenRedisOffline_ReturnsFalse()
     {
-        // Arrange
+        // Arrange - CodeRabbit Review 4: Return false when invalidation cannot reach Redis
+        _mockMultiplexer.Setup(m => m.IsConnected).Returns(false);
+
+        // Act
+        var success = await _service.RemoveAsync("offline:key");
+
+        // Assert
+        Assert.False(success);
+    }
+
+    [Fact]
+    public async Task RemoveByPrefixAsync_EscapesGlobCharactersAndDeletesInPipeline()
+    {
+        // Arrange - CodeRabbit Review 5 & 6: Glob escaping and CROSSSLOT-safe pipelining
         var keys = new RedisKey[] { "NewsHubTest:articles:1", "NewsHubTest:articles:2" };
         _mockServer
             .Setup(s => s.KeysAsync(
                 It.IsAny<int>(),
-                (RedisValue)"NewsHubTest:articles:*",
+                (RedisValue)"NewsHubTest:art\\*icles:\\?*",
                 It.IsAny<int>(),
                 It.IsAny<long>(),
                 It.IsAny<int>(),
@@ -256,16 +286,16 @@ public class RedisCacheServiceTests
             .Returns(ToAsyncEnumerable(keys));
 
         _mockDatabase
-            .Setup(d => d.KeyDeleteAsync(It.IsAny<RedisKey[]>(), It.IsAny<CommandFlags>()))
-            .ReturnsAsync(2);
+            .Setup(d => d.KeyDeleteAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+            .ReturnsAsync(true);
 
-        // Act
-        await _service.RemoveByPrefixAsync("articles:");
+        // Act - with glob characters in prefix
+        var success = await _service.RemoveByPrefixAsync("art*icles:?");
 
         // Assert
-        _mockDatabase.Verify(d => d.KeyDeleteAsync(
-            It.Is<RedisKey[]>(k => k.Length == 2),
-            It.IsAny<CommandFlags>()), Times.Once);
+        Assert.True(success);
+        _mockDatabase.Verify(d => d.KeyDeleteAsync("NewsHubTest:articles:1", It.IsAny<CommandFlags>()), Times.Once);
+        _mockDatabase.Verify(d => d.KeyDeleteAsync("NewsHubTest:articles:2", It.IsAny<CommandFlags>()), Times.Once);
     }
 
     [Fact]
@@ -357,4 +387,3 @@ public class RedisCacheServiceTests
         }
     }
 }
-
