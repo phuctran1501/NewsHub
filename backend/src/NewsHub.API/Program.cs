@@ -12,12 +12,13 @@ DotEnvLoader.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Exception Handling
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // Application & Infrastructure Layers
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ICorrelationIdProvider, CorrelationIdProvider>();
+builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 

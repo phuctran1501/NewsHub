@@ -1,6 +1,8 @@
+using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Infrastructure.Persistence;
 using NewsHub.Infrastructure.Repositories;
@@ -65,6 +67,25 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ICacheService, RedisCacheService>();
+
+        // Cloudinary Configuration, Singleton ICloudinary / Cloudinary & ICloudinaryService
+        var cloudinarySection = configuration.GetSection(CloudinaryOptions.SectionName);
+        services.Configure<CloudinaryOptions>(opt =>
+        {
+            opt.CloudName = cloudinarySection["CloudName"] ?? string.Empty;
+            opt.ApiKey = cloudinarySection["ApiKey"] ?? string.Empty;
+            opt.ApiSecret = cloudinarySection["ApiSecret"] ?? string.Empty;
+        });
+
+        services.AddSingleton<Cloudinary>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<CloudinaryOptions>>().Value;
+            var account = new Account(options.CloudName, options.ApiKey, options.ApiSecret);
+            return new Cloudinary(account);
+        });
+
+        services.AddSingleton<ICloudinary>(sp => sp.GetRequiredService<Cloudinary>());
+        services.AddScoped<ICloudinaryService, CloudinaryService>();
 
         return services;
     }

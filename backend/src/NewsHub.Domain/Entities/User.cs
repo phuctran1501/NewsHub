@@ -18,4 +18,5 @@ public class User : IHasCreatedAt, IHasUpdatedAt
 
     // Navigation properties
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
+    public ICollection<MediaFile> MediaFiles { get; set; } = new HashSet<MediaFile>();
 }
