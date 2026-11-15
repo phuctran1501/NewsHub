@@ -38,38 +38,87 @@ public class CloudinaryService : ICloudinaryService
         MediaFolder folder,
         CancellationToken cancellationToken = default)
     {
-        ValidateFile(fileStream, fileName);
-
-        var folderPath = GetFolderPath(folder);
-
-        var uploadParams = new ImageUploadParams
+        if (fileStream == null)
         {
-            File = new FileDescription(fileName, fileStream),
-            Folder = folderPath,
-            Transformation = new Transformation().FetchFormat("webp").Quality("auto"),
-            Overwrite = false,
-            UniqueFilename = true
-        };
-
-        var uploadResult = await _cloudinary.UploadAsync(uploadParams, cancellationToken);
-
-        if (uploadResult.Error != null)
-        {
-            _logger?.LogError("Cloudinary upload failed: {Error}", uploadResult.Error.Message);
-            throw new InvalidOperationException($"Image upload failed: {uploadResult.Error.Message}");
+            throw new AppValidationException("File", "File stream cannot be null or empty.");
         }
 
-        var url = uploadResult.SecureUrl?.ToString() ?? uploadResult.Url?.ToString() ?? string.Empty;
+        Stream streamToUpload = fileStream;
+        MemoryStream? bufferedStream = null;
 
-        return new CloudinaryUploadResult(
-            uploadResult.PublicId,
-            url,
-            uploadResult.Format ?? "webp",
-            uploadResult.Bytes,
-            uploadResult.Width,
-            uploadResult.Height);
+        try
+        {
+            // Nếu stream không hỗ trợ seeking (ví dụ NetworkStream, request body stream),
+            // copy sang MemoryStream trung gian đồng thời kiểm soát chặt chẽ giới hạn 5MB
+            if (!fileStream.CanSeek)
+            {
+                bufferedStream = new MemoryStream();
+                var buffer = new byte[81920]; // 80 KB chunks
+                long totalBytesRead = 0;
+                int bytesRead;
+
+                while ((bytesRead = await fileStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                {
+                    totalBytesRead += bytesRead;
+                    if (totalBytesRead > MaxFileSizeBytes)
+                    {
+                        throw new AppValidationException("File", "File size exceeds the 5MB limit.");
+                    }
+
+                    bufferedStream.Write(buffer, 0, bytesRead);
+                }
+
+                if (totalBytesRead == 0)
+                {
+                    throw new AppValidationException("File", "File stream cannot be null or empty.");
+                }
+
+                bufferedStream.Position = 0;
+                streamToUpload = bufferedStream;
+            }
+
+            ValidateFile(streamToUpload, fileName);
+
+            var folderPath = GetFolderPath(folder);
+
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(fileName, streamToUpload),
+                Folder = folderPath,
+                Transformation = new Transformation().FetchFormat("webp").Quality("auto"),
+                Overwrite = false,
+                UniqueFilename = true
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams, cancellationToken);
+
+            if (uploadResult.Error != null)
+            {
+                _logger?.LogError("Cloudinary upload failed: {Error}", uploadResult.Error.Message);
+                throw new InvalidOperationException($"Image upload failed: {uploadResult.Error.Message}");
+            }
+
+            var url = uploadResult.SecureUrl?.ToString() ?? uploadResult.Url?.ToString() ?? string.Empty;
+
+            return new CloudinaryUploadResult(
+                uploadResult.PublicId,
+                url,
+                uploadResult.Format ?? "webp",
+                uploadResult.Bytes,
+                uploadResult.Width,
+                uploadResult.Height);
+        }
+        finally
+        {
+            bufferedStream?.Dispose();
+        }
     }
 
+    /// <summary>
+    /// Xóa tệp tin ảnh từ xa trên máy chủ Cloudinary thông qua PublicId.
+    /// Lưu ý: CloudinaryDotNet 1.29.3 SDK không hỗ trợ hủy request đang chạy (in-flight) trên DestroyAsync,
+    /// phương thức kiểm tra token trước khi gửi request.
+    /// </summary>
     public async Task<bool> DeleteImageAsync(
         string publicId,
         CancellationToken cancellationToken = default)
@@ -78,6 +127,8 @@ public class CloudinaryService : ICloudinaryService
         {
             return false;
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var deletionParams = new DeletionParams(publicId);
         var result = await _cloudinary.DestroyAsync(deletionParams);
@@ -93,7 +144,12 @@ public class CloudinaryService : ICloudinaryService
 
     public static void ValidateFile(Stream fileStream, string fileName)
     {
-        if (fileStream == null || fileStream.Length == 0)
+        if (fileStream == null)
+        {
+            throw new AppValidationException("File", "File stream cannot be null or empty.");
+        }
+
+        if (fileStream.CanSeek && fileStream.Length == 0)
         {
             throw new AppValidationException("File", "File stream cannot be null or empty.");
         }
@@ -109,7 +165,7 @@ public class CloudinaryService : ICloudinaryService
             throw new AppValidationException("File", "Unsupported file extension. Allowed extensions are: .jpg, .jpeg, .png, .webp.");
         }
 
-        if (fileStream.Length > MaxFileSizeBytes)
+        if (fileStream.CanSeek && fileStream.Length > MaxFileSizeBytes)
         {
             throw new AppValidationException("File", "File size exceeds the 5MB limit.");
         }
@@ -121,7 +177,7 @@ public class CloudinaryService : ICloudinaryService
             try
             {
                 var header = new byte[12];
-                var bytesRead = fileStream.Read(header, 0, header.Length);
+                var bytesRead = fileStream.ReadAtLeast(header, 12, throwOnEndOfStream: false);
                 if (bytesRead < 12 || !IsValidImageHeader(header))
                 {
                     throw new AppValidationException("File", "File signature is invalid or does not match an allowed image type.");
@@ -147,8 +203,9 @@ public class CloudinaryService : ICloudinaryService
             return true;
         }
 
-        // PNG: 89 50 4E 47 0D 0A 1A 0A
-        if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47)
+        // PNG: 89 50 4E 47 0D 0A 1A 0A (Full 8-byte PNG signature per RFC 2083 / W3C)
+        if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 &&
+            header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A)
         {
             return true;
         }

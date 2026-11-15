@@ -163,4 +163,25 @@ public class HttpCurrentUserTests
         Assert.Equal(expectedRole, currentUser.Role);
         Assert.True(currentUser.IsInRole(expectedRole));
     }
+
+    [Theory]
+    [InlineData("999")]
+    [InlineData("-1")]
+    [InlineData("UnknownRole")]
+    public void Role_WhenClaimIsUndefinedOrInvalid_ShouldReturnNull(string invalidRole)
+    {
+        // Arrange
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.Role, invalidRole)
+        };
+
+        var currentUser = CreateCurrentUserWithClaims(claims);
+
+        // Assert
+        Assert.Null(currentUser.Role);
+        Assert.False(currentUser.IsInRole(UserRole.User));
+        Assert.False(currentUser.IsInRole(UserRole.Journalist));
+        Assert.False(currentUser.IsInRole(UserRole.Admin));
+    }
 }

@@ -36,11 +36,15 @@ public class CloudinaryServiceTests
     private static MemoryStream CreateValidPngStream(int length = 100)
     {
         var bytes = new byte[length];
-        // PNG magic bytes: 89 50 4E 47
+        // PNG full 8-byte signature: 89 50 4E 47 0D 0A 1A 0A
         bytes[0] = 0x89;
         bytes[1] = 0x50;
         bytes[2] = 0x4E;
         bytes[3] = 0x47;
+        bytes[4] = 0x0D;
+        bytes[5] = 0x0A;
+        bytes[6] = 0x1A;
+        bytes[7] = 0x0A;
         return new MemoryStream(bytes);
     }
 
@@ -104,8 +108,6 @@ public class CloudinaryServiceTests
     [Fact]
     public void ValidateFile_FileExceeds5MB_ThrowsAppValidationException()
     {
-        // 5MB + 1 byte
-        var largeStream = new Mock<MemoryStream> { CallBase = true };
         using var validHeaderStream = CreateValidJpegStream(12);
 
         // Tạo custom stream mô phỏng kích thước > 5MB
@@ -127,6 +129,25 @@ public class CloudinaryServiceTests
 
         var ex = Assert.Throws<AppValidationException>(() =>
             CloudinaryService.ValidateFile(stream, "fake.png"));
+
+        Assert.True(ex.Errors.ContainsKey("File"));
+        Assert.Contains("File signature is invalid", ex.Errors["File"][0]);
+    }
+
+    [Fact]
+    public void ValidateFile_MalformedPngHeader_MissingRemaining4Bytes_ThrowsAppValidationException()
+    {
+        // Chỉ có 4 bytes đầu 89 50 4E 47, nhưng 4 bytes sau là 0x00
+        var bytes = new byte[100];
+        bytes[0] = 0x89;
+        bytes[1] = 0x50;
+        bytes[2] = 0x4E;
+        bytes[3] = 0x47;
+        // bytes[4..7] remain 0x00
+        using var stream = new MemoryStream(bytes);
+
+        var ex = Assert.Throws<AppValidationException>(() =>
+            CloudinaryService.ValidateFile(stream, "malformed.png"));
 
         Assert.True(ex.Errors.ContainsKey("File"));
         Assert.Contains("File signature is invalid", ex.Errors["File"][0]);
@@ -192,6 +213,52 @@ public class CloudinaryServiceTests
     }
 
     [Fact]
+    public async Task UploadImageAsync_NonSeekableStream_ShouldBufferAndUploadSuccessfully()
+    {
+        // Arrange: Giả lập stream không hỗ trợ Seek (ví dụ NetworkStream, request body)
+        var validPngBytes = CreateValidPngStream().ToArray();
+        using var nonSeekableStream = new CustomNonSeekableStream(validPngBytes);
+        const string fileName = "streamed_avatar.png";
+
+        var uploadResult = new ImageUploadResult
+        {
+            PublicId = "newshub/avatars/streamed_user",
+            SecureUrl = new Uri("https://res.cloudinary.com/newshub/image/upload/v1/newshub/avatars/streamed_user.webp"),
+            Format = "webp",
+            Bytes = validPngBytes.Length,
+            Width = 400,
+            Height = 400
+        };
+
+        _mockCloudinary
+            .Setup(c => c.UploadAsync(It.IsAny<ImageUploadParams>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(uploadResult);
+
+        // Act
+        var result = await _service.UploadImageAsync(nonSeekableStream, fileName, MediaFolder.Avatar);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("newshub/avatars/streamed_user", result.PublicId);
+        _mockCloudinary.Verify(c => c.UploadAsync(It.IsAny<ImageUploadParams>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UploadImageAsync_NonSeekableStreamExceeding5MB_ThrowsAppValidationException()
+    {
+        // Arrange: Giả lập stream không seek được nhưng kích thước thực tế vượt quá 5MB
+        var header = CreateValidPngStream(12).ToArray();
+        using var nonSeekableOversizedStream = new CustomNonSeekableOversizedStream(CloudinaryService.MaxFileSizeBytes + 100, header);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<AppValidationException>(() =>
+            _service.UploadImageAsync(nonSeekableOversizedStream, "huge_stream.png", MediaFolder.ArticleCover));
+
+        Assert.True(ex.Errors.ContainsKey("File"));
+        Assert.Contains("5MB", ex.Errors["File"][0]);
+    }
+
+    [Fact]
     public async Task UploadImageAsync_WhenCloudinaryReturnsError_ThrowsInvalidOperationException()
     {
         // Arrange
@@ -243,6 +310,21 @@ public class CloudinaryServiceTests
         Assert.Equal(expected, result);
     }
 
+    [Fact]
+    public async Task DeleteImageAsync_WhenCancellationTokenAlreadyCanceled_ThrowsOperationCanceledException()
+    {
+        // Arrange
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<OperationCanceledException>(() =>
+            _service.DeleteImageAsync("newshub/avatars/sample_to_delete", cts.Token));
+
+        // SDK không bao giờ được gọi khi token đã bị hủy
+        _mockCloudinary.Verify(c => c.DestroyAsync(It.IsAny<DeletionParams>()), Times.Never);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
@@ -271,5 +353,98 @@ public class CloudinaryServiceTests
         }
 
         public override long Length => _customLength;
+    }
+
+    /// <summary>
+    /// Helper Stream mô phỏng NetworkStream không hỗ trợ Seek hoặc Length.
+    /// </summary>
+    private sealed class CustomNonSeekableStream : Stream
+    {
+        private readonly byte[] _data;
+        private int _position;
+
+        public CustomNonSeekableStream(byte[] data)
+        {
+            _data = data;
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (_position >= _data.Length)
+            {
+                return 0;
+            }
+
+            var bytesToCopy = Math.Min(count, _data.Length - _position);
+            Array.Copy(_data, _position, buffer, offset, bytesToCopy);
+            _position += bytesToCopy;
+            return bytesToCopy;
+        }
+
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
+    /// <summary>
+    /// Helper Stream không hỗ trợ Seek mô phỏng nguồn dữ liệu quá khổ (> 5MB) phát sinh theo chunk.
+    /// </summary>
+    private sealed class CustomNonSeekableOversizedStream : Stream
+    {
+        private readonly long _totalSimulatedBytes;
+        private readonly byte[] _header;
+        private long _bytesEmitted;
+
+        public CustomNonSeekableOversizedStream(long totalSimulatedBytes, byte[] header)
+        {
+            _totalSimulatedBytes = totalSimulatedBytes;
+            _header = header;
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (_bytesEmitted >= _totalSimulatedBytes)
+            {
+                return 0;
+            }
+
+            var toRead = (int)Math.Min(count, _totalSimulatedBytes - _bytesEmitted);
+
+            // Ghi header ở những bytes đầu tiên
+            if (_bytesEmitted < _header.Length)
+            {
+                var headerToCopy = Math.Min(toRead, _header.Length - (int)_bytesEmitted);
+                Array.Copy(_header, _bytesEmitted, buffer, offset, headerToCopy);
+            }
+
+            _bytesEmitted += toRead;
+            return toRead;
+        }
+
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 }

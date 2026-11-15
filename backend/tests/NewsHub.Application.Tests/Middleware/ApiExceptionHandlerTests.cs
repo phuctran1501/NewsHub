@@ -189,12 +189,12 @@ public class ApiExceptionHandlerTests
         // Act
         var (statusCode, body) = await ExecuteHandlerAsync(ex);
 
-        // Assert
+        // Assert: Ẩn thông điệp nội bộ (file path, system details) khỏi UnauthorizedAccessException
         Assert.Equal(StatusCodes.Status401Unauthorized, statusCode);
         Assert.NotNull(body);
         Assert.Equal(ExpectedCorrelationId, body.CorrelationId);
         Assert.Equal(ErrorCodes.Unauthorized, body.Error.Code);
-        Assert.Equal("Custom access denied.", body.Error.Message);
+        Assert.Equal("Authentication is required to access this resource.", body.Error.Message);
     }
 
     [Fact]

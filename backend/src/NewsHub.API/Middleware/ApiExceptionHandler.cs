@@ -89,12 +89,12 @@ public sealed class ApiExceptionHandler : IExceptionHandler
             return ((int)appException.ErrorKind, appException.ErrorCode, appException.Message, details);
         }
 
-        if (exception is UnauthorizedAccessException unauth)
+        if (exception is UnauthorizedAccessException)
         {
             return (
                 StatusCodes.Status401Unauthorized,
                 ErrorCodes.Unauthorized,
-                string.IsNullOrWhiteSpace(unauth.Message) ? "Authentication is required to access this resource." : unauth.Message,
+                "Authentication is required to access this resource.",
                 Array.Empty<ApiValidationErrorItem>());
         }
 

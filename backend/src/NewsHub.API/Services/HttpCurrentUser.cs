@@ -69,7 +69,7 @@ public class HttpCurrentUser : ICurrentUser
                 return null;
             }
 
-            if (Enum.TryParse<UserRole>(roleClaim, ignoreCase: true, out var role))
+            if (Enum.TryParse<UserRole>(roleClaim, ignoreCase: true, out var role) && Enum.IsDefined(role))
             {
                 return role;
             }
