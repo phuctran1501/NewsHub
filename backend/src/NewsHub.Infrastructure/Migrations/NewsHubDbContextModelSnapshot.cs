@@ -23,6 +23,73 @@ namespace NewsHub.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.MediaFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<long>("Bytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("bytes");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Folder")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("folder");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("format");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("integer")
+                        .HasColumnName("height");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("original_file_name");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("public_id");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("uploaded_by_user_id");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("url");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("integer")
+                        .HasColumnName("width");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
+
+                    b.HasIndex("UploadedByUserId");
+
+                    b.ToTable("media_files", "public");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -130,6 +197,17 @@ namespace NewsHub.Infrastructure.Migrations
                     b.ToTable("users", "public");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.MediaFile", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.User", "UploadedByUser")
+                        .WithMany("MediaFiles")
+                        .HasForeignKey("UploadedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UploadedByUser");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("NewsHub.Domain.Entities.User", "User")
@@ -143,6 +221,8 @@ namespace NewsHub.Infrastructure.Migrations
 
             modelBuilder.Entity("NewsHub.Domain.Entities.User", b =>
                 {
+                    b.Navigation("MediaFiles");
+
                     b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618

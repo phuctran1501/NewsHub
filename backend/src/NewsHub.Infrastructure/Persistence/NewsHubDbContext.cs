@@ -7,6 +7,7 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
