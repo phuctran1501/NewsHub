@@ -1,30 +1,33 @@
 namespace NewsHub.Domain.Exceptions;
 
-/// <summary>
-/// Ném khi dữ liệu đầu vào hoặc giá trị nghiệp vụ không thỏa mãn điều kiện hợp lệ.
-/// Middleware sẽ map sang HTTP 400 Bad Request + ProblemDetails.
-/// </summary>
-public sealed class ValidationException : DomainException
-{
-    public IDictionary<string, string[]> Errors { get; }
+using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 
-    public ValidationException(string message) : base(message)
+/// <summary>
+/// Ném khi dữ liệu đầu vào hoặc giá trị nghiệp vụ không thỏa mãn điều kiện hợp lệ tại tầng Domain.
+/// Middleware sẽ tự động ánh xạ sang HTTP 422 Unprocessable Entity kèm danh sách errors.
+/// </summary>
+public sealed class ValidationException : AppException
+{
+    public ValidationException(string message)
+        : base(message, AppErrorKind.Validation, ErrorCodes.ValidationFailed)
     {
-        Errors = new Dictionary<string, string[]>();
     }
 
     public ValidationException(string propertyName, string errorMessage)
-        : base(errorMessage)
+        : base(
+            "One or more validation failures have occurred.",
+            AppErrorKind.Validation,
+            ErrorCodes.ValidationFailed,
+            new Dictionary<string, string[]>
+            {
+                [propertyName] = [errorMessage]
+            })
     {
-        Errors = new Dictionary<string, string[]>
-        {
-            [propertyName] = [errorMessage]
-        };
     }
 
     public ValidationException(IDictionary<string, string[]> errors)
-        : base("One or more validation failures have occurred.")
+        : base("One or more validation failures have occurred.", AppErrorKind.Validation, ErrorCodes.ValidationFailed, errors)
     {
-        Errors = errors;
     }
 }
