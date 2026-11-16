@@ -54,4 +54,26 @@ public class UserTests
         Assert.Equal(UserRole.Journalist, journalist.Role);
         Assert.Equal(UserRole.Admin, admin.Role);
     }
+
+    [Fact]
+    public void CreateJournalistUser_WithPhoneNumberPressCardAndBio_ShouldStorePropertiesCorrectly()
+    {
+        // Arrange & Act
+        var journalist = new User
+        {
+            Email = new Email("journalist@newshub.com"),
+            PasswordHash = "hash",
+            FullName = "Lê Văn Báo",
+            Role = UserRole.Journalist,
+            PhoneNumber = "+84912345678",
+            PressCardNumber = "NB-2024-998811",
+            Bio = "Phóng viên công nghệ & kinh tế số"
+        };
+
+        // Assert
+        Assert.Equal("+84912345678", journalist.PhoneNumber);
+        Assert.Equal("NB-2024-998811", journalist.PressCardNumber);
+        Assert.Equal("Phóng viên công nghệ & kinh tế số", journalist.Bio);
+        Assert.Equal(UserRole.Journalist, journalist.Role);
+    }
 }

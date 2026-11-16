@@ -42,6 +42,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("avatar_url")
             .HasMaxLength(1024);
 
+        builder.Property(u => u.PhoneNumber)
+            .HasColumnName("phone_number")
+            .HasMaxLength(20);
+
+        builder.Property(u => u.PressCardNumber)
+            .HasColumnName("press_card_number")
+            .HasMaxLength(50);
+
+        builder.Property(u => u.Bio)
+            .HasColumnName("bio")
+            .HasMaxLength(500);
+
         // Lưu Role dạng chuỗi string trong database để dễ đọc trong Supabase Table Editor
         builder.Property(u => u.Role)
             .HasConversion<string>()

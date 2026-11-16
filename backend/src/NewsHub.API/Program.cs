@@ -22,7 +22,8 @@ builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Web Features (CORS, Authentication, SignalR, Health Checks, OpenAPI, Hangfire)
+// Web Features (CORS, Authentication, SignalR, Health Checks, OpenAPI, Hangfire, Controllers)
+builder.Services.AddControllers();
 builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSignalRServices();
@@ -54,6 +55,7 @@ app.UseAuthorization();
 app.UseHangfireDashboardCustom(app.Configuration);
 
 // Endpoints & SignalR Hubs
+app.MapControllers();
 app.MapSignalRHubs();
 app.MapAppHealthChecks();
 
