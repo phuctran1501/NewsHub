@@ -92,8 +92,17 @@ public sealed class UploadMediaImageCommandHandler(
             CreatedAt = DateTimeOffset.UtcNow
         };
 
-        dbContext.MediaFiles.Add(mediaFile);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            dbContext.MediaFiles.Add(mediaFile);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            // Bù trừ (Compensating action): Nếu lưu cơ sở dữ liệu thất bại, thu hồi ảnh vừa upload trên Cloudinary để tránh tệp tin mồ côi (Orphaned Assets)
+            await cloudinaryService.DeleteImageAsync(uploadResult.PublicId, CancellationToken.None);
+            throw;
+        }
 
         return new MediaFileResponseDto(
             mediaFile.Id,

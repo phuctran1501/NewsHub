@@ -58,7 +58,22 @@ public sealed class DeleteMediaImageCommandHandler(
             throw new ConflictException("Tệp tin hình ảnh đang được sử dụng làm ảnh đại diện và không thể xóa.", ErrorCodes.MediaInUse);
         }
 
-        await cloudinaryService.DeleteImageAsync(media.PublicId, cancellationToken);
+        var deleted = await cloudinaryService.DeleteImageAsync(media.PublicId, cancellationToken);
+        if (!deleted)
+        {
+            throw new BadRequestException("Không thể xóa tệp tin hình ảnh trên máy chủ lưu trữ đám mây. Vui lòng thử lại sau.", ErrorCodes.MediaDeleteFailed);
+        }
+
+        // Secondary check: Nếu xảy ra race-condition có user gán ảnh làm avatar trong lúc xóa Cloudinary,
+        // xóa liên kết AvatarUrl để tránh lỗi vỡ ảnh (Broken Avatar)
+        var affectedUsers = await dbContext.Users
+            .Where(u => u.AvatarUrl == media.Url)
+            .ToListAsync(cancellationToken);
+
+        foreach (var user in affectedUsers)
+        {
+            user.AvatarUrl = null;
+        }
 
         dbContext.MediaFiles.Remove(media);
         await dbContext.SaveChangesAsync(cancellationToken);

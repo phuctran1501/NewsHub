@@ -50,6 +50,7 @@ public static class ErrorCodes
     public const string MediaInvalidFormat = "MEDIA_INVALID_FORMAT";
     public const string MediaSizeExceeded = "MEDIA_SIZE_EXCEEDED";
     public const string MediaUploadFailed = "MEDIA_UPLOAD_FAILED";
+    public const string MediaDeleteFailed = "MEDIA_DELETE_FAILED";
     public const string MediaInUse = "MEDIA_IN_USE";
 
     // Server (500)

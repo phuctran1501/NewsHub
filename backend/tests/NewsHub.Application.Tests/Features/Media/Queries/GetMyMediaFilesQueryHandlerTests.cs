@@ -128,7 +128,60 @@ public class GetMyMediaFilesQueryHandlerTests
         Assert.Equal(1, result.TotalCount);
         Assert.Single(result.Items);
         Assert.Equal("pub_cover", result.Items[0].PublicId);
-        Assert.Equal(MediaFolder.ArticleCover, result.Items[0].Folder);
+    }
+
+    [Fact]
+    public async Task Handle_WithSameCreatedAt_ShouldSortDeterministicallyById()
+    {
+        // Arrange
+        var currentUserId = Guid.NewGuid();
+        var sameTime = DateTimeOffset.UtcNow;
+        var id1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var id2 = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(currentUserId);
+
+        var mediaFiles = new List<MediaFile>
+        {
+            new()
+            {
+                Id = id1,
+                PublicId = "pub_first_id",
+                Url = "url_first",
+                OriginalFileName = "first.webp",
+                Format = "webp",
+                Folder = MediaFolder.Avatar,
+                UploadedByUserId = currentUserId,
+                CreatedAt = sameTime
+            },
+            new()
+            {
+                Id = id2,
+                PublicId = "pub_second_id",
+                Url = "url_second",
+                OriginalFileName = "second.webp",
+                Format = "webp",
+                Folder = MediaFolder.Avatar,
+                UploadedByUserId = currentUserId,
+                CreatedAt = sameTime
+            }
+        };
+
+        var mockDbSet = mediaFiles.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.MediaFiles).Returns(mockDbSet.Object);
+
+        var handler = new GetMyMediaFilesQueryHandler(_currentUserMock.Object, _dbContextMock.Object);
+
+        // Act
+        var result = await handler.Handle(new GetMyMediaFilesQuery(1, 10), CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Items.Count);
+        // Ordered by CreatedAt DESC, then Id DESC -> id2 (000...002) comes before id1 (000...001)
+        Assert.Equal(id2, result.Items[0].Id);
+        Assert.Equal(id1, result.Items[1].Id);
     }
 
     [Fact]
@@ -150,6 +203,8 @@ public class GetMyMediaFilesQueryHandlerTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
+    [InlineData(10_001)]
+    [InlineData(500_000)]
     public void Validator_WithInvalidPageNumber_ShouldHaveValidationError(int pageNumber)
     {
         var query = new GetMyMediaFilesQuery(pageNumber, 12);

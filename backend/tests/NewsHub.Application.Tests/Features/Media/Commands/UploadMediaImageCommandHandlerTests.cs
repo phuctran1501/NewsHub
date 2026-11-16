@@ -84,6 +84,57 @@ public class UploadMediaImageCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenDatabaseSaveFails_ShouldInvokeCompensatingDeleteOnCloudinaryAndRethrow()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(userId);
+
+        var uploadResult = new CloudinaryUploadResult(
+            "folder/compensate_public_id",
+            "https://res.cloudinary.com/demo/image/upload/v1234/folder/compensate_public_id.webp",
+            "webp",
+            2048,
+            800,
+            600);
+
+        _cloudinaryMock
+            .Setup(c => c.UploadImageAsync(
+                It.IsAny<Stream>(),
+                "test.png",
+                MediaFolder.Avatar,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(uploadResult);
+
+        var mediaFiles = new List<MediaFile>().BuildMockDbSet();
+        _dbContextMock.Setup(db => db.MediaFiles).Returns(mediaFiles.Object);
+        _dbContextMock
+            .Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Database connection failed"));
+
+        var handler = new UploadMediaImageCommandHandler(
+            _currentUserMock.Object,
+            _cloudinaryMock.Object,
+            _dbContextMock.Object);
+
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("fake-image-bytes"));
+        var command = new UploadMediaImageCommand(
+            stream,
+            "test.png",
+            stream.Length,
+            "image/png",
+            MediaFolder.Avatar);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.Handle(command, CancellationToken.None));
+
+        // Verify Compensating action ran with CancellationToken.None
+        _cloudinaryMock.Verify(c => c.DeleteImageAsync(uploadResult.PublicId, CancellationToken.None), Times.Once);
+    }
+
+    [Fact]
     public async Task Handle_WhenUserUnauthenticated_ShouldThrowUnauthorizedException()
     {
         // Arrange

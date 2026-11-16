@@ -95,6 +95,10 @@ public class DeleteMediaImageCommandHandlerTests
         _dbContextMock.Setup(db => db.Users).Returns(usersList.Object);
         _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
+        _cloudinaryMock
+            .Setup(c => c.DeleteImageAsync(mediaFile.PublicId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
@@ -218,6 +222,110 @@ public class DeleteMediaImageCommandHandlerTests
         Assert.Equal(ErrorCodes.MediaInUse, exception.ErrorCode);
         _cloudinaryMock.Verify(c => c.DeleteImageAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         _dbContextMock.Verify(db => db.MediaFiles.Remove(It.IsAny<MediaFile>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_WhenCloudinaryDeleteFails_ShouldThrowBadRequestExceptionAndNotDeleteDatabaseRecord()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var mediaId = Guid.NewGuid();
+
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(userId);
+        _currentUserMock.Setup(c => c.IsInRole(UserRole.Admin)).Returns(false);
+
+        var mediaFile = new MediaFile
+        {
+            Id = mediaId,
+            PublicId = "test/fail_delete",
+            Url = "https://res.cloudinary.com/demo/test/fail_delete.webp",
+            OriginalFileName = "fail.webp",
+            Format = "webp",
+            UploadedByUserId = userId
+        };
+
+        var mediaList = new List<MediaFile> { mediaFile }.BuildMockDbSet();
+        var usersList = new List<User>().BuildMockDbSet();
+
+        _dbContextMock.Setup(db => db.MediaFiles).Returns(mediaList.Object);
+        _dbContextMock.Setup(db => db.Users).Returns(usersList.Object);
+
+        _cloudinaryMock
+            .Setup(c => c.DeleteImageAsync(mediaFile.PublicId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var handler = new DeleteMediaImageCommandHandler(
+            _currentUserMock.Object,
+            _cloudinaryMock.Object,
+            _dbContextMock.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() =>
+            handler.Handle(new DeleteMediaImageCommand(mediaId), CancellationToken.None));
+
+        Assert.Equal(ErrorCodes.MediaDeleteFailed, exception.ErrorCode);
+        _dbContextMock.Verify(db => db.MediaFiles.Remove(It.IsAny<MediaFile>()), Times.Never);
+        _dbContextMock.Verify(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_WhenAvatarAssignedDuringDeletion_ShouldNullifyUserAvatarUrl()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var mediaId = Guid.NewGuid();
+        var imageUrl = "https://res.cloudinary.com/demo/test/race.webp";
+
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(userId);
+        _currentUserMock.Setup(c => c.IsInRole(UserRole.Admin)).Returns(false);
+
+        var mediaFile = new MediaFile
+        {
+            Id = mediaId,
+            PublicId = "test/race",
+            Url = imageUrl,
+            OriginalFileName = "race.webp",
+            Format = "webp",
+            UploadedByUserId = userId
+        };
+
+        var user = new User
+        {
+            Id = userId,
+            Email = "race@example.com",
+            PasswordHash = "hash",
+            FullName = "Race User",
+            AvatarUrl = null // Initially not avatar, so passes first check
+        };
+
+        var mediaList = new List<MediaFile> { mediaFile }.BuildMockDbSet();
+        var usersList = new List<User> { user }.BuildMockDbSet();
+
+        _dbContextMock.Setup(db => db.MediaFiles).Returns(mediaList.Object);
+        _dbContextMock.Setup(db => db.Users).Returns(usersList.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        // Simulate user assigning avatar during Cloudinary deletion
+        _cloudinaryMock
+            .Setup(c => c.DeleteImageAsync(mediaFile.PublicId, It.IsAny<CancellationToken>()))
+            .Callback(() => user.AvatarUrl = imageUrl)
+            .ReturnsAsync(true);
+
+        var handler = new DeleteMediaImageCommandHandler(
+            _currentUserMock.Object,
+            _cloudinaryMock.Object,
+            _dbContextMock.Object);
+
+        // Act
+        var result = await handler.Handle(new DeleteMediaImageCommand(mediaId), CancellationToken.None);
+
+        // Assert
+        Assert.Equal(Unit.Value, result);
+        Assert.Null(user.AvatarUrl); // AvatarUrl was nullified by secondary check
+        _dbContextMock.Verify(db => db.MediaFiles.Remove(mediaFile), Times.Once);
+        _dbContextMock.Verify(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

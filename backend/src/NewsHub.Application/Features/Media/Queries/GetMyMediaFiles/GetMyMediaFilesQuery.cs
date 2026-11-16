@@ -20,8 +20,8 @@ public sealed class GetMyMediaFilesQueryValidator : AbstractValidator<GetMyMedia
     public GetMyMediaFilesQueryValidator()
     {
         RuleFor(x => x.PageNumber)
-            .GreaterThan(0)
-            .WithMessage("Số trang phải lớn hơn 0.");
+            .InclusiveBetween(1, 10_000)
+            .WithMessage("Số trang phải từ 1 đến 10,000.");
 
         RuleFor(x => x.PageSize)
             .InclusiveBetween(1, 50)
@@ -60,9 +60,16 @@ public sealed class GetMyMediaFilesQueryHandler(
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        var offset = (long)(request.PageNumber - 1) * request.PageSize;
+        if (offset > int.MaxValue)
+        {
+            return new PagedList<MediaFileResponseDto>([], request.PageNumber, request.PageSize, totalCount);
+        }
+
         var items = await query
             .OrderByDescending(m => m.CreatedAt)
-            .Skip((request.PageNumber - 1) * request.PageSize)
+            .ThenByDescending(m => m.Id)
+            .Skip((int)offset)
             .Take(request.PageSize)
             .Select(m => new MediaFileResponseDto(
                 m.Id,
