@@ -12,6 +12,7 @@ public class RefreshToken : IHasCreatedAt
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? RevokedAt { get; set; }
     public string? ReplacedByTokenHash { get; set; }
+    public uint Version { get; set; }
 
     public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
     public bool IsActive => !IsRevoked && !IsExpired;

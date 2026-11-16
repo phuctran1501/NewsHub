@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\NewsHub.Domain\NewsHub.Domain.csproj" />
@@ -8,6 +8,7 @@
     <PackageReference Include="FluentValidation" Version="12.2.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
     <PackageReference Include="MediatR" Version="14.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
   </ItemGroup>
 
   <PropertyGroup>

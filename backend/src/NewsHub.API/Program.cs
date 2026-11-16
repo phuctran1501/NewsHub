@@ -22,12 +22,14 @@ builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Web Features (CORS, Authentication, SignalR, Health Checks, OpenAPI, Hangfire)
+// Web Features (CORS, Authentication, SignalR, Health Checks, OpenAPI, Hangfire, Controllers)
+builder.Services.AddControllers();
 builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSignalRServices();
 builder.Services.AddAppHealthChecks(builder.Configuration);
 builder.Services.AddHangfireServices(builder.Configuration);
+builder.Services.AddAppRateLimiter();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -36,10 +38,7 @@ var app = builder.Build();
 // Exception handler đứng đầu để bắt lỗi toàn bộ pipeline bên dưới
 app.UseExceptionHandler();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+if (app.Environment.IsDevelopment()){app.MapOpenApi();}
 
 app.UseHttpsRedirection();
 
@@ -53,7 +52,11 @@ app.UseAuthorization();
 // Hangfire Dashboard
 app.UseHangfireDashboardCustom(app.Configuration);
 
+// Rate Limiting
+app.UseRateLimiter();
+
 // Endpoints & SignalR Hubs
+app.MapControllers();
 app.MapSignalRHubs();
 app.MapAppHealthChecks();
 
