@@ -41,4 +41,9 @@ public static class ApiResponseFactory
 
         return new PagedApiResponse<T>(data, meta, correlationId);
     }
+
+    public static PagedApiResponse<T> Paged<T>(
+        PagedList<T> pagedList,
+        string correlationId)
+        => Paged(pagedList.Items, pagedList.PageNumber, pagedList.PageSize, pagedList.TotalCount, correlationId);
 }

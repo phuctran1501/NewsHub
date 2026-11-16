@@ -46,10 +46,11 @@ public static class ErrorCodes
     public const string CannotFollowOwnCompany = "CANNOT_FOLLOW_OWN_COMPANY";
     public const string InvalidRequest = "INVALID_REQUEST";
 
-    // Media (400, 422)
+    // Media (400, 409, 422)
     public const string MediaInvalidFormat = "MEDIA_INVALID_FORMAT";
     public const string MediaSizeExceeded = "MEDIA_SIZE_EXCEEDED";
     public const string MediaUploadFailed = "MEDIA_UPLOAD_FAILED";
+    public const string MediaInUse = "MEDIA_IN_USE";
 
     // Server (500)
     public const string InternalServerError = "INTERNAL_SERVER_ERROR";
