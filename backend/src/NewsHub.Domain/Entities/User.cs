@@ -12,7 +12,6 @@ public class User : IHasCreatedAt, IHasUpdatedAt
     public required string FullName { get; set; }
     public string? AvatarUrl { get; set; }
     public string? PhoneNumber { get; set; }
-    public string? PhoneNumber { get; set; }
     public string? PressCardNumber { get; set; }
     public string? Bio { get; set; }
     public UserRole Role { get; set; } = UserRole.User;

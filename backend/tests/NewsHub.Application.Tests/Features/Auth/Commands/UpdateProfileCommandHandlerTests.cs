@@ -166,6 +166,15 @@ public class UpdateProfileCommandHandlerTests
     }
 
     [Fact]
+    public void Validator_WhenFullNameTrimmedTooShort_ShouldFail()
+    {
+        var command = new UpdateProfileCommand(" A ", null, null, null);
+        var result = _validator.TestValidate(command);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(UpdateProfileCommand.FullName));
+    }
+
+    [Fact]
     public void Validator_WhenPressCardNumberExceeds50_ShouldFail()
     {
         var longCardNumber = new string('A', 51);

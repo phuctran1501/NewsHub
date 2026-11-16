@@ -50,6 +50,12 @@ public class PasswordHasher : IPasswordHasher
         {
             var hash = Convert.FromHexString(segments[0]);
             var salt = Convert.FromHexString(segments[1]);
+
+            if (hash.Length == 0 || salt.Length == 0)
+            {
+                return false;
+            }
+
             if (!int.TryParse(segments[2], out var iterations))
             {
                 return false;

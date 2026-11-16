@@ -38,7 +38,8 @@ public sealed class RegisterJournalistCommandValidator : AbstractValidator<Regis
 
         RuleFor(x => x.FullName)
             .NotEmpty().WithMessage("Họ tên không được để trống.")
-            .Length(2, 100).WithMessage("Họ tên phải từ 2 đến 100 ký tự.");
+            .Must(name => name.Trim().Length >= 2 && name.Trim().Length <= 100)
+            .WithMessage("Họ tên phải từ 2 đến 100 ký tự.");
 
         When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
         {
@@ -91,7 +92,14 @@ public sealed class RegisterJournalistCommandHandler(
         };
 
         dbContext.Users.Add(user);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Email đã tồn tại trên hệ thống.", ErrorCodes.EmailAlreadyExists);
+        }
 
         return new JournalistResponseDto(
             user.Id,

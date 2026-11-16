@@ -8,7 +8,7 @@ using NewsHub.Domain.Constants;
 using NewsHub.Domain.Entities;
 using NewsHub.Domain.Exceptions;
 
-public sealed record RefreshTokenCommand(string? RawRefreshToken) : IRequest<RefreshTokenResultDto>, ITransactionalRequest;
+public sealed record RefreshTokenCommand(string? RawRefreshToken) : IRequest<RefreshTokenResultDto>;
 
 public sealed class RefreshTokenCommandHandler(
     IApplicationDbContext dbContext,
@@ -80,7 +80,14 @@ public sealed class RefreshTokenCommandHandler(
         };
 
         dbContext.RefreshTokens.Add(newRefreshToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new UnauthorizedException("Phiên làm việc đã bị thay đổi bởi một yêu cầu khác. Vui lòng đăng nhập lại.", ErrorCodes.InvalidRefreshToken);
+        }
 
         return new RefreshTokenResultDto(
             newAccessToken,

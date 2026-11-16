@@ -24,7 +24,8 @@ public sealed class UpdateProfileCommandValidator : AbstractValidator<UpdateProf
         {
             RuleFor(x => x.FullName!)
                 .NotEmpty().WithMessage("Họ tên không được để trống khi cập nhật.")
-                .Length(2, 100).WithMessage("Họ tên phải từ 2 đến 100 ký tự.");
+                .Must(name => name.Trim().Length >= 2 && name.Trim().Length <= 100)
+                .WithMessage("Họ tên phải từ 2 đến 100 ký tự.");
         });
 
         When(x => !string.IsNullOrEmpty(x.AvatarUrl), () =>

@@ -75,6 +75,26 @@ public class RegisterCommandHandlerTests
         _dbContextMock.Verify(db => db.Users.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    public async Task Handle_WhenConcurrentInsertThrowsDbUpdateException_ShouldThrowConflictException()
+    {
+        // Arrange
+        var users = new List<User>().BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Users).Returns(users.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Duplicate key violation"));
+
+        _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<string>()))
+            .Returns("hashed");
+
+        var handler = new RegisterCommandHandler(_dbContextMock.Object, _passwordHasherMock.Object);
+        var command = new RegisterCommand("concurrent@example.com", "ValidPassword123!", "Concurrent User");
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => handler.Handle(command, CancellationToken.None));
+        Assert.Equal(ErrorCodes.EmailAlreadyExists, ex.ErrorCode);
+    }
+
     [Theory]
     [InlineData("", "Valid123!@", "Name")] // Empty email
     [InlineData("not-an-email", "Valid123!@", "Name")] // Invalid format
@@ -84,6 +104,7 @@ public class RegisterCommandHandlerTests
     [InlineData("test@domain.com", "NoDigitsPassword", "Name")] // No digit
     [InlineData("test@domain.com", "Valid123!@", "")] // Empty full name
     [InlineData("test@domain.com", "Valid123!@", "A")] // Too short full name (<2)
+    [InlineData("test@domain.com", "Valid123!@", " A ")] // Trimmed full name too short (<2)
     public void Validator_WithInvalidInputs_ShouldHaveValidationErrors(string email, string password, string fullName)
     {
         var command = new RegisterCommand(email, password, fullName);

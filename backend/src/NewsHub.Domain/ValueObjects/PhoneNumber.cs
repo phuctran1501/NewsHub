@@ -13,7 +13,7 @@ public readonly partial record struct PhoneNumber
 {
     public string Value { get; }
 
-    [GeneratedRegex(@"^(?:\+84|84|0)([35789]\d{8})$")]
+    [GeneratedRegex(@"^(?:\+84|84|0)([35789][0-9]{8})$")]
     private static partial Regex VietnamPhoneRegex();
 
     [GeneratedRegex(@"[\s\.\-\(\)]")]

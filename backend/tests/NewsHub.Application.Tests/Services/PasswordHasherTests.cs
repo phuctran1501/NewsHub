@@ -52,6 +52,8 @@ public class PasswordHasherTests
     [InlineData("invalid_no_colon")]
     [InlineData("not_hex:invalid_hex")]
     [InlineData("short:short")]
+    [InlineData(":00112233445566778899AABBCCDDEEFF:100000:SHA512")]
+    [InlineData("AABBCCDDEEFF::100000:SHA512")]
     public void VerifyPassword_WithMalformedHash_ShouldReturnFalse(string malformedHash)
     {
         var isValid = _hasher.VerifyPassword("Password123!", malformedHash);

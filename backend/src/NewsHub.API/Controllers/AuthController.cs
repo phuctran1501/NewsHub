@@ -2,6 +2,8 @@ namespace NewsHub.API.Controllers;
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using NewsHub.API.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
 using NewsHub.Application.Features.Auth.Commands.Login;
@@ -14,7 +16,8 @@ using NewsHub.Application.Features.Auth.Commands.RegisterJournalist;
 [Route("api/v1/auth")]
 public class AuthController(
     ISender mediator,
-    ICorrelationIdProvider correlationIdProvider) : ControllerBase
+    ICorrelationIdProvider correlationIdProvider,
+    IJwtTokenGenerator jwtTokenGenerator) : ControllerBase
 {
     private const string RefreshTokenCookieName = "refreshToken";
     private const string AuthCookiePath = "/api/v1/auth";
@@ -42,6 +45,7 @@ public class AuthController(
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting(RateLimitingExtensions.LoginPolicy)]
     public async Task<IActionResult> Login(
         [FromBody] LoginCommand command,
         CancellationToken cancellationToken)
@@ -102,7 +106,7 @@ public class AuthController(
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddDays(7),
+            Expires = DateTimeOffset.UtcNow.AddDays(jwtTokenGenerator.RefreshTokenExpirationDays),
             Path = AuthCookiePath
         };
 

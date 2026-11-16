@@ -223,4 +223,39 @@ public class RefreshTokenCommandHandlerTests
         var ex = await Assert.ThrowsAsync<UnauthorizedException>(() => handler.Handle(command, CancellationToken.None));
         Assert.Equal(ErrorCodes.InvalidCredentials, ex.ErrorCode);
     }
+
+    [Fact]
+    public async Task Handle_WhenDbUpdateConcurrencyExceptionOccurs_ShouldThrowUnauthorizedException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var validToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            TokenHash = "hash_123",
+            ExpiresAt = DateTimeOffset.UtcNow.AddDays(1),
+            IsRevoked = false,
+            User = new User
+            {
+                Id = userId,
+                Email = "active@example.com",
+                PasswordHash = "hash",
+                FullName = "Active",
+                IsActive = true
+            }
+        };
+
+        var tokens = new List<RefreshToken> { validToken }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.RefreshTokens).Returns(tokens.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException("Concurrency conflict"));
+
+        var handler = new RefreshTokenCommandHandler(_dbContextMock.Object, _jwtTokenGeneratorMock.Object);
+        var command = new RefreshTokenCommand("raw_token_123");
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<UnauthorizedException>(() => handler.Handle(command, CancellationToken.None));
+        Assert.Equal(ErrorCodes.InvalidRefreshToken, ex.ErrorCode);
+    }
 }

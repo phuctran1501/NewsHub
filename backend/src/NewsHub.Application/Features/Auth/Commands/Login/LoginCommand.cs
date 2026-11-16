@@ -73,7 +73,6 @@ public sealed class LoginCommandHandler(
             user.AvatarUrl,
             user.Role,
             user.PhoneNumber,
-            user.PhoneNumber,
             user.PressCardNumber,
             user.Bio,
             user.IsActive,

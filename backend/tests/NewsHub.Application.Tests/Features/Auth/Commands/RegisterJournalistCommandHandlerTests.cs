@@ -91,6 +91,26 @@ public class RegisterJournalistCommandHandlerTests
         Assert.Equal(ErrorCodes.EmailAlreadyExists, ex.ErrorCode);
     }
 
+    [Fact]
+    public async Task Handle_WhenConcurrentInsertThrowsDbUpdateException_ShouldThrowConflictException()
+    {
+        // Arrange
+        var users = new List<User>().BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Users).Returns(users.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Duplicate key violation"));
+
+        _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<string>()))
+            .Returns("hashed");
+
+        var handler = new RegisterJournalistCommandHandler(_dbContextMock.Object, _passwordHasherMock.Object);
+        var command = new RegisterJournalistCommand("concurrent.journalist@news.com", "ValidPassword123!", "Jane", null, null, null);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => handler.Handle(command, CancellationToken.None));
+        Assert.Equal(ErrorCodes.EmailAlreadyExists, ex.ErrorCode);
+    }
+
     [Theory]
     [InlineData("0123456789")] // Invalid prefix 01
     [InlineData("091234567")] // Too short

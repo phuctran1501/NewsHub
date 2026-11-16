@@ -61,6 +61,7 @@ public class PhoneNumberTests
     [InlineData("091234567")] // Too short (9 digits)
     [InlineData("09123456789")] // Too long (11 digits)
     [InlineData("098abc4321")] // Containing letters
+    [InlineData("091\u0662\u0663\u0664\u0665\u0666\u06678")] // Unicode Arabic digits
     [InlineData("invalid")]
     public void Constructor_WithInvalidPhone_ShouldThrowValidationException(string invalidPhone)
     {
