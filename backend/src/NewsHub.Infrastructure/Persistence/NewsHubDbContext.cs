@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Interfaces;
 using NewsHub.Domain.Entities;
 
 namespace NewsHub.Infrastructure.Persistence;
 
-public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbContext(options)
+public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbContext(options), IApplicationDbContext
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

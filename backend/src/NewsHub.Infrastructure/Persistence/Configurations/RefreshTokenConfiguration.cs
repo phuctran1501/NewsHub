@@ -46,6 +46,9 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
             .HasColumnName("replaced_by_token_hash")
             .HasMaxLength(256);
 
+        builder.Property(r => r.Version)
+            .IsRowVersion();
+
         // Khóa ngoại liên kết tới bảng users
         builder.HasOne(r => r.User)
             .WithMany(u => u.RefreshTokens)

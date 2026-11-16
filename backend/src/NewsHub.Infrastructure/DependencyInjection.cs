@@ -32,6 +32,8 @@ public static class DependencyInjection
             });
         });
 
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<NewsHubDbContext>());
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();
 
@@ -86,6 +88,20 @@ public static class DependencyInjection
 
         services.AddSingleton<ICloudinary>(sp => sp.GetRequiredService<Cloudinary>());
         services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+        // JWT & Password Hasher
+        var jwtSection = configuration.GetSection(JwtOptions.SectionName);
+        services.Configure<JwtOptions>(opt =>
+        {
+            opt.SecretKey = jwtSection["SecretKey"] ?? string.Empty;
+            opt.Issuer = jwtSection["Issuer"] ?? "NewsHubAPI";
+            opt.Audience = jwtSection["Audience"] ?? "NewsHubClients";
+            opt.AccessTokenExpirationMinutes = int.TryParse(jwtSection["AccessTokenExpirationMinutes"], out var at) ? at : 15;
+            opt.RefreshTokenExpirationDays = int.TryParse(jwtSection["RefreshTokenExpirationDays"], out var rt) ? rt : 7;
+        });
+
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }
