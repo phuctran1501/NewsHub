@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Auth.Commands.RegisterJournalist;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Auth.DTOs;
 using NewsHub.Domain.Constants;
@@ -96,7 +97,7 @@ public sealed class RegisterJournalistCommandHandler(
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
         {
             throw new ConflictException("Email đã tồn tại trên hệ thống.", ErrorCodes.EmailAlreadyExists);
         }

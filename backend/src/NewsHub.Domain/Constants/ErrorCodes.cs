@@ -42,6 +42,8 @@ public static class ErrorCodes
 
     // Conflicts & Bad Requests (400, 409)
     public const string Conflict = "CONFLICT";
+    public const string CategoryConflict = "CATEGORY_CONFLICT";
+    public const string CategoryInUse = "CATEGORY_IN_USE";
     public const string ArticleSlugConflict = "ARTICLE_SLUG_CONFLICT";
     public const string CannotFollowOwnCompany = "CANNOT_FOLLOW_OWN_COMPANY";
     public const string InvalidRequest = "INVALID_REQUEST";
