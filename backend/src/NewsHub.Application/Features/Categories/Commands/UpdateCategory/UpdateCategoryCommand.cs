@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Categories.Commands.UpdateCategory;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Categories.Constants;
 using NewsHub.Application.Features.Categories.DTOs;
@@ -94,7 +95,11 @@ public sealed class UpdateCategoryCommandHandler(
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateConcurrencyException)
+        {
+            throw NotFoundException.WithErrorCode("Không tìm thấy chuyên mục tin tức.", ErrorCodes.CategoryNotFound);
+        }
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
         {
             throw new ConflictException("Tên hoặc đường dẫn (slug) của chuyên mục đã tồn tại trong hệ thống.", ErrorCodes.CategoryConflict);
         }

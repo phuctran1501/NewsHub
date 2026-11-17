@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Categories.Commands.CreateCategory;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Categories.Constants;
 using NewsHub.Application.Features.Categories.DTOs;
@@ -72,7 +73,7 @@ public sealed class CreateCategoryCommandHandler(
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
         {
             throw new ConflictException("Tên hoặc đường dẫn (slug) của chuyên mục đã tồn tại trong hệ thống.", ErrorCodes.CategoryConflict);
         }

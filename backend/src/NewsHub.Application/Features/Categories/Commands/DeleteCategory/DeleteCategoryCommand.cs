@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Categories.Commands.DeleteCategory;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Categories.Constants;
 using NewsHub.Domain.Constants;
@@ -45,7 +46,11 @@ public sealed class DeleteCategoryCommandHandler(
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateConcurrencyException)
+        {
+            throw NotFoundException.WithErrorCode("Không tìm thấy chuyên mục tin tức.", ErrorCodes.CategoryNotFound);
+        }
+        catch (DbUpdateException ex) when (ex.IsForeignKeyViolation())
         {
             throw new ConflictException("Không thể xóa chuyên mục đang chứa bài viết hoặc đang được sử dụng trong hệ thống.", ErrorCodes.CategoryInUse);
         }

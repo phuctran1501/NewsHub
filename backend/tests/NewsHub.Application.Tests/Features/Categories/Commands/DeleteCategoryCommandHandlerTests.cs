@@ -63,6 +63,64 @@ public class DeleteCategoryCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenDbUpdateConcurrencyExceptionOccurs_ShouldThrowNotFoundException()
+    {
+        // Arrange (2 concurrent deletes: second one gets 0 rows affected -> DbUpdateConcurrencyException)
+        var categoryId = Guid.NewGuid();
+        var category = new Category { Id = categoryId, Name = "Xóa", Slug = "xoa" };
+        var categories = new List<Category> { category }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException("Concurrency conflict"));
+
+        var handler = new DeleteCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+            handler.Handle(new DeleteCategoryCommand(categoryId), CancellationToken.None));
+
+        Assert.Equal(ErrorCodes.CategoryNotFound, exception.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenForeignKeyViolationOccurs_ShouldThrowConflictExceptionWithCategoryInUse()
+    {
+        // Arrange (Category is referenced by existing articles)
+        var categoryId = Guid.NewGuid();
+        var category = new Category { Id = categoryId, Name = "Bóng đá", Slug = "bong-da" };
+        var categories = new List<Category> { category }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Database error", new Exception("23503: foreign key constraint violation")));
+
+        var handler = new DeleteCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ConflictException>(() =>
+            handler.Handle(new DeleteCategoryCommand(categoryId), CancellationToken.None));
+
+        Assert.Equal(ErrorCodes.CategoryInUse, exception.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenUnrelatedDbUpdateExceptionOccurs_ShouldRethrowOriginalException()
+    {
+        // Arrange (e.g. database timeout or hardware error)
+        var categoryId = Guid.NewGuid();
+        var category = new Category { Id = categoryId, Name = "Bóng đá", Slug = "bong-da" };
+        var categories = new List<Category> { category }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Database error", new Exception("Connection timeout")));
+
+        var handler = new DeleteCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Microsoft.EntityFrameworkCore.DbUpdateException>(() =>
+            handler.Handle(new DeleteCategoryCommand(categoryId), CancellationToken.None));
+    }
+
+    [Fact]
     public void Validator_WithEmptyId_ShouldHaveValidationError()
     {
         var command = new DeleteCategoryCommand(Guid.Empty);

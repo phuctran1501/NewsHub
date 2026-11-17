@@ -70,6 +70,42 @@ public class CreateCategoryCommandHandlerTests
         _cacheServiceMock.Verify(c => c.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    public async Task Handle_WhenDatabaseUniqueConstraintViolationOccurs_ShouldThrowConflictException()
+    {
+        // Arrange
+        var categories = new List<Category>().BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Duplicate", new Exception("23505: duplicate key")));
+
+        var handler = new CreateCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+        var command = new CreateCategoryCommand("Kinh doanh", null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ConflictException>(() =>
+            handler.Handle(command, CancellationToken.None));
+
+        Assert.Equal(ErrorCodes.CategoryConflict, exception.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenUnrelatedDbUpdateExceptionOccurs_ShouldRethrowOriginalException()
+    {
+        // Arrange
+        var categories = new List<Category>().BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Database error", new Exception("Connection lost")));
+
+        var handler = new CreateCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+        var command = new CreateCategoryCommand("Kinh doanh", null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Microsoft.EntityFrameworkCore.DbUpdateException>(() =>
+            handler.Handle(command, CancellationToken.None));
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

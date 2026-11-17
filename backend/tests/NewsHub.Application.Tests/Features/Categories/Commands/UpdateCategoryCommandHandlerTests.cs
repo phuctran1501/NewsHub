@@ -96,6 +96,67 @@ public class UpdateCategoryCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenDbUpdateConcurrencyExceptionOccurs_ShouldThrowNotFoundException()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var category = new Category { Id = categoryId, Name = "Cũ", Slug = "cu" };
+        var categories = new List<Category> { category }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException("Concurrency conflict"));
+
+        var handler = new UpdateCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+        var command = new UpdateCategoryCommand(categoryId, "Mới", null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+            handler.Handle(command, CancellationToken.None));
+
+        Assert.Equal(ErrorCodes.CategoryNotFound, exception.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenDatabaseUniqueConstraintViolationOccurs_ShouldThrowConflictException()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var category = new Category { Id = categoryId, Name = "Cũ", Slug = "cu" };
+        var categories = new List<Category> { category }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Duplicate", new Exception("23505: duplicate key")));
+
+        var handler = new UpdateCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+        var command = new UpdateCategoryCommand(categoryId, "Mới", null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ConflictException>(() =>
+            handler.Handle(command, CancellationToken.None));
+
+        Assert.Equal(ErrorCodes.CategoryConflict, exception.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenUnrelatedDbUpdateExceptionOccurs_ShouldRethrowOriginalException()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var category = new Category { Id = categoryId, Name = "Cũ", Slug = "cu" };
+        var categories = new List<Category> { category }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Categories).Returns(categories.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateException("Database error", new Exception("Disk full")));
+
+        var handler = new UpdateCategoryCommandHandler(_dbContextMock.Object, _cacheServiceMock.Object);
+        var command = new UpdateCategoryCommand(categoryId, "Mới", null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Microsoft.EntityFrameworkCore.DbUpdateException>(() =>
+            handler.Handle(command, CancellationToken.None));
+    }
+
+    [Fact]
     public void Validator_WhenNoFieldsProvided_ShouldHaveValidationError()
     {
         var command = new UpdateCategoryCommand(Guid.NewGuid(), null, null);
