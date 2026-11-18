@@ -84,6 +84,12 @@ public sealed class CreateArticleCommandHandler(
             throw NotFoundException.WithErrorCode("Không tìm thấy thông tin tác giả.", ErrorCodes.UserNotFound);
         }
 
+        // Kiểm tra quyền chỉ định tòa soạn (CompanyId): Chỉ Admin hoặc thành viên được phép chỉ định bài viết cho tòa soạn
+        if (request.CompanyId.HasValue && !currentUser.IsInRole(UserRole.Admin) && author.Role == UserRole.User)
+        {
+            throw new ForbiddenException("Người dùng thông thường không có quyền chỉ định bài viết cho tòa soạn.", ErrorCodes.Forbidden);
+        }
+
         // 1. Sanitize HTML
         var sanitizedHtml = htmlSanitizer.Sanitize(request.ContentHtml);
         if (string.IsNullOrWhiteSpace(sanitizedHtml))

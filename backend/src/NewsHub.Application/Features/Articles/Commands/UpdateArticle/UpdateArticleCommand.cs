@@ -107,18 +107,23 @@ public sealed class UpdateArticleCommandHandler(
         var oldSlug = article.Slug;
 
         // 1. Cập nhật Tiêu đề & Tái tạo Slug nếu có thay đổi
+        // Lưu ý SEO: Nếu bài viết đã xuất bản (Published), giữ nguyên Slug cũ để tránh làm chết liên kết/SEO backlinks
         if (!string.IsNullOrWhiteSpace(request.Title) && request.Title.Trim() != article.Title)
         {
             var newTitle = request.Title.Trim();
-            var baseSlug = SlugHelper.GenerateSlug(newTitle, 300);
-            if (string.IsNullOrWhiteSpace(baseSlug))
-            {
-                baseSlug = $"bai-viet-{article.Id:N}"[..20];
-            }
-
-            var uniqueSlug = await GenerateUniqueSlugAsync(article.Id, baseSlug, cancellationToken);
             article.Title = newTitle;
-            article.Slug = uniqueSlug;
+
+            if (article.Status != ArticleStatus.Published)
+            {
+                var baseSlug = SlugHelper.GenerateSlug(newTitle, 300);
+                if (string.IsNullOrWhiteSpace(baseSlug))
+                {
+                    baseSlug = $"bai-viet-{article.Id:N}"[..20];
+                }
+
+                var uniqueSlug = await GenerateUniqueSlugAsync(article.Id, baseSlug, cancellationToken);
+                article.Slug = uniqueSlug;
+            }
         }
 
         // 2. Cập nhật Nội dung & Tính lại reading time nếu có thay đổi

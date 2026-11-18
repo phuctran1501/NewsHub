@@ -28,7 +28,6 @@ public sealed class PublishArticleCommandHandler(
     ICurrentUser currentUser,
     ICacheService cacheService,
     INotificationService notificationService,
-    IBackgroundJobService backgroundJobService,
     ILogger<PublishArticleCommandHandler> logger) : IRequestHandler<PublishArticleCommand, ArticleDetailDto>
 {
     public async Task<ArticleDetailDto> Handle(
@@ -106,12 +105,6 @@ public sealed class PublishArticleCommandHandler(
                 article.Id,
                 article.Status.ToString(),
                 cancellationToken);
-
-            // Kích hoạt tác vụ nền Hangfire (Fire-and-forget)
-            var articleId = article.Id;
-            var authorId = article.AuthorId;
-            backgroundJobService.Enqueue<INotificationService>(service =>
-                service.NotifyArticleStatusChangedAsync(authorId, articleId, "Published", CancellationToken.None));
         }
         catch (Exception ex)
         {

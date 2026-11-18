@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Articles.Queries.GetRelatedArticles;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Helpers;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Application.Features.Articles.DTOs;
@@ -85,7 +86,7 @@ public sealed class GetRelatedArticlesQueryHandler(
                         a.Id,
                         a.Title,
                         a.Slug,
-                        ExtractExcerpt(a.ContentHtml),
+                        HtmlExcerptHelper.ExtractExcerpt(a.ContentHtml),
                         a.Status.ToString(),
                         new AuthorSummaryDto(author.Id, author.FullName, author.AvatarUrl),
                         a.CompanyId,
@@ -101,21 +102,5 @@ public sealed class GetRelatedArticlesQueryHandler(
             cancellationToken);
 
         return allRelated.Take(request.Limit).ToList();
-    }
-
-    private static string? ExtractExcerpt(string html)
-    {
-        if (string.IsNullOrWhiteSpace(html))
-        {
-            return null;
-        }
-
-        var plainText = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", " ").Trim();
-        if (plainText.Length <= 160)
-        {
-            return plainText;
-        }
-
-        return plainText[..160].Trim() + "...";
     }
 }

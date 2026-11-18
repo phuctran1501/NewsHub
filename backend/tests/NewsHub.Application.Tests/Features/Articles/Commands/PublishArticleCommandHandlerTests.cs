@@ -18,7 +18,6 @@ public class PublishArticleCommandHandlerTests
     private readonly Mock<ICurrentUser> _currentUserMock = new();
     private readonly Mock<ICacheService> _cacheServiceMock = new();
     private readonly Mock<INotificationService> _notificationServiceMock = new();
-    private readonly Mock<IBackgroundJobService> _backgroundJobServiceMock = new();
     private readonly Mock<ILogger<PublishArticleCommandHandler>> _loggerMock = new();
 
     private PublishArticleCommandHandler CreateHandler() =>
@@ -27,7 +26,6 @@ public class PublishArticleCommandHandlerTests
             _currentUserMock.Object,
             _cacheServiceMock.Object,
             _notificationServiceMock.Object,
-            _backgroundJobServiceMock.Object,
             _loggerMock.Object);
 
     [Fact]
@@ -67,7 +65,6 @@ public class PublishArticleCommandHandlerTests
         Assert.NotNull(result.PublishedAt);
         _dbContextMock.Verify(db => db.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _notificationServiceMock.Verify(n => n.NotifyArticleStatusChangedAsync(authorId, articleId, "Published", It.IsAny<CancellationToken>()), Times.Once);
-        _backgroundJobServiceMock.Verify(b => b.Enqueue(It.IsAny<Expression<Func<INotificationService, Task>>>()), Times.Once);
     }
 
     [Fact]
