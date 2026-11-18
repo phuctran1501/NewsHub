@@ -20,28 +20,20 @@ public sealed class RemoveBookmarkCommandValidator : AbstractValidator<RemoveBoo
 
 public sealed class RemoveBookmarkCommandHandler(
     IApplicationDbContext dbContext,
-    ICurrentUser currentUser,
-    IUnitOfWork unitOfWork) : IRequestHandler<RemoveBookmarkCommand>
+    ICurrentUser currentUser) : IRequestHandler<RemoveBookmarkCommand>
 {
     public async Task Handle(RemoveBookmarkCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             throw new UnauthorizedException("Vui lòng đăng nhập để bỏ lưu bài viết.", ErrorCodes.Unauthorized);
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
-        var bookmark = await dbContext.UserBookmarks
-            .FirstOrDefaultAsync(ub => ub.UserId == userId && ub.ArticleId == request.ArticleId, cancellationToken);
-
-        if (bookmark is null)
-        {
-            // Idempotent: Nếu bookmark không tồn tại hoặc đã bị xóa trước đó, coi như thành công
-            return;
-        }
-
-        dbContext.UserBookmarks.Remove(bookmark);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        // Xóa trực tiếp qua ExecuteDeleteAsync để bảo đảm an toàn trước Concurrency và Idempotent
+        await dbContext.UserBookmarks
+            .Where(ub => ub.UserId == userId && ub.ArticleId == request.ArticleId)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 }

@@ -14,12 +14,12 @@ public sealed class ClearAllBookmarksCommandHandler(
 {
     public async Task<int> Handle(ClearAllBookmarksCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             throw new UnauthorizedException("Vui lòng đăng nhập để xóa toàn bộ bài viết đã lưu.", ErrorCodes.Unauthorized);
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
         // Thực hiện xóa set-based trực tiếp trên PostgreSQL với hiệu năng O(1) RAM
         var deletedCount = await dbContext.UserBookmarks

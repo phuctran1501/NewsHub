@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Bookmarks.Commands.AddBookmark;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NewsHub.Application.Common.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Domain.Constants;
 using NewsHub.Domain.Entities;
@@ -27,12 +28,12 @@ public sealed class AddBookmarkCommandHandler(
 {
     public async Task Handle(AddBookmarkCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             throw new UnauthorizedException("Vui lòng đăng nhập để lưu bài viết.", ErrorCodes.Unauthorized);
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
         // 1. Kiểm tra bài viết tồn tại và đang ở trạng thái Published
         var article = await dbContext.Articles
@@ -72,10 +73,24 @@ public sealed class AddBookmarkCommandHandler(
             dbContext.UserBookmarks.Add(bookmark);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
         {
             // Bắt race condition nếu hai request đồng thời cùng lưu bài viết
             // Idempotent: không coi là lỗi
+        }
+        catch (DbUpdateException)
+        {
+            // Nếu bài viết bị xóa giữa lúc check và insert -> vi phạm Foreign Key
+            var stillExists = await dbContext.Articles
+                .AsNoTracking()
+                .AnyAsync(a => a.Id == request.ArticleId, cancellationToken);
+
+            if (!stillExists)
+            {
+                throw NotFoundException.WithErrorCode("Không tìm thấy bài viết yêu cầu.", ErrorCodes.ArticleNotFound);
+            }
+
+            throw;
         }
     }
 }

@@ -14,12 +14,12 @@ public sealed class ClearAllReadingHistoryCommandHandler(
 {
     public async Task<int> Handle(ClearAllReadingHistoryCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             throw new UnauthorizedException("Vui lòng đăng nhập để xóa toàn bộ lịch sử đọc.", ErrorCodes.Unauthorized);
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
         // Xóa set-based trực tiếp trên PostgreSQL với hiệu năng O(1) RAM
         var deletedCount = await dbContext.ReadingHistories

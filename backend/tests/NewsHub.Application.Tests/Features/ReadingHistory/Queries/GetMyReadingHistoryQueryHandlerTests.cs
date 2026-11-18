@@ -44,7 +44,8 @@ public class GetMyReadingHistoryQueryHandlerTests
             Id = Guid.NewGuid(),
             Title = "Tin đã xem",
             Slug = "tin-da-xem",
-            ContentHtml = "<p>Nội dung</p>"
+            ContentHtml = "<p>Nội dung</p>",
+            Status = NewsHub.Domain.Enums.ArticleStatus.Published
         };
 
         var history = new ReadingHistory

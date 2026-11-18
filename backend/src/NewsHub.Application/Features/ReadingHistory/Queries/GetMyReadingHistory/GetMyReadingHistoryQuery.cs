@@ -7,6 +7,7 @@ using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
 using NewsHub.Application.Features.ReadingHistory.DTOs;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
 public sealed record GetMyReadingHistoryQuery(
@@ -33,23 +34,29 @@ public sealed class GetMyReadingHistoryQueryHandler(
         GetMyReadingHistoryQuery request,
         CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             throw new UnauthorizedException("Vui lòng đăng nhập để xem lịch sử đọc.", ErrorCodes.Unauthorized);
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
+        // Chỉ hiển thị lịch sử của các bài viết đang ở trạng thái Published
         var query = dbContext.ReadingHistories
             .AsNoTracking()
-            .Where(rh => rh.UserId == userId);
+            .Where(rh => rh.UserId == userId && rh.Article != null && rh.Article.Status == ArticleStatus.Published);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var offset = (long)(request.PageNumber - 1) * request.PageSize;
+        if (offset >= totalCount)
+        {
+            return new PagedList<ReadingHistoryItemDto>([], request.PageNumber, request.PageSize, totalCount);
+        }
 
         var histories = await query
             .OrderByDescending(rh => rh.ReadAt)
+            .ThenByDescending(rh => rh.Id)
             .Skip((int)offset)
             .Take(request.PageSize)
             .Include(rh => rh.Article)

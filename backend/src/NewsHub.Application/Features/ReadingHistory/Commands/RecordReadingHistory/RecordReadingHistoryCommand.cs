@@ -15,12 +15,12 @@ public sealed class RecordReadingHistoryCommandHandler(
 {
     public async Task Handle(RecordReadingHistoryCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             return;
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
         try
         {

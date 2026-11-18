@@ -7,6 +7,7 @@ using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
 using NewsHub.Application.Features.Bookmarks.DTOs;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
 public sealed record GetMyBookmarksQuery(
@@ -33,23 +34,29 @@ public sealed class GetMyBookmarksQueryHandler(
         GetMyBookmarksQuery request,
         CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
+        if (!currentUser.IsAuthenticated || !currentUser.Id.HasValue)
         {
             throw new UnauthorizedException("Vui lòng đăng nhập để xem danh sách bài viết đã lưu.", ErrorCodes.Unauthorized);
         }
 
-        var userId = currentUser.Id!.Value;
+        var userId = currentUser.Id.Value;
 
+        // Chỉ hiển thị bookmark của các bài viết đang ở trạng thái Published
         var query = dbContext.UserBookmarks
             .AsNoTracking()
-            .Where(ub => ub.UserId == userId);
+            .Where(ub => ub.UserId == userId && ub.Article != null && ub.Article.Status == ArticleStatus.Published);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var offset = (long)(request.PageNumber - 1) * request.PageSize;
+        if (offset >= totalCount)
+        {
+            return new PagedList<BookmarkItemDto>([], request.PageNumber, request.PageSize, totalCount);
+        }
 
         var bookmarks = await query
             .OrderByDescending(ub => ub.SavedAt)
+            .ThenByDescending(ub => ub.ArticleId)
             .Skip((int)offset)
             .Take(request.PageSize)
             .Include(ub => ub.Article)
