@@ -22,4 +22,7 @@ public class User : IHasCreatedAt, IHasUpdatedAt
     // Navigation properties
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
     public ICollection<MediaFile> MediaFiles { get; set; } = new HashSet<MediaFile>();
+    public ICollection<Article> Articles { get; set; } = new HashSet<Article>();
+    public ICollection<ReadingHistory> ReadingHistories { get; set; } = new HashSet<ReadingHistory>();
+    public ICollection<ArticleReport> ReportedArticles { get; set; } = new HashSet<ArticleReport>();
 }

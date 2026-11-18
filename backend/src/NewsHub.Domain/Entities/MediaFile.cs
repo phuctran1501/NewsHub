@@ -19,4 +19,5 @@ public class MediaFile : IHasCreatedAt
 
     // Navigation property
     public User? UploadedByUser { get; set; }
+    public ICollection<Article> CoverArticles { get; set; } = new HashSet<Article>();
 }

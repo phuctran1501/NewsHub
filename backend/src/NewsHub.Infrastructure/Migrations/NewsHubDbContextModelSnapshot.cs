@@ -23,6 +23,181 @@ namespace NewsHub.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<Guid?>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("company_id");
+
+                    b.Property<string>("ContentHtml")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_html");
+
+                    b.Property<Guid?>("CoverImageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cover_image_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at");
+
+                    b.Property<int>("ReadingTimeMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("reading_time_minutes");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(350)
+                        .HasColumnType("character varying(350)")
+                        .HasColumnName("slug");
+
+                    b.Property<string>("SourceName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_name");
+
+                    b.Property<string>("SourceUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_url");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("ViewCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("view_count");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("CoverImageId");
+
+                    b.HasIndex("PublishedAt");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("ViewCount");
+
+                    b.ToTable("articles", "public");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ArticleCategory", b =>
+                {
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.Property<bool>("IsAiAssigned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_ai_assigned");
+
+                    b.HasKey("ArticleId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("article_categories", "public");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ArticleReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text")
+                        .HasColumnName("details");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid?>("ReporterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reporter_id");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid?>("ResolvedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resolved_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasDefaultValue("Pending")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("ResolvedBy");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.ToTable("article_reports", "public");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -131,6 +306,34 @@ namespace NewsHub.Infrastructure.Migrations
                     b.HasIndex("UploadedByUserId");
 
                     b.ToTable("media_files", "public");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ReadingHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<DateTimeOffset>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId", "ReadAt");
+
+                    b.ToTable("reading_histories", "public");
                 });
 
             modelBuilder.Entity("NewsHub.Domain.Entities.RefreshToken", b =>
@@ -261,6 +464,68 @@ namespace NewsHub.Infrastructure.Migrations
                     b.ToTable("users", "public");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.User", "Author")
+                        .WithMany("Articles")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NewsHub.Domain.Entities.MediaFile", "CoverImage")
+                        .WithMany("CoverArticles")
+                        .HasForeignKey("CoverImageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("CoverImage");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ArticleCategory", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.Article", "Article")
+                        .WithMany("ArticleCategories")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsHub.Domain.Entities.Category", "Category")
+                        .WithMany("ArticleCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ArticleReport", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.Article", "Article")
+                        .WithMany("Reports")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsHub.Domain.Entities.User", "Reporter")
+                        .WithMany("ReportedArticles")
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("NewsHub.Domain.Entities.User", "Resolver")
+                        .WithMany()
+                        .HasForeignKey("ResolvedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Reporter");
+
+                    b.Navigation("Resolver");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.MediaFile", b =>
                 {
                     b.HasOne("NewsHub.Domain.Entities.User", "UploadedByUser")
@@ -270,6 +535,25 @@ namespace NewsHub.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("UploadedByUser");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ReadingHistory", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.Article", "Article")
+                        .WithMany("ReadingHistories")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsHub.Domain.Entities.User", "User")
+                        .WithMany("ReadingHistories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NewsHub.Domain.Entities.RefreshToken", b =>
@@ -283,11 +567,36 @@ namespace NewsHub.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
+                {
+                    b.Navigation("ArticleCategories");
+
+                    b.Navigation("ReadingHistories");
+
+                    b.Navigation("Reports");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("ArticleCategories");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.MediaFile", b =>
+                {
+                    b.Navigation("CoverArticles");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Articles");
+
                     b.Navigation("MediaFiles");
 
+                    b.Navigation("ReadingHistories");
+
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("ReportedArticles");
                 });
 #pragma warning restore 612, 618
         }

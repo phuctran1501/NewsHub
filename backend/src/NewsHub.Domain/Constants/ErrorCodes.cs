@@ -25,28 +25,33 @@ public static class ErrorCodes
     public const string RefreshTokenRequired = "REFRESH_TOKEN_REQUIRED";
     public const string InvalidRefreshToken = "INVALID_REFRESH_TOKEN";
     public const string RefreshTokenExpired = "REFRESH_TOKEN_EXPIRED";
+    public const string InvalidPreviewToken = "INVALID_PREVIEW_TOKEN";
 
     // Authorization & Permissions (401, 403)
     public const string Unauthorized = "UNAUTHORIZED";
     public const string PermissionDenied = "PERMISSION_DENIED";
     public const string Forbidden = "FORBIDDEN";
     public const string PressCardNotVerified = "PRESS_CARD_NOT_VERIFIED";
+    public const string ArticleForbiddenEdit = "ARTICLE_FORBIDDEN_EDIT";
     public const string CannotDeletePublishedCompanyArticle = "CANNOT_DELETE_PUBLISHED_COMPANY_ARTICLE";
 
     // Resources (404)
     public const string ResourceNotFound = "RESOURCE_NOT_FOUND";
     public const string UserNotFound = "USER_NOT_FOUND";
     public const string ArticleNotFound = "ARTICLE_NOT_FOUND";
+    public const string ArticleNotPublished = "ARTICLE_NOT_PUBLISHED";
     public const string CategoryNotFound = "CATEGORY_NOT_FOUND";
     public const string MediaNotFound = "MEDIA_NOT_FOUND";
 
-    // Conflicts & Bad Requests (400, 409)
+    // Conflicts & Bad Requests (400, 409, 429)
     public const string Conflict = "CONFLICT";
     public const string CategoryConflict = "CATEGORY_CONFLICT";
     public const string CategoryInUse = "CATEGORY_IN_USE";
     public const string ArticleSlugConflict = "ARTICLE_SLUG_CONFLICT";
     public const string CannotFollowOwnCompany = "CANNOT_FOLLOW_OWN_COMPANY";
     public const string InvalidRequest = "INVALID_REQUEST";
+    public const string RateLimitExceeded = "RATE_LIMIT_EXCEEDED";
+    public const string ReportAlreadySubmitted = "REPORT_ALREADY_SUBMITTED";
 
     // Media (400, 409, 422)
     public const string MediaInvalidFormat = "MEDIA_INVALID_FORMAT";
