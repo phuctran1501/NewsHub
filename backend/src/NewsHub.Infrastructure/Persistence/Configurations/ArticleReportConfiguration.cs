@@ -37,6 +37,7 @@ public class ArticleReportConfiguration : IEntityTypeConfiguration<ArticleReport
             .HasMaxLength(32)
             .HasConversion<string>()
             .HasDefaultValue(ReportStatus.Pending)
+            .HasSentinel((ReportStatus)0)
             .IsRequired();
 
         builder.Property(r => r.CreatedAt)

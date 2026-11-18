@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Articles.Commands.PublishArticle;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Application.Features.Articles.DTOs;
@@ -27,7 +28,8 @@ public sealed class PublishArticleCommandHandler(
     ICurrentUser currentUser,
     ICacheService cacheService,
     INotificationService notificationService,
-    IBackgroundJobService backgroundJobService) : IRequestHandler<PublishArticleCommand, ArticleDetailDto>
+    IBackgroundJobService backgroundJobService,
+    ILogger<PublishArticleCommandHandler> logger) : IRequestHandler<PublishArticleCommand, ArticleDetailDto>
 {
     public async Task<ArticleDetailDto> Handle(
         PublishArticleCommand request,
@@ -58,6 +60,33 @@ public sealed class PublishArticleCommandHandler(
             throw new ForbiddenException("Bạn không có quyền xuất bản bài viết của tác giả khác.", ErrorCodes.ArticleForbiddenEdit);
         }
 
+        if (article.Status == ArticleStatus.Published)
+        {
+            var existingCats = article.ArticleCategories.Select(ac => ac.Category!).Where(c => c != null).ToList();
+            return new ArticleDetailDto(
+                article.Id,
+                article.Title,
+                article.Slug,
+                article.ContentHtml,
+                article.Status.ToString(),
+                new AuthorSummaryDto(article.Author!.Id, article.Author.FullName, article.Author.AvatarUrl),
+                article.CompanyId,
+                article.SourceName,
+                article.SourceUrl,
+                article.CoverImage is null ? null : new CoverImageDto(
+                    article.CoverImage.Id,
+                    article.CoverImage.Url,
+                    article.CoverImage.Width,
+                    article.CoverImage.Height,
+                    article.CoverImage.Format),
+                article.ReadingTimeMinutes,
+                article.ViewCount,
+                existingCats.Select(c => new CategorySummaryDto(c.Id, c.Name, c.Slug)).ToList(),
+                article.PublishedAt,
+                article.CreatedAt,
+                article.UpdatedAt);
+        }
+
         article.Status = ArticleStatus.Published;
         article.PublishedAt = DateTimeOffset.UtcNow;
         article.UpdatedAt = DateTimeOffset.UtcNow;
@@ -69,18 +98,25 @@ public sealed class PublishArticleCommandHandler(
         await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(article.Id), cancellationToken);
         await cacheService.RemoveAsync(ArticleCacheKeys.ArticleRelated(article.Id), cancellationToken);
 
-        // Phát tín hiệu SignalR thời gian thực tới tác giả và phòng theo dõi bài viết
-        await notificationService.NotifyArticleStatusChangedAsync(
-            article.AuthorId,
-            article.Id,
-            article.Status.ToString(),
-            cancellationToken);
+        try
+        {
+            // Phát tín hiệu SignalR thời gian thực tới tác giả và phòng theo dõi bài viết
+            await notificationService.NotifyArticleStatusChangedAsync(
+                article.AuthorId,
+                article.Id,
+                article.Status.ToString(),
+                cancellationToken);
 
-        // Kích hoạt tác vụ nền Hangfire (Fire-and-forget)
-        var articleId = article.Id;
-        var authorId = article.AuthorId;
-        backgroundJobService.Enqueue<INotificationService>(service =>
-            service.NotifyArticleStatusChangedAsync(authorId, articleId, "Published", CancellationToken.None));
+            // Kích hoạt tác vụ nền Hangfire (Fire-and-forget)
+            var articleId = article.Id;
+            var authorId = article.AuthorId;
+            backgroundJobService.Enqueue<INotificationService>(service =>
+                service.NotifyArticleStatusChangedAsync(authorId, articleId, "Published", CancellationToken.None));
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi khi phát tín hiệu thông báo xuất bản bài viết {ArticleId}", article.Id);
+        }
 
         var categories = article.ArticleCategories.Select(ac => ac.Category!).Where(c => c != null).ToList();
 

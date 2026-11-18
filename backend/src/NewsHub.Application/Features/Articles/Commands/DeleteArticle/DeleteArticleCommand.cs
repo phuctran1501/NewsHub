@@ -51,8 +51,10 @@ public sealed class DeleteArticleCommandHandler(
             throw new ForbiddenException("Bạn không có quyền xóa bài viết của tác giả khác.", ErrorCodes.ArticleForbiddenEdit);
         }
 
-        // Quy tắc nghiệp vụ tòa soạn: Bài viết đã xuất bản thuộc sở hữu của tòa soạn, phóng viên không được phép tự ý xóa
-        if (article.CompanyId.HasValue && article.Status == ArticleStatus.Published && !isAdmin)
+        // Quy tắc nghiệp vụ tòa soạn: Bài viết của tòa soạn đã từng được xuất bản hoặc đang lưu trữ thuộc sở hữu của tòa soạn, phóng viên không được phép tự ý xóa
+        if (article.CompanyId.HasValue &&
+            (article.PublishedAt.HasValue || article.Status == ArticleStatus.Published || article.Status == ArticleStatus.Archived) &&
+            !isAdmin)
         {
             throw new ForbiddenException(
                 "Bài viết đã xuất bản thuộc sở hữu của tòa soạn. Phóng viên không được phép xóa.",

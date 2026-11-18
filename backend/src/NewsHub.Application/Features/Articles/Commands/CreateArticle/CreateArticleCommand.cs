@@ -171,6 +171,10 @@ public sealed class CreateArticleCommandHandler(
         {
             throw new ConflictException("Đường dẫn (slug) của bài viết đã tồn tại.", ErrorCodes.ArticleSlugConflict);
         }
+        catch (DbUpdateException ex) when (ex.IsForeignKeyViolation())
+        {
+            throw NotFoundException.WithErrorCode("Một hoặc nhiều chuyên mục hoặc ảnh bìa không tồn tại trong hệ thống.", ErrorCodes.CategoryNotFound);
+        }
 
         return MapToDetailDto(article, author, coverImage, categories);
     }

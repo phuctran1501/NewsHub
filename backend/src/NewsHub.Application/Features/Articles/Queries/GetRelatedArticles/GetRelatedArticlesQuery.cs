@@ -31,6 +31,7 @@ public sealed class GetRelatedArticlesQueryHandler(
     ICacheService cacheService) : IRequestHandler<GetRelatedArticlesQuery, IReadOnlyList<ArticleSummaryDto>>
 {
     private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(1);
+    private const int MaxRelatedToCache = 10;
 
     public async Task<IReadOnlyList<ArticleSummaryDto>> Handle(
         GetRelatedArticlesQuery request,
@@ -38,7 +39,7 @@ public sealed class GetRelatedArticlesQueryHandler(
     {
         var cacheKey = ArticleCacheKeys.ArticleRelated(request.Id);
 
-        return await cacheService.GetOrCreateAsync<IReadOnlyList<ArticleSummaryDto>>(
+        var allRelated = await cacheService.GetOrCreateAsync<IReadOnlyList<ArticleSummaryDto>>(
             cacheKey,
             async ct =>
             {
@@ -67,7 +68,7 @@ public sealed class GetRelatedArticlesQueryHandler(
                 var articles = await relatedQuery
                     .OrderByDescending(a => a.PublishedAt)
                     .ThenByDescending(a => a.Id)
-                    .Take(request.Limit)
+                    .Take(MaxRelatedToCache)
                     .Include(a => a.Author)
                     .Include(a => a.CoverImage)
                     .Include(a => a.ArticleCategories)
@@ -98,6 +99,8 @@ public sealed class GetRelatedArticlesQueryHandler(
             },
             CacheTtl,
             cancellationToken);
+
+        return allRelated.Take(request.Limit).ToList();
     }
 
     private static string? ExtractExcerpt(string html)

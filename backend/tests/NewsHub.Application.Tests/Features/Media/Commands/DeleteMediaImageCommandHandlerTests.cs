@@ -17,7 +17,13 @@ public class DeleteMediaImageCommandHandlerTests
     private readonly Mock<ICurrentUser> _currentUserMock = new();
     private readonly Mock<ICloudinaryService> _cloudinaryMock = new();
     private readonly Mock<IApplicationDbContext> _dbContextMock = new();
+    private readonly Mock<ICacheService> _cacheServiceMock = new();
     private readonly DeleteMediaImageCommandValidator _validator = new();
+
+    public DeleteMediaImageCommandHandlerTests()
+    {
+        _dbContextMock.Setup(db => db.Articles).Returns(new List<Article>().BuildMockDbSet().Object);
+    }
 
     [Fact]
     public async Task Handle_WhenUserIsOwner_ShouldDeleteFromCloudinaryAndDatabase()
@@ -54,7 +60,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act
         var result = await handler.Handle(new DeleteMediaImageCommand(mediaId), CancellationToken.None);
@@ -102,7 +109,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act
         var result = await handler.Handle(new DeleteMediaImageCommand(mediaId), CancellationToken.None);
@@ -127,7 +135,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
@@ -164,7 +173,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ForbiddenException>(() =>
@@ -213,7 +223,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ConflictException>(() =>
@@ -258,7 +269,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<BadRequestException>(() =>
@@ -316,7 +328,8 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act
         var result = await handler.Handle(new DeleteMediaImageCommand(mediaId), CancellationToken.None);
@@ -338,13 +351,76 @@ public class DeleteMediaImageCommandHandlerTests
         var handler = new DeleteMediaImageCommandHandler(
             _currentUserMock.Object,
             _cloudinaryMock.Object,
-            _dbContextMock.Object);
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<UnauthorizedException>(() =>
             handler.Handle(new DeleteMediaImageCommand(Guid.NewGuid()), CancellationToken.None));
 
         Assert.Equal(ErrorCodes.Unauthorized, exception.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenCoverImageUsedByArticles_ShouldInvalidateCachedArticles()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var mediaId = Guid.NewGuid();
+        var articleId = Guid.NewGuid();
+        var articleSlug = "bai-viet-mau";
+
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(userId);
+        _currentUserMock.Setup(c => c.IsInRole(UserRole.Admin)).Returns(false);
+
+        var mediaFile = new MediaFile
+        {
+            Id = mediaId,
+            PublicId = "test/cover_image",
+            Url = "https://res.cloudinary.com/demo/test/cover.webp",
+            OriginalFileName = "cover.webp",
+            Format = "webp",
+            UploadedByUserId = userId
+        };
+
+        var article = new Article
+        {
+            Id = articleId,
+            Title = "Bài viết mẫu",
+            Slug = articleSlug,
+            CoverImageId = mediaId,
+            AuthorId = userId,
+            ContentHtml = "<p>Test</p>",
+            Status = ArticleStatus.Published
+        };
+
+        var mediaList = new List<MediaFile> { mediaFile }.BuildMockDbSet();
+        var usersList = new List<User>().BuildMockDbSet();
+        var articlesList = new List<Article> { article }.BuildMockDbSet();
+
+        _dbContextMock.Setup(db => db.MediaFiles).Returns(mediaList.Object);
+        _dbContextMock.Setup(db => db.Users).Returns(usersList.Object);
+        _dbContextMock.Setup(db => db.Articles).Returns(articlesList.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        _cloudinaryMock
+            .Setup(c => c.DeleteImageAsync(mediaFile.PublicId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var handler = new DeleteMediaImageCommandHandler(
+            _currentUserMock.Object,
+            _cloudinaryMock.Object,
+            _dbContextMock.Object,
+            _cacheServiceMock.Object);
+
+        // Act
+        var result = await handler.Handle(new DeleteMediaImageCommand(mediaId), CancellationToken.None);
+
+        // Assert
+        Assert.Equal(Unit.Value, result);
+        _cacheServiceMock.Verify(c => c.RemoveAsync($"articles:detail:{articleId}", It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync($"articles:slug:{articleSlug}", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

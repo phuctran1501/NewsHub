@@ -14,6 +14,7 @@ using NewsHub.Application.Common.Interfaces;
 public class DraftPreviewTokenService : IDraftPreviewTokenService
 {
     private const string PreviewPurpose = "draft_preview";
+    public const string PreviewAudience = "NewsHub:DraftPreview";
     private readonly JwtOptions _options;
     private readonly ILogger<DraftPreviewTokenService> _logger;
     private readonly JwtSecurityTokenHandler _tokenHandler = new();
@@ -44,7 +45,7 @@ public class DraftPreviewTokenService : IDraftPreviewTokenService
             Subject = new ClaimsIdentity(claims),
             Expires = expires,
             Issuer = _options.Issuer,
-            Audience = _options.Audience,
+            Audience = PreviewAudience,
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)
@@ -73,7 +74,7 @@ public class DraftPreviewTokenService : IDraftPreviewTokenService
                 ValidateIssuer = true,
                 ValidIssuer = _options.Issuer,
                 ValidateAudience = true,
-                ValidAudience = _options.Audience,
+                ValidAudience = PreviewAudience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(1)
             };

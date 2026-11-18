@@ -38,7 +38,10 @@ public sealed class GetArticleBySlugQueryHandler(
         CancellationToken cancellationToken)
     {
         var cleanSlug = request.Slug.Trim().ToLowerInvariant();
-        var cacheKey = ArticleCacheKeys.ArticleSlug(cleanSlug);
+        var isGuid = Guid.TryParse(cleanSlug, out var articleGuid);
+        var cacheKey = isGuid
+            ? ArticleCacheKeys.ArticleDetail(articleGuid)
+            : ArticleCacheKeys.ArticleSlug(cleanSlug);
 
         // 1. Đọc từ Cache-Aside Redis nếu đã có (chỉ cache bài viết Published)
         var cached = await cacheService.GetAsync<ArticleDetailDto>(cacheKey, cancellationToken);
@@ -49,7 +52,6 @@ public sealed class GetArticleBySlugQueryHandler(
         }
 
         // 2. Truy vấn Database
-        var isGuid = Guid.TryParse(cleanSlug, out var articleGuid);
         var article = await dbContext.Articles
             .AsNoTracking()
             .Include(a => a.Author)
@@ -100,7 +102,7 @@ public sealed class GetArticleBySlugQueryHandler(
         // 4. Lưu Cache nếu bài viết đã Published
         if (article.Status == ArticleStatus.Published)
         {
-            await cacheService.SetAsync(cacheKey, detailDto, CacheTtl, cancellationToken);
+            await cacheService.SetAsync(ArticleCacheKeys.ArticleSlug(article.Slug.ToLowerInvariant()), detailDto, CacheTtl, cancellationToken);
             await cacheService.SetAsync(ArticleCacheKeys.ArticleDetail(article.Id), detailDto, CacheTtl, cancellationToken);
         }
 

@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Articles.Commands.ArchiveArticle;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Application.Features.Articles.DTOs;
@@ -26,7 +27,8 @@ public sealed class ArchiveArticleCommandHandler(
     IApplicationDbContext dbContext,
     ICurrentUser currentUser,
     ICacheService cacheService,
-    INotificationService notificationService) : IRequestHandler<ArchiveArticleCommand, ArticleDetailDto>
+    INotificationService notificationService,
+    ILogger<ArchiveArticleCommandHandler> logger) : IRequestHandler<ArchiveArticleCommand, ArticleDetailDto>
 {
     public async Task<ArticleDetailDto> Handle(
         ArchiveArticleCommand request,
@@ -57,6 +59,33 @@ public sealed class ArchiveArticleCommandHandler(
             throw new ForbiddenException("Bạn không có quyền lưu trữ bài viết của tác giả khác.", ErrorCodes.ArticleForbiddenEdit);
         }
 
+        if (article.Status == ArticleStatus.Archived)
+        {
+            var existingCats = article.ArticleCategories.Select(ac => ac.Category!).Where(c => c != null).ToList();
+            return new ArticleDetailDto(
+                article.Id,
+                article.Title,
+                article.Slug,
+                article.ContentHtml,
+                article.Status.ToString(),
+                new AuthorSummaryDto(article.Author!.Id, article.Author.FullName, article.Author.AvatarUrl),
+                article.CompanyId,
+                article.SourceName,
+                article.SourceUrl,
+                article.CoverImage is null ? null : new CoverImageDto(
+                    article.CoverImage.Id,
+                    article.CoverImage.Url,
+                    article.CoverImage.Width,
+                    article.CoverImage.Height,
+                    article.CoverImage.Format),
+                article.ReadingTimeMinutes,
+                article.ViewCount,
+                existingCats.Select(c => new CategorySummaryDto(c.Id, c.Name, c.Slug)).ToList(),
+                article.PublishedAt,
+                article.CreatedAt,
+                article.UpdatedAt);
+        }
+
         article.Status = ArticleStatus.Archived;
         article.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -67,12 +96,19 @@ public sealed class ArchiveArticleCommandHandler(
         await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(article.Id), cancellationToken);
         await cacheService.RemoveAsync(ArticleCacheKeys.ArticleRelated(article.Id), cancellationToken);
 
-        // Phát tín hiệu SignalR
-        await notificationService.NotifyArticleStatusChangedAsync(
-            article.AuthorId,
-            article.Id,
-            article.Status.ToString(),
-            cancellationToken);
+        try
+        {
+            // Phát tín hiệu SignalR
+            await notificationService.NotifyArticleStatusChangedAsync(
+                article.AuthorId,
+                article.Id,
+                article.Status.ToString(),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi khi phát tín hiệu SignalR lưu trữ bài viết {ArticleId}", article.Id);
+        }
 
         var categories = article.ArticleCategories.Select(ac => ac.Category!).Where(c => c != null).ToList();
 

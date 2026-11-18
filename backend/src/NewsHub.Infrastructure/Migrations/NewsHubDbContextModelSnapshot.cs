@@ -331,6 +331,9 @@ namespace NewsHub.Infrastructure.Migrations
 
                     b.HasIndex("ArticleId");
 
+                    b.HasIndex("UserId", "ArticleId")
+                        .IsUnique();
+
                     b.HasIndex("UserId", "ReadAt");
 
                     b.ToTable("reading_histories", "public");

@@ -4,6 +4,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NewsHub.Application.Common.Interfaces;
+using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Domain.Constants;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
@@ -23,7 +24,8 @@ public sealed class DeleteMediaImageCommandValidator : AbstractValidator<DeleteM
 public sealed class DeleteMediaImageCommandHandler(
     ICurrentUser currentUser,
     ICloudinaryService cloudinaryService,
-    IApplicationDbContext dbContext) : IRequestHandler<DeleteMediaImageCommand, Unit>
+    IApplicationDbContext dbContext,
+    ICacheService cacheService) : IRequestHandler<DeleteMediaImageCommand, Unit>
 {
     public async Task<Unit> Handle(
         DeleteMediaImageCommand request,
@@ -75,8 +77,22 @@ public sealed class DeleteMediaImageCommandHandler(
             user.AvatarUrl = null;
         }
 
+        // Tìm các bài viết đang sử dụng ảnh này làm ảnh bìa để xóa cache sau khi xóa media
+        var affectedArticles = await dbContext.Articles
+            .AsNoTracking()
+            .Where(a => a.CoverImageId == media.Id)
+            .Select(a => new { a.Id, a.Slug })
+            .ToListAsync(cancellationToken);
+
         dbContext.MediaFiles.Remove(media);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        // Vô hiệu hóa cache cho các bài viết bị ảnh hưởng
+        foreach (var art in affectedArticles)
+        {
+            await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(art.Id), cancellationToken);
+            await cacheService.RemoveAsync(ArticleCacheKeys.ArticleSlug(art.Slug), cancellationToken);
+        }
 
         return Unit.Value;
     }

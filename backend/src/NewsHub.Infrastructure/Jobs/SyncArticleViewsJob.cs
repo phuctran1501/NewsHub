@@ -2,8 +2,10 @@ namespace NewsHub.Infrastructure.Jobs;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Infrastructure.Persistence;
+using NewsHub.Infrastructure.Services;
 using StackExchange.Redis;
 
 /// <summary>
@@ -14,16 +16,21 @@ public class SyncArticleViewsJob
     private readonly IConnectionMultiplexer _connectionMultiplexer;
     private readonly NewsHubDbContext _dbContext;
     private readonly ILogger<SyncArticleViewsJob> _logger;
+    private readonly RedisOptions _options;
 
     public SyncArticleViewsJob(
         IConnectionMultiplexer connectionMultiplexer,
         NewsHubDbContext dbContext,
+        IOptions<RedisOptions> redisOptions,
         ILogger<SyncArticleViewsJob> logger)
     {
         _connectionMultiplexer = connectionMultiplexer;
         _dbContext = dbContext;
         _logger = logger;
+        _options = redisOptions.Value;
     }
+
+    private string BuildKey(string key) => $"{_options.InstanceName}{key}";
 
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
@@ -34,7 +41,8 @@ public class SyncArticleViewsJob
         }
 
         var db = _connectionMultiplexer.GetDatabase();
-        var dirtyArticleIds = await db.SetMembersAsync(ArticleCacheKeys.DirtyViewsSet);
+        var dirtyViewsSetKey = BuildKey(ArticleCacheKeys.DirtyViewsSet);
+        var dirtyArticleIds = await db.SetMembersAsync(dirtyViewsSetKey);
 
         if (dirtyArticleIds.Length == 0)
         {
@@ -52,11 +60,11 @@ public class SyncArticleViewsJob
 
             if (!Guid.TryParse(redisValue.ToString(), out var articleId))
             {
-                await db.SetRemoveAsync(ArticleCacheKeys.DirtyViewsSet, redisValue);
+                await db.SetRemoveAsync(dirtyViewsSetKey, redisValue);
                 continue;
             }
 
-            var bufferKey = ArticleCacheKeys.ViewsBuffer(articleId);
+            var bufferKey = BuildKey(ArticleCacheKeys.ViewsBuffer(articleId));
             var bufferValue = await db.StringGetDeleteAsync(bufferKey);
 
             if (bufferValue.HasValue && long.TryParse(bufferValue.ToString(), out var viewsDelta) && viewsDelta > 0)
@@ -78,7 +86,7 @@ public class SyncArticleViewsJob
                 }
             }
 
-            await db.SetRemoveAsync(ArticleCacheKeys.DirtyViewsSet, redisValue);
+            await db.SetRemoveAsync(dirtyViewsSetKey, redisValue);
         }
 
         _logger.LogInformation("Hoàn tất tác vụ SyncArticleViewsJob");

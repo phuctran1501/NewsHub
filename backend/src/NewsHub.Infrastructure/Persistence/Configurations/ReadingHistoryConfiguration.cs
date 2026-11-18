@@ -27,6 +27,8 @@ public class ReadingHistoryConfiguration : IEntityTypeConfiguration<ReadingHisto
             .IsRequired();
 
         // Index
+        builder.HasIndex(rh => new { rh.UserId, rh.ArticleId })
+            .IsUnique();
         builder.HasIndex(rh => new { rh.UserId, rh.ReadAt });
         builder.HasIndex(rh => rh.ArticleId);
 
