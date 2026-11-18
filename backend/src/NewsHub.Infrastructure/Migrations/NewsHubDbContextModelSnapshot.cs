@@ -467,6 +467,30 @@ namespace NewsHub.Infrastructure.Migrations
                     b.ToTable("users", "public");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.UserBookmark", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<DateTimeOffset>("SavedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("saved_at");
+
+                    b.HasKey("UserId", "ArticleId");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId", "SavedAt")
+                        .HasDatabaseName("ix_user_bookmarks_user_saved");
+
+                    b.ToTable("user_bookmarks", "public");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
                 {
                     b.HasOne("NewsHub.Domain.Entities.User", "Author")
@@ -570,9 +594,30 @@ namespace NewsHub.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.UserBookmark", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.Article", "Article")
+                        .WithMany("Bookmarks")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsHub.Domain.Entities.User", "User")
+                        .WithMany("Bookmarks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
                 {
                     b.Navigation("ArticleCategories");
+
+                    b.Navigation("Bookmarks");
 
                     b.Navigation("ReadingHistories");
 
@@ -592,6 +637,8 @@ namespace NewsHub.Infrastructure.Migrations
             modelBuilder.Entity("NewsHub.Domain.Entities.User", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Bookmarks");
 
                     b.Navigation("MediaFiles");
 

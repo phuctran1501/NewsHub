@@ -19,15 +19,13 @@ public class GetArticleBySlugQueryHandlerTests
     private readonly Mock<ICacheService> _cacheServiceMock = new();
     private readonly Mock<ICurrentUser> _currentUserMock = new();
     private readonly Mock<ISender> _senderMock = new();
-    private readonly Mock<ILogger<GetArticleBySlugQueryHandler>> _loggerMock = new();
 
     private GetArticleBySlugQueryHandler CreateHandler() =>
         new(
             _dbContextMock.Object,
             _cacheServiceMock.Object,
             _currentUserMock.Object,
-            _senderMock.Object,
-            _loggerMock.Object);
+            _senderMock.Object);
 
     [Fact]
     public async Task Handle_WhenArticleExistsAndPublished_ShouldReturnDetailAndCacheBothKeys()

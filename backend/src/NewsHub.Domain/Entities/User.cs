@@ -25,4 +25,5 @@ public class User : IHasCreatedAt, IHasUpdatedAt
     public ICollection<Article> Articles { get; set; } = new HashSet<Article>();
     public ICollection<ReadingHistory> ReadingHistories { get; set; } = new HashSet<ReadingHistory>();
     public ICollection<ArticleReport> ReportedArticles { get; set; } = new HashSet<ArticleReport>();
+    public ICollection<UserBookmark> Bookmarks { get; set; } = new HashSet<UserBookmark>();
 }
