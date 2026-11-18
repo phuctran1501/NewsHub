@@ -13,6 +13,7 @@ public interface IApplicationDbContext
     DbSet<ArticleCategory> ArticleCategories { get; }
     DbSet<ArticleReport> ArticleReports { get; }
     DbSet<ReadingHistory> ReadingHistories { get; }
+    DbSet<UserBookmark> UserBookmarks { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
