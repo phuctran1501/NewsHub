@@ -250,6 +250,59 @@ public class RedisCacheService : ICacheService
         }
     }
 
+    public async Task<long> IncrementAsync(string key, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        try
+        {
+            if (!_connectionMultiplexer.IsConnected)
+            {
+                _logger.LogWarning("Redis chưa kết nối, bỏ qua increment cho key: {Key}", key);
+                return 0;
+            }
+
+            var db = _connectionMultiplexer.GetDatabase();
+            var redisKey = BuildKey(key);
+            var value = await db.StringIncrementAsync(redisKey);
+
+            if (value == 1 && expiration.HasValue)
+            {
+                await db.KeyExpireAsync(redisKey, expiration.Value);
+            }
+
+            return value;
+        }
+        catch (Exception ex) when (ex is RedisException or SocketException or TimeoutException)
+        {
+            _logger.LogWarning(ex, "Lỗi khi increment Redis key {Key}", key);
+            return 0;
+        }
+    }
+
+    public async Task<bool> AddToSetAsync(string key, string member, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+        ArgumentException.ThrowIfNullOrWhiteSpace(member);
+
+        try
+        {
+            if (!_connectionMultiplexer.IsConnected)
+            {
+                _logger.LogWarning("Redis chưa kết nối, bỏ qua AddToSet cho key: {Key}", key);
+                return false;
+            }
+
+            var db = _connectionMultiplexer.GetDatabase();
+            return await db.SetAddAsync(BuildKey(key), member);
+        }
+        catch (Exception ex) when (ex is RedisException or SocketException or TimeoutException)
+        {
+            _logger.LogWarning(ex, "Lỗi khi SetAdd Redis key {Key}", key);
+            return false;
+        }
+    }
+
     public async Task<IDisposable?> AcquireLockAsync(
         string key,
         TimeSpan expiration,

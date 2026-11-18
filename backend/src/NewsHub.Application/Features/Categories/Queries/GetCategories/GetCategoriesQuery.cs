@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Categories.Constants;
 using NewsHub.Application.Features.Categories.DTOs;
+using NewsHub.Domain.Enums;
 
 public sealed record GetCategoriesQuery : IRequest<IReadOnlyList<CategoryResponseDto>>;
 
@@ -30,7 +31,7 @@ public sealed class GetCategoriesQueryHandler(
                         c.Name,
                         c.Slug,
                         c.Description,
-                        0, // articleCount sẽ được liên kết với ArticleCategories trong NH-FEAT-04
+                        c.ArticleCategories.Count(ac => ac.Article != null && ac.Article.Status == ArticleStatus.Published),
                         c.CreatedAt))
                     .ToListAsync(ct);
 

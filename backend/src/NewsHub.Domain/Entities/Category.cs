@@ -10,4 +10,7 @@ public class Category : IHasCreatedAt, IHasUpdatedAt
     public string? Description { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; }
+
+    // Navigation properties
+    public ICollection<ArticleCategory> ArticleCategories { get; set; } = new HashSet<ArticleCategory>();
 }

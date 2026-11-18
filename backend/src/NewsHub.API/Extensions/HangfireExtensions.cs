@@ -1,6 +1,8 @@
 using Hangfire;
 using Hangfire.PostgreSql;
 using NewsHub.API.Security;
+using NewsHub.Application.Common.Interfaces;
+using NewsHub.Infrastructure.Jobs;
 
 namespace NewsHub.API.Extensions;
 
@@ -52,6 +54,18 @@ public static class HangfireExtensions
             Authorization = [new HangfireDashboardAuthorizationFilter(configuration)],
             DarkModeEnabled = true
         });
+
+        return app;
+    }
+
+    public static WebApplication UseHangfireRecurringJobs(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var backgroundJobService = scope.ServiceProvider.GetService<IBackgroundJobService>();
+        backgroundJobService?.AddOrUpdateRecurringJob<SyncArticleViewsJob>(
+            "sync-article-views",
+            job => job.ExecuteAsync(CancellationToken.None),
+            "*/5 * * * *");
 
         return app;
     }
