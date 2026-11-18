@@ -10,6 +10,10 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Article> Articles => Set<Article>();
+    public DbSet<ArticleCategory> ArticleCategories => Set<ArticleCategory>();
+    public DbSet<ArticleReport> ArticleReports => Set<ArticleReport>();
+    public DbSet<ReadingHistory> ReadingHistories => Set<ReadingHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

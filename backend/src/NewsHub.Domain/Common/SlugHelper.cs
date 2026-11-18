@@ -16,12 +16,18 @@ public static partial class SlugHelper
     /// Ví dụ: "Thời sự & Đời sống!" -> "thoi-su-doi-song".
     /// </summary>
     /// <param name="text">Chuỗi văn bản nguồn.</param>
+    /// <param name="maxLength">Độ dài tối đa của slug (mặc định 120 ký tự).</param>
     /// <returns>Chuỗi slug chuẩn hóa hoặc string.Empty nếu chuỗi nguồn rỗng.</returns>
-    public static string GenerateSlug(string? text)
+    public static string GenerateSlug(string? text, int maxLength = MaxSlugLength)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             return string.Empty;
+        }
+
+        if (maxLength <= 0)
+        {
+            maxLength = MaxSlugLength;
         }
 
         // 1. Chuyển đổi chữ đ/Đ riêng biệt trước khi normalize FormD
@@ -58,9 +64,9 @@ public static partial class SlugHelper
         cleanText = cleanText.Trim('-');
 
         // 7. Giới hạn độ dài tối đa
-        if (cleanText.Length > MaxSlugLength)
+        if (cleanText.Length > maxLength)
         {
-            cleanText = cleanText[..MaxSlugLength].TrimEnd('-');
+            cleanText = cleanText[..maxLength].TrimEnd('-');
         }
 
         return cleanText;

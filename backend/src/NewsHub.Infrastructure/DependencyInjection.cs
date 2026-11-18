@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NewsHub.Application.Common.Interfaces;
+using NewsHub.Infrastructure.Jobs;
 using NewsHub.Infrastructure.Persistence;
 using NewsHub.Infrastructure.Repositories;
 using NewsHub.Infrastructure.Services;
@@ -102,6 +103,9 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddSingleton<IHtmlSanitizer, HtmlSanitizerService>();
+        services.AddSingleton<IDraftPreviewTokenService, DraftPreviewTokenService>();
+        services.AddScoped<SyncArticleViewsJob>();
 
         return services;
     }

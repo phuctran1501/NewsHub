@@ -9,6 +9,10 @@ public interface IApplicationDbContext
     DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<MediaFile> MediaFiles { get; }
     DbSet<Category> Categories { get; }
+    DbSet<Article> Articles { get; }
+    DbSet<ArticleCategory> ArticleCategories { get; }
+    DbSet<ArticleReport> ArticleReports { get; }
+    DbSet<ReadingHistory> ReadingHistories { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

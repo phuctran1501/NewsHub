@@ -49,8 +49,9 @@ app.UseCorsPolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Hangfire Dashboard
+// Hangfire Dashboard & Recurring Jobs
 app.UseHangfireDashboardCustom(app.Configuration);
+app.UseHangfireRecurringJobs();
 
 // Rate Limiting
 app.UseRateLimiter();

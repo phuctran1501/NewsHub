@@ -45,6 +45,17 @@ public interface ICacheService
     Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Tăng giá trị số nguyên của một khóa trong cache theo phương thức atomic.
+    /// Nếu truyền expiration và đây là lần đầu khởi tạo khóa (giá trị trả về = 1), thiết lập TTL tương ứng.
+    /// </summary>
+    Task<long> IncrementAsync(string key, TimeSpan? expiration = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Thêm một phần tử vào Set trong cache.
+    /// </summary>
+    Task<bool> AddToSetAsync(string key, string member, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Chiếm khóa phân tán (Distributed Lock). 
     /// Trả về IDisposable để tự động giải phóng khi kết thúc scope; trả về null nếu không chiếm được khóa.
     /// </summary>
