@@ -34,6 +34,7 @@ public static class ErrorCodes
     public const string PressCardNotVerified = "PRESS_CARD_NOT_VERIFIED";
     public const string ArticleForbiddenEdit = "ARTICLE_FORBIDDEN_EDIT";
     public const string CannotDeletePublishedCompanyArticle = "CANNOT_DELETE_PUBLISHED_COMPANY_ARTICLE";
+    public const string CannotLockOwnAccount = "CANNOT_LOCK_OWN_ACCOUNT";
 
     // Resources (404)
     public const string ResourceNotFound = "RESOURCE_NOT_FOUND";
@@ -44,6 +45,7 @@ public static class ErrorCodes
     public const string MediaNotFound = "MEDIA_NOT_FOUND";
     public const string BookmarkNotFound = "BOOKMARK_NOT_FOUND";
     public const string ReadingHistoryNotFound = "READING_HISTORY_NOT_FOUND";
+    public const string ReportNotFound = "REPORT_NOT_FOUND";
 
     // Conflicts & Bad Requests (400, 409, 429)
     public const string Conflict = "CONFLICT";
