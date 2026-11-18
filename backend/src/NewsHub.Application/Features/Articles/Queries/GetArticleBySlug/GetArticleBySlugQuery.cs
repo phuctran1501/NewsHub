@@ -28,8 +28,7 @@ public sealed class GetArticleBySlugQueryHandler(
     IApplicationDbContext dbContext,
     ICacheService cacheService,
     ICurrentUser currentUser,
-    ISender sender,
-    ILogger<GetArticleBySlugQueryHandler> logger) : IRequestHandler<GetArticleBySlugQuery, ArticleDetailDto>
+    ISender sender) : IRequestHandler<GetArticleBySlugQuery, ArticleDetailDto>
 {
     private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(1);
 
@@ -117,35 +116,10 @@ public sealed class GetArticleBySlugQueryHandler(
         // Ghi nhận view buffer qua Redis
         await sender.Send(new RecordArticleViewCommand(articleId), cancellationToken);
 
-        // Ghi nhận lịch sử đọc nếu người dùng đã đăng nhập
+        // Ghi nhận lịch sử đọc nếu người dùng đã đăng nhập (qua Command tách biệt)
         if (currentUser.IsAuthenticated)
         {
-            try
-            {
-                var userId = currentUser.Id!.Value;
-                var existingHistory = await dbContext.ReadingHistories
-                    .FirstOrDefaultAsync(h => h.UserId == userId && h.ArticleId == articleId, cancellationToken);
-
-                if (existingHistory is not null)
-                {
-                    existingHistory.ReadAt = DateTimeOffset.UtcNow;
-                }
-                else
-                {
-                    dbContext.ReadingHistories.Add(new ReadingHistory
-                    {
-                        UserId = userId,
-                        ArticleId = articleId,
-                        ReadAt = DateTimeOffset.UtcNow
-                    });
-                }
-
-                await dbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Lỗi khi lưu lịch sử đọc cho UserId: {UserId}, ArticleId: {ArticleId}", currentUser.Id, articleId);
-            }
+            await sender.Send(new NewsHub.Application.Features.ReadingHistory.Commands.RecordReadingHistory.RecordReadingHistoryCommand(articleId), cancellationToken);
         }
     }
 }

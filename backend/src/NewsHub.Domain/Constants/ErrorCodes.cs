@@ -42,12 +42,15 @@ public static class ErrorCodes
     public const string ArticleNotPublished = "ARTICLE_NOT_PUBLISHED";
     public const string CategoryNotFound = "CATEGORY_NOT_FOUND";
     public const string MediaNotFound = "MEDIA_NOT_FOUND";
+    public const string BookmarkNotFound = "BOOKMARK_NOT_FOUND";
+    public const string ReadingHistoryNotFound = "READING_HISTORY_NOT_FOUND";
 
     // Conflicts & Bad Requests (400, 409, 429)
     public const string Conflict = "CONFLICT";
     public const string CategoryConflict = "CATEGORY_CONFLICT";
     public const string CategoryInUse = "CATEGORY_IN_USE";
     public const string ArticleSlugConflict = "ARTICLE_SLUG_CONFLICT";
+    public const string BookmarkAlreadyExists = "BOOKMARK_ALREADY_EXISTS";
     public const string CannotFollowOwnCompany = "CANNOT_FOLLOW_OWN_COMPANY";
     public const string InvalidRequest = "INVALID_REQUEST";
     public const string RateLimitExceeded = "RATE_LIMIT_EXCEEDED";

@@ -14,6 +14,7 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
     public DbSet<ArticleCategory> ArticleCategories => Set<ArticleCategory>();
     public DbSet<ArticleReport> ArticleReports => Set<ArticleReport>();
     public DbSet<ReadingHistory> ReadingHistories => Set<ReadingHistory>();
+    public DbSet<UserBookmark> UserBookmarks => Set<UserBookmark>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

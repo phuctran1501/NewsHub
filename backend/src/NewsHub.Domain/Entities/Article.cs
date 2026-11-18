@@ -30,4 +30,5 @@ public class Article : IHasCreatedAt, IHasUpdatedAt
     public ICollection<ArticleCategory> ArticleCategories { get; set; } = new List<ArticleCategory>();
     public ICollection<ArticleReport> Reports { get; set; } = new List<ArticleReport>();
     public ICollection<ReadingHistory> ReadingHistories { get; set; } = new List<ReadingHistory>();
+    public ICollection<UserBookmark> Bookmarks { get; set; } = new List<UserBookmark>();
 }
