@@ -48,7 +48,8 @@ public sealed class ReviewEditorialArticleCommandHandler(
     IUnitOfWork unitOfWork,
     ICacheService cacheService,
     INotificationService notificationService,
-    ILogger<ReviewEditorialArticleCommandHandler> logger) : IRequestHandler<ReviewEditorialArticleCommand>
+    ILogger<ReviewEditorialArticleCommandHandler> logger,
+    IBackgroundJobService? backgroundJobService = null) : IRequestHandler<ReviewEditorialArticleCommand>
 {
     public async Task Handle(ReviewEditorialArticleCommand request, CancellationToken cancellationToken)
     {
@@ -147,6 +148,28 @@ public sealed class ReviewEditorialArticleCommandHandler(
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Lỗi gửi SignalR notification sau khi xuất bản bài viết {ArticleId}.", article.Id);
+            }
+
+            try
+            {
+                // Kích hoạt tác vụ nền Hangfire xử lý tóm tắt AI
+                backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
+                    job.GenerateArticleSummaryAsync(article.Id, CancellationToken.None));
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi khi đưa tác vụ tóm tắt AI vào hàng đợi cho bài viết {ArticleId}", article.Id);
+            }
+
+            try
+            {
+                // Kích hoạt tác vụ nền Hangfire sinh vector nhúng
+                backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
+                    job.GenerateArticleEmbeddingAsync(article.Id, CancellationToken.None));
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi khi đưa tác vụ sinh vector nhúng vào hàng đợi cho bài viết {ArticleId}", article.Id);
             }
         }
         else if (request.Action == "RequestChanges")

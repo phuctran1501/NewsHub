@@ -25,6 +25,7 @@ public static class DependencyInjection
         {
             options.UseNpgsql(connectionString, npgsqlOptions =>
             {
+                npgsqlOptions.UseVector();
                 npgsqlOptions.MigrationsAssembly(typeof(NewsHubDbContext).Assembly.FullName);
                 npgsqlOptions.EnableRetryOnFailure(
                     maxRetryCount: 3,
@@ -106,6 +107,19 @@ public static class DependencyInjection
         services.AddSingleton<IHtmlSanitizer, HtmlSanitizerService>();
         services.AddSingleton<IDraftPreviewTokenService, DraftPreviewTokenService>();
         services.AddScoped<SyncArticleViewsJob>();
+
+        // Google Gemini AI Configuration & Services
+        var geminiSection = configuration.GetSection(GeminiOptions.SectionName);
+        services.Configure<GeminiOptions>(opt =>
+        {
+            opt.ApiKey = geminiSection["ApiKey"] ?? string.Empty;
+            opt.ModelName = geminiSection["ModelName"] ?? "gemini-3.5-flash-lite";
+            opt.EmbeddingModel = geminiSection["EmbeddingModel"] ?? "text-embedding-004";
+            opt.TimeoutSeconds = int.TryParse(geminiSection["TimeoutSeconds"], out var to) ? to : 30;
+        });
+
+        services.AddHttpClient<IAiService, GeminiAiService>();
+        services.AddScoped<IAiBackgroundJobs, AiBackgroundJobs>();
 
         return services;
     }
