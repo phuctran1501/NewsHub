@@ -33,4 +33,6 @@ public class Article : IHasCreatedAt, IHasUpdatedAt
     public ICollection<ArticleReport> Reports { get; set; } = new List<ArticleReport>();
     public ICollection<ReadingHistory> ReadingHistories { get; set; } = new List<ReadingHistory>();
     public ICollection<UserBookmark> Bookmarks { get; set; } = new List<UserBookmark>();
+    public AiSummary? AiSummary { get; set; }
+    public ArticleEmbedding? ArticleEmbedding { get; set; }
 }

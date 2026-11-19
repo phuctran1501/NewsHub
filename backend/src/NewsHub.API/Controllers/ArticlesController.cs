@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
+using NewsHub.Application.Features.Ai.Commands.RegenerateArticleAiSummary;
+using NewsHub.Application.Features.Ai.Queries.GetArticleAiSummary;
 using NewsHub.Application.Features.Articles.Commands.ArchiveArticle;
 using NewsHub.Application.Features.Articles.Commands.CreateArticle;
 using NewsHub.Application.Features.Articles.Commands.DeleteArticle;
@@ -251,5 +253,35 @@ public class ArticlesController(
         await mediator.Send(new SubmitArticleToCompanyCommand(id), cancellationToken);
 
         return Ok(ApiResponseFactory.Success("Bài viết đã được gửi tới Ban Biên tập / Chủ tòa soạn phê duyệt.", correlationId));
+    }
+
+    /// <summary>
+    /// Lấy tóm tắt AI thông minh và sắc thái cảm xúc của bài viết.
+    /// </summary>
+    [HttpGet("{id:guid}/ai-summary")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetArticleAiSummary(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        var result = await mediator.Send(new GetArticleAiSummaryQuery(id), cancellationToken);
+
+        return Ok(ApiResponseFactory.Success(result, correlationId));
+    }
+
+    /// <summary>
+    /// Yêu cầu sinh lại tóm tắt AI cho bài viết (Dành cho tác giả hoặc Admin).
+    /// </summary>
+    [HttpPost("{id:guid}/ai-summary/regenerate")]
+    [Authorize]
+    public async Task<IActionResult> RegenerateArticleAiSummary(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        await mediator.Send(new RegenerateArticleAiSummaryCommand(id), cancellationToken);
+
+        return Accepted(string.Empty, ApiResponseFactory.Success(new { message = "Yêu cầu tạo lại tóm tắt AI đã được tiếp nhận và xử lý ngầm.", articleId = id }, correlationId));
     }
 }

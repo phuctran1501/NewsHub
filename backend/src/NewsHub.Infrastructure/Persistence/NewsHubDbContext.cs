@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using NewsHub.Application.Common.Interfaces;
+using NewsHub.Application.Features.Ai.DTOs;
 using NewsHub.Domain.Entities;
+using NewsHub.Domain.Enums;
+using Pgvector;
+using Pgvector.EntityFrameworkCore;
 
 namespace NewsHub.Infrastructure.Persistence;
 
@@ -20,6 +24,31 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
     public DbSet<CompanyRequest> CompanyRequests => Set<CompanyRequest>();
     public DbSet<CompanyFollower> CompanyFollowers => Set<CompanyFollower>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<AiSummary> AiSummaries => Set<AiSummary>();
+    public DbSet<ArticleEmbedding> ArticleEmbeddings => Set<ArticleEmbedding>();
+
+    public async Task<IReadOnlyList<SemanticSearchResultDto>> SearchArticlesByEmbeddingAsync(
+        Vector embedding,
+        int limit,
+        double minSimilarity = 0.65,
+        CancellationToken cancellationToken = default)
+    {
+        return await ArticleEmbeddings
+            .AsNoTracking()
+            .Include(e => e.Article)
+            .Where(e => e.Article != null &&
+                        e.Article.Status == ArticleStatus.Published &&
+                        (1 - e.Embedding.CosineDistance(embedding)) >= minSimilarity)
+            .OrderBy(e => e.Embedding.CosineDistance(embedding))
+            .Take(limit)
+            .Select(e => new SemanticSearchResultDto(
+                e.ArticleId,
+                e.Article!.Title,
+                e.Article.Slug,
+                (float)(1 - e.Embedding.CosineDistance(embedding)),
+                e.Article.PublishedAt))
+            .ToListAsync(cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +56,9 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
 
         // Supabase PostgreSQL mặc định sử dụng schema public
         modelBuilder.HasDefaultSchema("public");
+
+        // Kích hoạt extension pgvector cho tìm kiếm ngữ nghĩa
+        modelBuilder.HasPostgresExtension("vector");
 
         // Quét và áp dụng tự động toàn bộ Fluent API Configurations trong Assembly này
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(NewsHubDbContext).Assembly);
