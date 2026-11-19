@@ -3,6 +3,8 @@ namespace NewsHub.API.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using NewsHub.API.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
 using NewsHub.Application.Features.Ai.Commands.RegenerateArticleAiSummary;
@@ -272,9 +274,11 @@ public class ArticlesController(
 
     /// <summary>
     /// Yêu cầu sinh lại tóm tắt AI cho bài viết (Dành cho tác giả hoặc Admin).
+    /// Giới hạn: 5 requests / 1 phút / tài khoản.
     /// </summary>
     [HttpPost("{id:guid}/ai-summary/regenerate")]
     [Authorize]
+    [EnableRateLimiting(RateLimitingExtensions.AiRegenerateSummaryPolicy)]
     public async Task<IActionResult> RegenerateArticleAiSummary(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)

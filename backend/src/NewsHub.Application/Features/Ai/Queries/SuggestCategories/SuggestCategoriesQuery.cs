@@ -30,8 +30,11 @@ public sealed class SuggestCategoriesQueryValidator : AbstractValidator<SuggestC
 public sealed class SuggestCategoriesQueryHandler(
     IApplicationDbContext dbContext,
     ICurrentUser currentUser,
-    IAiService aiService) : IRequestHandler<SuggestCategoriesQuery, SuggestCategoriesResponseDto>
+    IAiService aiService,
+    ICacheService? cacheService = null) : IRequestHandler<SuggestCategoriesQuery, SuggestCategoriesResponseDto>
 {
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(24);
+
     public async Task<SuggestCategoriesResponseDto> Handle(
         SuggestCategoriesQuery request,
         CancellationToken cancellationToken)
@@ -46,10 +49,25 @@ public sealed class SuggestCategoriesQueryHandler(
             throw new ForbiddenException("Chỉ nhà báo hoặc quản trị viên mới có quyền sử dụng tính năng này.", ErrorCodes.PermissionDenied);
         }
 
-        var availableCategories = await dbContext.Categories
-            .AsNoTracking()
-            .Select(c => new CategoryCandidateDto(c.Id, c.Name, c.Slug))
-            .ToListAsync(cancellationToken);
+        IReadOnlyList<CategoryCandidateDto> availableCategories;
+        if (cacheService != null)
+        {
+            availableCategories = await cacheService.GetOrCreateAsync<IReadOnlyList<CategoryCandidateDto>>(
+                "categories:candidates",
+                async ct => await dbContext.Categories
+                    .AsNoTracking()
+                    .Select(c => new CategoryCandidateDto(c.Id, c.Name, c.Slug))
+                    .ToListAsync(ct),
+                CacheTtl,
+                cancellationToken);
+        }
+        else
+        {
+            availableCategories = await dbContext.Categories
+                .AsNoTracking()
+                .Select(c => new CategoryCandidateDto(c.Id, c.Name, c.Slug))
+                .ToListAsync(cancellationToken);
+        }
 
         if (availableCategories.Count == 0)
         {

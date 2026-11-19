@@ -37,9 +37,11 @@ public class AiController(
 
     /// <summary>
     /// Tìm kiếm bài viết thông minh bằng ngôn ngữ tự nhiên (NLP Semantic Search & pgvector).
+    /// Giới hạn: 30 requests / 1 phút / IP.
     /// </summary>
     [HttpGet("search")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.AiSearchPolicy)]
     public async Task<IActionResult> SearchByNlp(
         [FromQuery] string q,
         [FromQuery] int limit = 10,
@@ -52,5 +54,3 @@ public class AiController(
         return Ok(ApiResponseFactory.Success(result, correlationId));
     }
 }
-
-public sealed record SuggestCategoriesRequest(string Title, string ContentSnippet);

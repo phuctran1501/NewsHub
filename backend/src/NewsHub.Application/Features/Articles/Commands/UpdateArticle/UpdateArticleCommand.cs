@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Articles.Commands.UpdateArticle;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NewsHub.Application.Common.Extensions;
 using NewsHub.Application.Common.Helpers;
 using NewsHub.Application.Common.Interfaces;
@@ -73,7 +74,9 @@ public sealed class UpdateArticleCommandHandler(
     ICurrentUser currentUser,
     IHtmlSanitizer htmlSanitizer,
     ICacheService cacheService,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateArticleCommand, ArticleDetailDto>
+    IUnitOfWork unitOfWork,
+    IBackgroundJobService? backgroundJobService = null,
+    ILogger<UpdateArticleCommandHandler>? logger = null) : IRequestHandler<UpdateArticleCommand, ArticleDetailDto>
 {
     public async Task<ArticleDetailDto> Handle(
         UpdateArticleCommand request,
@@ -231,6 +234,20 @@ public sealed class UpdateArticleCommandHandler(
         }
         await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(article.Id), cancellationToken);
         await cacheService.RemoveAsync(ArticleCacheKeys.ArticleRelated(article.Id), cancellationToken);
+
+        // Nếu bài viết đã xuất bản, cập nhật lại vector embedding ngầm để tìm kiếm ngữ nghĩa luôn đồng bộ
+        if (article.Status == ArticleStatus.Published)
+        {
+            try
+            {
+                backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
+                    job.GenerateArticleEmbeddingAsync(article.Id, CancellationToken.None));
+            }
+            catch (Exception ex)
+            {
+                logger?.LogWarning(ex, "Lỗi khi đưa tác vụ cập nhật vector nhúng vào hàng đợi cho bài viết {ArticleId}", article.Id);
+            }
+        }
 
         return new ArticleDetailDto(
             article.Id,

@@ -35,7 +35,6 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
     {
         return await ArticleEmbeddings
             .AsNoTracking()
-            .Include(e => e.Article)
             .Where(e => e.Article != null &&
                         e.Article.Status == ArticleStatus.Published &&
                         (1 - e.Embedding.CosineDistance(embedding)) >= minSimilarity)

@@ -284,7 +284,32 @@ Nội dung bài viết:
         var result = await response.Content.ReadFromJsonAsync<GeminiGenerateContentResponse>(JsonOptions, cts.Token);
         var text = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
-        return text ?? string.Empty;
+        return CleanJsonMarkdown(text ?? string.Empty);
+    }
+
+    private static string CleanJsonMarkdown(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = text.Trim();
+        if (trimmed.StartsWith("```json", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed[7..];
+        }
+        else if (trimmed.StartsWith("```"))
+        {
+            trimmed = trimmed[3..];
+        }
+
+        if (trimmed.EndsWith("```"))
+        {
+            trimmed = trimmed[..^3];
+        }
+
+        return trimmed.Trim();
     }
 
     // Gemini API Internal Response DTOs

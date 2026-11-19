@@ -275,4 +275,60 @@ public class GeminiAiServiceTests
         var ex = await Assert.ThrowsAsync<BadRequestException>(() => service.GenerateEmbeddingAsync("Văn bản thử nghiệm", CancellationToken.None));
         Assert.Equal(ErrorCodes.InvalidAiResponse, ex.ErrorCode);
     }
+
+    [Fact]
+    public async Task GenerateSummaryAndSentimentAsync_WhenGeminiReturnsJsonWrappedInMarkdownFences_ShouldParseSuccessfully()
+    {
+        // Arrange (giả lập trường hợp model bọc JSON trong ```json ... ```)
+        var rawJson = JsonSerializer.Serialize(new
+        {
+            bulletPoints = new[] { "Ý chính 1", "Ý chính 2" },
+            sentiment = "Positive",
+            extractedTags = new[] { "tag1" },
+            confidenceScore = 0.9
+        });
+        var markdownWrappedText = $"```json\n{rawJson}\n```";
+
+        var geminiResponseJson = JsonSerializer.Serialize(new
+        {
+            candidates = new[]
+            {
+                new
+                {
+                    content = new
+                    {
+                        parts = new[]
+                        {
+                            new
+                            {
+                                text = markdownWrappedText
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        var handlerMock = new Mock<HttpMessageHandler>();
+        handlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(geminiResponseJson)
+            });
+
+        var service = CreateService(handlerMock.Object);
+
+        // Act
+        var result = await service.GenerateSummaryAndSentimentAsync("Tiêu đề", "Nội dung", CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.BulletPoints.Count);
+        Assert.Equal("Positive", result.Sentiment);
+    }
 }

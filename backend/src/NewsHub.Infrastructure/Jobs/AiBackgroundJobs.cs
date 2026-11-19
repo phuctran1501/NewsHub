@@ -32,9 +32,11 @@ public class AiBackgroundJobs(
 
         try
         {
+            var plainTextContent = StripHtmlTags(article.ContentHtml);
+
             var summaryResult = await aiService.GenerateSummaryAndSentimentAsync(
                 article.Title,
-                article.ContentHtml,
+                plainTextContent,
                 cancellationToken);
 
             var sentiment = summaryResult.Sentiment switch
@@ -131,7 +133,10 @@ public class AiBackgroundJobs(
 
         try
         {
-            var textToEmbed = $"{article.Title} {article.ContentHtml[..Math.Min(1000, article.ContentHtml.Length)]}";
+            var plainTextContent = StripHtmlTags(article.ContentHtml);
+            var snippet = plainTextContent.Length > 1000 ? plainTextContent[..1000] : plainTextContent;
+            var textToEmbed = $"{article.Title} {snippet}".Trim();
+
             var embeddingArray = await aiService.GenerateEmbeddingAsync(textToEmbed, cancellationToken);
 
             var vector = new Vector(embeddingArray);
@@ -164,5 +169,16 @@ public class AiBackgroundJobs(
             logger.LogError(ex, "Lỗi trong quá trình sinh vector nhúng cho bài viết {ArticleId}", articleId);
             throw; // Ném lại để Hangfire kích hoạt retry
         }
+    }
+
+    private static string StripHtmlTags(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            return string.Empty;
+        }
+
+        var text = System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", " ");
+        return System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ").Trim();
     }
 }
