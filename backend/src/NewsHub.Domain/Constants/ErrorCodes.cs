@@ -48,6 +48,7 @@ public static class ErrorCodes
     public const string ReportNotFound = "REPORT_NOT_FOUND";
     public const string CompanyNotFound = "COMPANY_NOT_FOUND";
     public const string RequestNotFound = "REQUEST_NOT_FOUND";
+    public const string NotificationNotFound = "NOTIFICATION_NOT_FOUND";
 
     // Conflicts & Bad Requests (400, 409, 429)
     public const string Conflict = "CONFLICT";
