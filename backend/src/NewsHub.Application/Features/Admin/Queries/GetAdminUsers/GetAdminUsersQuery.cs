@@ -29,6 +29,12 @@ public sealed class GetAdminUsersQueryValidator : AbstractValidator<GetAdminUser
 
         RuleFor(x => x.PageSize)
             .InclusiveBetween(1, 50).WithMessage("Kích thước trang (pageSize) phải từ 1 đến 50.");
+
+        When(x => !string.IsNullOrEmpty(x.SearchTerm), () =>
+        {
+            RuleFor(x => x.SearchTerm!)
+                .MaximumLength(100).WithMessage("Từ khóa tìm kiếm không được vượt quá 100 ký tự.");
+        });
     }
 }
 
@@ -72,6 +78,7 @@ public sealed class GetAdminUsersQueryHandler(
 
         var items = await query
             .OrderByDescending(u => u.CreatedAt)
+            .ThenByDescending(u => u.Id)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(u => new AdminUserSummaryDto(

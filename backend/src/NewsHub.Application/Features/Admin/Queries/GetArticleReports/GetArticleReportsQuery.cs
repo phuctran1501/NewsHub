@@ -50,10 +50,7 @@ public sealed class GetArticleReportsQueryHandler(
         }
 
         var query = dbContext.ArticleReports
-            .AsNoTracking()
-            .Include(r => r.Article)
-            .Include(r => r.Reporter)
-            .AsQueryable();
+            .AsNoTracking();
 
         if (request.Status.HasValue)
         {
@@ -69,6 +66,7 @@ public sealed class GetArticleReportsQueryHandler(
 
         var items = await query
             .OrderByDescending(r => r.CreatedAt)
+            .ThenByDescending(r => r.Id)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(r => new AdminArticleReportDto(
@@ -77,7 +75,7 @@ public sealed class GetArticleReportsQueryHandler(
                 r.Article != null ? r.Article.Title : string.Empty,
                 r.Article != null ? r.Article.Slug : string.Empty,
                 r.Reporter != null
-                    ? new AdminReportUserSummaryDto(r.Reporter.Id, r.Reporter.FullName, r.Reporter.Email.Value)
+                    ? new AdminReportUserSummaryDto(r.Reporter.Id, r.Reporter.FullName, (string)r.Reporter.Email)
                     : null,
                 r.Reason,
                 r.Details,

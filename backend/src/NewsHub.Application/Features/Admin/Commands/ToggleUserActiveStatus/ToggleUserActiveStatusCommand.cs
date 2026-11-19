@@ -3,6 +3,7 @@ namespace NewsHub.Application.Features.Admin.Commands.ToggleUserActiveStatus;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Domain.Constants;
 using NewsHub.Domain.Enums;
@@ -31,7 +32,8 @@ public sealed class ToggleUserActiveStatusCommandValidator : AbstractValidator<T
 public sealed class ToggleUserActiveStatusCommandHandler(
     IApplicationDbContext dbContext,
     ICurrentUser currentUser,
-    IUnitOfWork unitOfWork) : IRequestHandler<ToggleUserActiveStatusCommand>
+    IUnitOfWork unitOfWork,
+    ILogger<ToggleUserActiveStatusCommandHandler> logger) : IRequestHandler<ToggleUserActiveStatusCommand>
 {
     public async Task Handle(ToggleUserActiveStatusCommand request, CancellationToken cancellationToken)
     {
@@ -61,6 +63,10 @@ public sealed class ToggleUserActiveStatusCommandHandler(
 
         user.IsActive = request.IsActive;
         user.UpdatedAt = DateTimeOffset.UtcNow;
+
+        logger.LogWarning(
+            "Admin {AdminId} changed status of User {UserId} to {IsActive}. Reason: {LockReason}",
+            currentUser.Id, request.UserId, request.IsActive, request.LockReason ?? "N/A");
 
         // Nếu khóa tài khoản: thu hồi lập tức toàn bộ Refresh Token đang hoạt động để cưỡng bức đăng xuất khỏi mọi thiết bị
         if (!request.IsActive)

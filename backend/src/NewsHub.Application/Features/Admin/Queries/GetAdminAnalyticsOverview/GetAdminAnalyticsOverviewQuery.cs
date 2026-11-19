@@ -44,11 +44,17 @@ public sealed class GetAdminAnalyticsOverviewQueryHandler(
         }
 
         // 2. Tính toán 6 chỉ số cốt lõi từ cơ sở dữ liệu
-        // Chỉ số 1: Tổng số bài viết theo trạng thái
-        var totalArticles = await dbContext.Articles.CountAsync(cancellationToken);
-        var draftArticles = await dbContext.Articles.CountAsync(a => a.Status == ArticleStatus.Draft, cancellationToken);
-        var publishedArticles = await dbContext.Articles.CountAsync(a => a.Status == ArticleStatus.Published, cancellationToken);
-        var archivedArticles = await dbContext.Articles.CountAsync(a => a.Status == ArticleStatus.Archived, cancellationToken);
+        // Chỉ số 1: Tổng số bài viết theo trạng thái (Tối ưu thành 1 câu truy vấn Group By)
+        var statusCounts = await dbContext.Articles
+            .AsNoTracking()
+            .GroupBy(a => a.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Status, x => x.Count, cancellationToken);
+
+        var draftArticles = statusCounts.GetValueOrDefault(ArticleStatus.Draft, 0);
+        var publishedArticles = statusCounts.GetValueOrDefault(ArticleStatus.Published, 0);
+        var archivedArticles = statusCounts.GetValueOrDefault(ArticleStatus.Archived, 0);
+        var totalArticles = statusCounts.Values.Sum();
         var articlesCount = new ArticlesCountSummaryDto(totalArticles, draftArticles, publishedArticles, archivedArticles);
 
         // Chỉ số 2: Số lượng bài viết xuất bản mới trong 7 và 30 ngày gần nhất
@@ -69,9 +75,10 @@ public sealed class GetAdminAnalyticsOverviewQueryHandler(
             .Select(a => (long?)a.ViewCount)
             .SumAsync(cancellationToken) ?? 0L;
 
-        // Chỉ số 4: Top 5 bài viết được bookmark nhiều nhất
+        // Chỉ số 4: Top 5 bài viết được bookmark nhiều nhất (chỉ tính bài viết Published)
         var topBookmarkedGroups = await dbContext.UserBookmarks
             .AsNoTracking()
+            .Where(b => b.Article != null && b.Article.Status == ArticleStatus.Published)
             .GroupBy(b => b.ArticleId)
             .Select(g => new { ArticleId = g.Key, Count = g.Count() })
             .OrderByDescending(x => x.Count)
@@ -120,9 +127,10 @@ public sealed class GetAdminAnalyticsOverviewQueryHandler(
                 x.PublishedCount))
             .ToList();
 
-        // Chỉ số 6: Top danh mục có nhiều bài viết nhất
+        // Chỉ số 6: Top danh mục có nhiều bài viết nhất (chỉ tính bài viết Published)
         var topCategoryGroups = await dbContext.ArticleCategories
             .AsNoTracking()
+            .Where(ac => ac.Article != null && ac.Article.Status == ArticleStatus.Published)
             .GroupBy(ac => ac.CategoryId)
             .Select(g => new { CategoryId = g.Key, ArticleCount = g.Count() })
             .OrderByDescending(x => x.ArticleCount)

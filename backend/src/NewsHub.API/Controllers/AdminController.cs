@@ -23,6 +23,8 @@ public sealed record SendBroadcastRequest(
     string Message);
 
 public sealed record ResolveArticleReportRequest(
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
+    [property: JsonRequired]
     ReportStatus Status,
     bool ArchiveArticle = false,
     string? AdminNote = null);

@@ -128,12 +128,14 @@ public class GetAdminAnalyticsOverviewQueryHandlerTests
         {
             UserId = Guid.NewGuid(),
             ArticleId = articleId,
+            Article = article,
             SavedAt = DateTimeOffset.UtcNow
         };
 
         var articleCategory = new ArticleCategory
         {
             ArticleId = articleId,
+            Article = article,
             CategoryId = categoryId
         };
 

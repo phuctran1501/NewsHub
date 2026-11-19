@@ -1,5 +1,6 @@
 namespace NewsHub.Application.Tests.Features.Admin.Commands;
 
+using Microsoft.Extensions.Logging;
 using MockQueryable;
 using MockQueryable.Moq;
 using Moq;
@@ -17,9 +18,10 @@ public class ToggleUserActiveStatusCommandHandlerTests
     private readonly Mock<IApplicationDbContext> _dbContextMock = new();
     private readonly Mock<ICurrentUser> _currentUserMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
+    private readonly Mock<ILogger<ToggleUserActiveStatusCommandHandler>> _loggerMock = new();
 
     private ToggleUserActiveStatusCommandHandler CreateHandler() =>
-        new(_dbContextMock.Object, _currentUserMock.Object, _unitOfWorkMock.Object);
+        new(_dbContextMock.Object, _currentUserMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
 
     [Fact]
     public async Task Handle_WhenUserNotAuthenticated_ShouldThrowUnauthorizedException()
