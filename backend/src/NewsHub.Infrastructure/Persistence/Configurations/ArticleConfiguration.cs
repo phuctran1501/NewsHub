@@ -76,6 +76,9 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(a => a.UpdatedAt)
             .HasColumnName("updated_at");
 
+        builder.Property(a => a.Version)
+            .IsRowVersion();
+
         // Indexes
         builder.HasIndex(a => a.AuthorId);
         builder.HasIndex(a => a.CompanyId);
@@ -91,6 +94,11 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.HasOne(a => a.CoverImage)
             .WithMany(m => m.CoverArticles)
             .HasForeignKey(a => a.CoverImageId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(a => a.Company)
+            .WithMany(c => c.Articles)
+            .HasForeignKey(a => a.CompanyId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

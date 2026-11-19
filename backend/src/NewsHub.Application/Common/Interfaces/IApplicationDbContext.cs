@@ -14,6 +14,10 @@ public interface IApplicationDbContext
     DbSet<ArticleReport> ArticleReports { get; }
     DbSet<ReadingHistory> ReadingHistories { get; }
     DbSet<UserBookmark> UserBookmarks { get; }
+    DbSet<Company> Companies { get; }
+    DbSet<CompanyMember> CompanyMembers { get; }
+    DbSet<CompanyRequest> CompanyRequests { get; }
+    DbSet<CompanyFollower> CompanyFollowers { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

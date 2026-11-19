@@ -9,9 +9,12 @@ using NewsHub.Application.Common.Models;
 using NewsHub.Application.Features.Admin.Commands.ResolveArticleReport;
 using NewsHub.Application.Features.Admin.Commands.SendSystemBroadcast;
 using NewsHub.Application.Features.Admin.Commands.ToggleUserActiveStatus;
+using NewsHub.Application.Features.Admin.Commands.ReviewCompanyStatus;
+using NewsHub.Application.Features.Admin.Commands.EmergencyAssignCompanyOwner;
 using NewsHub.Application.Features.Admin.Queries.GetAdminAnalyticsOverview;
 using NewsHub.Application.Features.Admin.Queries.GetAdminUsers;
 using NewsHub.Application.Features.Admin.Queries.GetArticleReports;
+using NewsHub.Application.Features.Admin.Queries.GetPendingCompanies;
 using NewsHub.Domain.Enums;
 
 public sealed record ToggleUserStatusRequest(
@@ -28,6 +31,14 @@ public sealed record ResolveArticleReportRequest(
     ReportStatus Status,
     bool ArchiveArticle = false,
     string? AdminNote = null);
+
+public sealed record ReviewCompanyStatusRequest(
+    [property: JsonRequired] string Status,
+    string? RejectionReason = null);
+
+public sealed record EmergencyAssignCompanyOwnerRequest(
+    [property: JsonRequired] Guid NewOwnerId,
+    [property: JsonRequired] string Reason);
 
 /// <summary>
 /// Trung tâm chỉ huy (Command Center) quản trị hệ thống và theo dõi phân tích số liệu toàn diện NewsHub.
@@ -154,5 +165,61 @@ public class AdminController(
         var result = await mediator.Send(command, cancellationToken);
 
         return Ok(ApiResponseFactory.Success(result, correlationId));
+    }
+
+    // ==========================================
+    // 4. COMPANY MANAGEMENT & AUDIT
+    // ==========================================
+
+    /// <summary>
+    /// Xem danh sách các công ty / tòa soạn đang chờ Quản trị viên phê duyệt thành lập.
+    /// </summary>
+    [HttpGet("companies/pending")]
+    public async Task<IActionResult> GetPendingCompanies(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        var query = new GetPendingCompaniesQuery(pageNumber, pageSize);
+        var result = await mediator.Send(query, cancellationToken);
+
+        return Ok(ApiResponseFactory.Paged(result, correlationId));
+    }
+
+    /// <summary>
+    /// Thẩm định phê duyệt hoặc từ chối hồ sơ thành lập tòa soạn.
+    /// </summary>
+    [HttpPatch("companies/{companyId:guid}/status")]
+    public async Task<IActionResult> ReviewCompanyStatus(
+        [FromRoute] Guid companyId,
+        [FromBody] ReviewCompanyStatusRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        var command = new ReviewCompanyStatusCommand(companyId, request.Status, request.RejectionReason);
+        await mediator.Send(command, cancellationToken);
+
+        var message = request.Status == "Approved"
+            ? "Đã phê duyệt thành lập tòa soạn thành công."
+            : "Đã từ chối hồ sơ thành lập tòa soạn.";
+
+        return Ok(ApiResponseFactory.Success(message, correlationId));
+    }
+
+    /// <summary>
+    /// Chỉ định Chủ sở hữu (Owner) thay thế khẩn cấp cho tòa soạn khi Owner cũ bị khóa hoặc vi phạm.
+    /// </summary>
+    [HttpPatch("companies/{companyId:guid}/assign-owner")]
+    public async Task<IActionResult> EmergencyAssignCompanyOwner(
+        [FromRoute] Guid companyId,
+        [FromBody] EmergencyAssignCompanyOwnerRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        var command = new EmergencyAssignCompanyOwnerCommand(companyId, request.NewOwnerId, request.Reason);
+        await mediator.Send(command, cancellationToken);
+
+        return Ok(ApiResponseFactory.Success("Đã chỉ định Chủ sở hữu thay thế thành công.", correlationId));
     }
 }
