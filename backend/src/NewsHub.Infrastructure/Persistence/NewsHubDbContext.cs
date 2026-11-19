@@ -19,6 +19,7 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
     public DbSet<CompanyMember> CompanyMembers => Set<CompanyMember>();
     public DbSet<CompanyRequest> CompanyRequests => Set<CompanyRequest>();
     public DbSet<CompanyFollower> CompanyFollowers => Set<CompanyFollower>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

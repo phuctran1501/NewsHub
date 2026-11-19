@@ -30,4 +30,5 @@ public class User : IHasCreatedAt, IHasUpdatedAt
     public ICollection<CompanyMember> CompanyMemberships { get; set; } = new HashSet<CompanyMember>();
     public ICollection<CompanyRequest> CompanyRequests { get; set; } = new HashSet<CompanyRequest>();
     public ICollection<CompanyFollower> FollowedCompanies { get; set; } = new HashSet<CompanyFollower>();
+    public ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
 }
