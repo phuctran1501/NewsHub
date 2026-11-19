@@ -92,5 +92,10 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             .WithMany(m => m.CoverArticles)
             .HasForeignKey(a => a.CoverImageId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(a => a.Company)
+            .WithMany(c => c.Articles)
+            .HasForeignKey(a => a.CompanyId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -26,4 +26,8 @@ public class User : IHasCreatedAt, IHasUpdatedAt
     public ICollection<ReadingHistory> ReadingHistories { get; set; } = new HashSet<ReadingHistory>();
     public ICollection<ArticleReport> ReportedArticles { get; set; } = new HashSet<ArticleReport>();
     public ICollection<UserBookmark> Bookmarks { get; set; } = new HashSet<UserBookmark>();
+    public ICollection<Company> OwnedCompanies { get; set; } = new HashSet<Company>();
+    public ICollection<CompanyMember> CompanyMemberships { get; set; } = new HashSet<CompanyMember>();
+    public ICollection<CompanyRequest> CompanyRequests { get; set; } = new HashSet<CompanyRequest>();
+    public ICollection<CompanyFollower> FollowedCompanies { get; set; } = new HashSet<CompanyFollower>();
 }

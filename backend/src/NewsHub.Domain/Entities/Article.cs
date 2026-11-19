@@ -26,6 +26,7 @@ public class Article : IHasCreatedAt, IHasUpdatedAt
 
     // Navigation properties
     public User? Author { get; set; }
+    public Company? Company { get; set; }
     public MediaFile? CoverImage { get; set; }
     public ICollection<ArticleCategory> ArticleCategories { get; set; } = new List<ArticleCategory>();
     public ICollection<ArticleReport> Reports { get; set; } = new List<ArticleReport>();

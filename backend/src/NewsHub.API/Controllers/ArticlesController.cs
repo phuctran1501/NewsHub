@@ -18,6 +18,7 @@ using NewsHub.Application.Features.Articles.Queries.GetDraftArticleByPreviewToke
 using NewsHub.Application.Features.Articles.Queries.GetMyArticles;
 using NewsHub.Application.Features.Articles.Queries.GetPublishedArticles;
 using NewsHub.Application.Features.Articles.Queries.GetRelatedArticles;
+using NewsHub.Application.Features.Companies.Commands.SubmitArticleToCompany;
 using NewsHub.Domain.Enums;
 
 [ApiController]
@@ -235,5 +236,20 @@ public class ArticlesController(
         await mediator.Send(command, cancellationToken);
 
         return Ok(ApiResponseFactory.Success(new { message = "Báo cáo bài viết thành công. Ban biên tập sẽ tiến hành kiểm duyệt." }, correlationId));
+    }
+
+    /// <summary>
+    /// Nhà báo nộp bài viết lên Tòa soạn để chờ kiểm duyệt và xuất bản.
+    /// </summary>
+    [HttpPost("{id:guid}/submit-to-company")]
+    [Authorize(Roles = "Journalist")]
+    public async Task<IActionResult> SubmitToCompany(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        await mediator.Send(new SubmitArticleToCompanyCommand(id), cancellationToken);
+
+        return Ok(ApiResponseFactory.Success("Bài viết đã được gửi tới Ban Biên tập / Chủ tòa soạn phê duyệt.", correlationId));
     }
 }
