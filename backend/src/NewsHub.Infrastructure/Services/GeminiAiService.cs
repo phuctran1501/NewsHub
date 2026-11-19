@@ -217,7 +217,8 @@ Nội dung bài viết:
                 {
                     new { text = cleanText }
                 }
-            }
+            },
+            outputDimensionality = 768
         };
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -235,6 +236,12 @@ Nội dung bài viết:
         if (result?.Embedding?.Values == null || result.Embedding.Values.Length == 0)
         {
             throw new BadRequestException("Dữ liệu vector nhúng rỗng.", ErrorCodes.InvalidAiResponse);
+        }
+
+        if (result.Embedding.Values.Length != 768)
+        {
+            logger.LogError("Kích thước vector nhúng trả về không khớp: nhận {ActualLength} chiều thay vì 768 chiều.", result.Embedding.Values.Length);
+            throw new BadRequestException($"Kích thước vector nhúng không hợp lệ: nhận {result.Embedding.Values.Length} chiều thay vì 768 chiều.", ErrorCodes.InvalidAiResponse);
         }
 
         return result.Embedding.Values;

@@ -88,7 +88,7 @@ public class RegenerateArticleAiSummaryCommandHandlerTests
 
         var articles = new List<Article>
         {
-            new() { Id = articleId, AuthorId = authorId, Title = "Bài viết", Slug = "bai-viet", ContentHtml = "<p>Nội dung</p>" }
+            new() { Id = articleId, AuthorId = authorId, Title = "Bài viết", Slug = "bai-viet", ContentHtml = "<p>Nội dung</p>", Status = ArticleStatus.Published }
         }.BuildMockDbSet();
         _dbContextMock.Setup(db => db.Articles).Returns(articles.Object);
 
@@ -100,6 +100,31 @@ public class RegenerateArticleAiSummaryCommandHandlerTests
 
         // Assert
         _backgroundJobServiceMock.Verify(b => b.Enqueue(It.IsAny<Expression<Func<IAiBackgroundJobs, Task>>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WhenArticleIsNotPublished_ShouldThrowBadRequestException()
+    {
+        // Arrange
+        var authorId = Guid.NewGuid();
+        var articleId = Guid.NewGuid();
+
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(authorId);
+        _currentUserMock.Setup(c => c.IsInRole(UserRole.Admin)).Returns(false);
+
+        var articles = new List<Article>
+        {
+            new() { Id = articleId, AuthorId = authorId, Title = "Bản nháp", Slug = "ban-nhap", ContentHtml = "<p>Nội dung</p>", Status = ArticleStatus.Draft }
+        }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Articles).Returns(articles.Object);
+
+        var handler = CreateHandler();
+        var command = new RegenerateArticleAiSummaryCommand(articleId);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        Assert.Equal(ErrorCodes.ArticleNotPublished, ex.ErrorCode);
     }
 
     [Fact]
@@ -116,7 +141,7 @@ public class RegenerateArticleAiSummaryCommandHandlerTests
 
         var articles = new List<Article>
         {
-            new() { Id = articleId, AuthorId = authorId, Title = "Bài viết", Slug = "bai-viet", ContentHtml = "<p>Nội dung</p>" }
+            new() { Id = articleId, AuthorId = authorId, Title = "Bài viết", Slug = "bai-viet", ContentHtml = "<p>Nội dung</p>", Status = ArticleStatus.Published }
         }.BuildMockDbSet();
         _dbContextMock.Setup(db => db.Articles).Returns(articles.Object);
 

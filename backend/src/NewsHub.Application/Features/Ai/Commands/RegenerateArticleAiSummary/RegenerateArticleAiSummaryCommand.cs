@@ -49,6 +49,11 @@ public sealed class RegenerateArticleAiSummaryCommandHandler(
             throw new ForbiddenException("Chỉ tác giả bài viết hoặc quản trị viên mới có quyền tạo lại bản tóm tắt AI.", ErrorCodes.PermissionDenied);
         }
 
+        if (article.Status != ArticleStatus.Published)
+        {
+            throw new BadRequestException("Chỉ có thể tạo lại bản tóm tắt AI cho bài viết đã được xuất bản.", ErrorCodes.ArticleNotPublished);
+        }
+
         // Đẩy tác vụ vào hàng đợi Hangfire
         backgroundJobService.Enqueue<IAiBackgroundJobs>(job =>
             job.GenerateArticleSummaryAsync(article.Id, CancellationToken.None));

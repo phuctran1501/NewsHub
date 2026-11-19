@@ -51,7 +51,40 @@ public class GetArticleAiSummaryQueryHandlerTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotFoundException>(() => handler.Handle(query, CancellationToken.None));
-        Assert.Equal(ErrorCodes.AiSummaryNotFound, ex.ErrorCode);
+        Assert.Equal(ErrorCodes.ArticleNotFound, ex.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Handle_WhenArticleIsArchivedWithExistingSummary_ShouldThrowNotFoundException()
+    {
+        // Arrange
+        var articleId = Guid.NewGuid();
+        var articles = new List<Article>
+        {
+            new() { Id = articleId, Title = "Đã lưu trữ", Slug = "da-luu-tru", ContentHtml = "<p>Nội dung</p>", Status = ArticleStatus.Archived }
+        }.BuildMockDbSet();
+        var summaries = new List<AiSummary>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ArticleId = articleId,
+                BulletPoints = ["Bí mật 1"],
+                Sentiment = ArticleSentiment.Negative,
+                ExtractedTags = ["Secret"],
+                ConfidenceScore = 0.9f
+            }
+        }.BuildMockDbSet();
+
+        _dbContextMock.Setup(db => db.Articles).Returns(articles.Object);
+        _dbContextMock.Setup(db => db.AiSummaries).Returns(summaries.Object);
+
+        var handler = CreateHandler();
+        var query = new GetArticleAiSummaryQuery(articleId);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<NotFoundException>(() => handler.Handle(query, CancellationToken.None));
+        Assert.Equal(ErrorCodes.ArticleNotFound, ex.ErrorCode);
     }
 
     [Fact]

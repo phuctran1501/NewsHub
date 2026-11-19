@@ -114,15 +114,24 @@ public sealed class PublishArticleCommandHandler(
 
         try
         {
-            // Kích hoạt tác vụ nền Hangfire xử lý tóm tắt AI và sinh vector nhúng
+            // Kích hoạt tác vụ nền Hangfire xử lý tóm tắt AI
             backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
                 job.GenerateArticleSummaryAsync(article.Id, CancellationToken.None));
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi khi đưa tác vụ tóm tắt AI vào hàng đợi cho bài viết {ArticleId}", article.Id);
+        }
+
+        try
+        {
+            // Kích hoạt tác vụ nền Hangfire sinh vector nhúng
             backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
                 job.GenerateArticleEmbeddingAsync(article.Id, CancellationToken.None));
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Lỗi khi đưa tác vụ tóm tắt AI / Vector vào hàng đợi cho bài viết {ArticleId}", article.Id);
+            logger.LogWarning(ex, "Lỗi khi đưa tác vụ sinh vector nhúng vào hàng đợi cho bài viết {ArticleId}", article.Id);
         }
 
         var categories = article.ArticleCategories.Select(ac => ac.Category!).Where(c => c != null).ToList();

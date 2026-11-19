@@ -242,4 +242,37 @@ public class GeminiAiServiceTests
         Assert.Equal(768, result.Length);
         Assert.Equal(0.42f, result[0]);
     }
+
+    [Fact]
+    public async Task GenerateEmbeddingAsync_WhenGeminiReturnsInvalidDimensions_ShouldThrowBadRequestException()
+    {
+        // Arrange (giả lập trường hợp model trả về 3072 chiều thay vì 768)
+        var values = new float[3072];
+
+        var geminiResponseJson = JsonSerializer.Serialize(new
+        {
+            embedding = new
+            {
+                values
+            }
+        });
+
+        var handlerMock = new Mock<HttpMessageHandler>();
+        handlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(geminiResponseJson)
+            });
+
+        var service = CreateService(handlerMock.Object);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<BadRequestException>(() => service.GenerateEmbeddingAsync("Văn bản thử nghiệm", CancellationToken.None));
+        Assert.Equal(ErrorCodes.InvalidAiResponse, ex.ErrorCode);
+    }
 }

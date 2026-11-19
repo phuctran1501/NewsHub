@@ -31,7 +31,7 @@ public sealed class GetArticleAiSummaryQueryHandler(
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == request.ArticleId, cancellationToken);
 
-        if (article == null)
+        if (article == null || article.Status != ArticleStatus.Published)
         {
             throw NotFoundException.WithErrorCode("Không tìm thấy bài viết yêu cầu.", ErrorCodes.ArticleNotFound);
         }
@@ -42,13 +42,8 @@ public sealed class GetArticleAiSummaryQueryHandler(
 
         if (summary == null)
         {
-            // Nếu bài viết đã xuất bản nhưng AI chưa tóm tắt xong, trả về trạng thái Processing
-            if (article.Status == ArticleStatus.Published)
-            {
-                return new ArticleAiSummaryDto(Status: "Processing");
-            }
-
-            throw NotFoundException.WithErrorCode("Bản tóm tắt AI chưa sẵn sàng cho bài viết này.", ErrorCodes.AiSummaryNotFound);
+            // Bài viết đã xuất bản nhưng AI chưa tóm tắt xong, trả về trạng thái Processing
+            return new ArticleAiSummaryDto(Status: "Processing");
         }
 
         return new ArticleAiSummaryDto(
