@@ -96,6 +96,7 @@ public class CreateCompanyCommandHandlerTests
         var companies = new List<Company>();
         var mockCompanies = companies.BuildMockDbSet();
         _dbContextMock.Setup(db => db.Companies).Returns(mockCompanies.Object);
+        _dbContextMock.Setup(db => db.CompanyMembers).Returns(new List<CompanyMember>().BuildMockDbSet().Object);
 
         var users = new List<User>
         {
@@ -112,5 +113,25 @@ public class CreateCompanyCommandHandlerTests
         Assert.Equal("0109988776", result.TaxCode);
         Assert.Equal(8, result.Code.Length);
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WhenJournalistAlreadyIn5Companies_ShouldThrowBadRequestException()
+    {
+        var journalistId = Guid.NewGuid();
+        _currentUserMock.Setup(u => u.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(u => u.IsInRole(UserRole.Journalist)).Returns(true);
+        _currentUserMock.Setup(u => u.Id).Returns(journalistId);
+
+        _dbContextMock.Setup(db => db.Companies).Returns(new List<Company>().BuildMockDbSet().Object);
+
+        var members = Enumerable.Range(1, 5).Select(_ => new CompanyMember { UserId = journalistId }).ToList();
+        _dbContextMock.Setup(db => db.CompanyMembers).Returns(members.BuildMockDbSet().Object);
+
+        var handler = CreateHandler();
+
+        var ex = await Assert.ThrowsAsync<BadRequestException>(() =>
+            handler.Handle(new CreateCompanyCommand("Tòa Soạn 6", "0109988776"), CancellationToken.None));
+        Assert.Equal(ErrorCodes.MaxCompaniesLimitReached, ex.ErrorCode);
     }
 }

@@ -71,6 +71,15 @@ public sealed class ReviewCompanyStatusCommandHandler(
 
         if (request.Status == "Approved")
         {
+            // Kiểm tra giới hạn 5 công ty của người sáng lập
+            var ownerCompaniesCount = await dbContext.CompanyMembers
+                .CountAsync(m => m.UserId == company.OwnerId, cancellationToken);
+
+            if (ownerCompaniesCount >= 5)
+            {
+                throw new BadRequestException("Người sáng lập đã tham gia tối đa 5 tòa soạn. Không thể phê duyệt thành lập thêm.", ErrorCodes.MaxCompaniesLimitReached);
+            }
+
             company.Status = CompanyStatus.Approved;
             company.UpdatedAt = DateTimeOffset.UtcNow;
 

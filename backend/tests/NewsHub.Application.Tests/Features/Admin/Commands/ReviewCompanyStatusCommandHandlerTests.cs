@@ -108,4 +108,26 @@ public class ReviewCompanyStatusCommandHandlerTests
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _notifMock.Verify(n => n.SendToUserAsync(ownerId, It.IsAny<NotificationDto>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task Handle_WhenAdminApprovesAndOwnerAlreadyIn5Companies_ShouldThrowBadRequestException()
+    {
+        var companyId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+
+        _currentUserMock.Setup(u => u.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(u => u.IsInRole(UserRole.Admin)).Returns(true);
+
+        var company = new Company { Id = companyId, Name = "C", Code = "1", TaxCode = "2", Status = CompanyStatus.Pending, OwnerId = ownerId };
+        _dbContextMock.Setup(db => db.Companies).Returns(new List<Company> { company }.BuildMockDbSet().Object);
+
+        var members = Enumerable.Range(1, 5).Select(_ => new CompanyMember { UserId = ownerId }).ToList();
+        _dbContextMock.Setup(db => db.CompanyMembers).Returns(members.BuildMockDbSet().Object);
+
+        var handler = CreateHandler();
+
+        var ex = await Assert.ThrowsAsync<BadRequestException>(() =>
+            handler.Handle(new ReviewCompanyStatusCommand(companyId, "Approved"), CancellationToken.None));
+        Assert.Equal(ErrorCodes.MaxCompaniesLimitReached, ex.ErrorCode);
+    }
 }

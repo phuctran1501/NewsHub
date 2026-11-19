@@ -91,6 +91,13 @@ public sealed class RespondToInvitationCommandHandler(
             invite.Status = CompanyRequestStatus.Accepted;
             invite.RespondedAt = DateTimeOffset.UtcNow;
 
+            // Tự động đóng bất kỳ đơn xin gia nhập nào đang Pending từ nhà báo này vào công ty
+            await dbContext.CompanyRequests
+                .Where(r => r.CompanyId == invite.CompanyId && r.JournalistId == userId && r.Type == CompanyRequestType.JoinRequest && r.Status == CompanyRequestStatus.Pending)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(r => r.Status, CompanyRequestStatus.Accepted)
+                    .SetProperty(r => r.RespondedAt, DateTimeOffset.UtcNow), cancellationToken);
+
             logger.LogInformation("Nhà báo {UserId} đã chấp nhận lời mời gia nhập công ty {CompanyId}.", userId, invite.CompanyId);
         }
         else

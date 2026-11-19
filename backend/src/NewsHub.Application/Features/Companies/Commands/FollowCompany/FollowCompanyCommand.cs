@@ -70,8 +70,14 @@ public sealed class FollowCompanyCommandHandler(
         };
 
         dbContext.CompanyFollowers.Add(follower);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.LogInformation("Người dùng {UserId} đã theo dõi tòa soạn {CompanyId}.", currentUserId, request.CompanyId);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Người dùng {UserId} đã theo dõi tòa soạn {CompanyId}.", currentUserId, request.CompanyId);
+        }
+        catch (DbUpdateException)
+        {
+            // Idempotent: Nếu request đồng thời đã chèn bản ghi, bỏ qua lỗi duplicate key
+        }
     }
 }

@@ -105,6 +105,13 @@ public sealed class RespondToJoinRequestCommandHandler(
             joinRequest.Status = CompanyRequestStatus.Accepted;
             joinRequest.RespondedAt = DateTimeOffset.UtcNow;
 
+            // Tự động đóng bất kỳ lời mời nào đang Pending gửi tới nhà báo này từ công ty
+            await dbContext.CompanyRequests
+                .Where(r => r.CompanyId == request.CompanyId && r.JournalistId == joinRequest.JournalistId && r.Type == CompanyRequestType.Invitation && r.Status == CompanyRequestStatus.Pending)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(r => r.Status, CompanyRequestStatus.Accepted)
+                    .SetProperty(r => r.RespondedAt, DateTimeOffset.UtcNow), cancellationToken);
+
             logger.LogInformation("Owner {OwnerId} đã duyệt đơn gia nhập của nhà báo {JournalistId} vào công ty {CompanyId}.",
                 currentUserId, joinRequest.JournalistId, request.CompanyId);
         }

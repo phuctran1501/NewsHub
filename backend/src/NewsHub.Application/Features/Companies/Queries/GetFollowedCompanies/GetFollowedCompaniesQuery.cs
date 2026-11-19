@@ -7,6 +7,7 @@ using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
 using NewsHub.Application.Features.Companies.DTOs;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
 public sealed record GetFollowedCompaniesQuery(
@@ -40,7 +41,7 @@ public sealed class GetFollowedCompaniesQueryHandler(
 
         var query = dbContext.CompanyFollowers
             .AsNoTracking()
-            .Where(f => f.UserId == currentUserId);
+            .Where(f => f.UserId == currentUserId && f.Company != null && f.Company.Status == CompanyStatus.Approved);
 
         var totalCount = await query.CountAsync(cancellationToken);
 

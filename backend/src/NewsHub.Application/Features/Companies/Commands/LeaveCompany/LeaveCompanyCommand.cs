@@ -53,14 +53,6 @@ public sealed class LeaveCompanyCommandHandler(
             throw new BadRequestException("Chủ sở hữu không thể tự ý rời tòa soạn. Vui lòng chuyển giao quyền Owner cho thành viên khác trước khi rời.", ErrorCodes.CannotLeaveAsOwner);
         }
 
-        var company = await dbContext.Companies
-            .FirstOrDefaultAsync(c => c.Id == request.CompanyId, cancellationToken);
-
-        if (company != null && company.OwnerId == userId)
-        {
-            throw new BadRequestException("Chủ sở hữu không thể tự ý rời tòa soạn. Vui lòng chuyển giao quyền Owner cho thành viên khác trước khi rời.", ErrorCodes.CannotLeaveAsOwner);
-        }
-
         dbContext.CompanyMembers.Remove(member);
 
         // Tự động giải phóng các bài viết nháp (Draft) và chờ duyệt (PendingCompanyReview) của phóng viên về cá nhân

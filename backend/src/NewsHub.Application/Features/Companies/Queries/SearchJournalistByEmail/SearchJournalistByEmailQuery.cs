@@ -69,10 +69,13 @@ public sealed class SearchJournalistByEmailQueryHandler(
         var isAlreadyMember = await dbContext.CompanyMembers
             .AnyAsync(m => m.CompanyId == request.CompanyId && m.UserId == targetUser.Id, cancellationToken);
 
+        var hasPendingInvitation = await dbContext.CompanyRequests
+            .AnyAsync(r => r.CompanyId == request.CompanyId && r.JournalistId == targetUser.Id && r.Type == CompanyRequestType.Invitation && r.Status == CompanyRequestStatus.Pending, cancellationToken);
+
         var activeCompaniesCount = await dbContext.CompanyMembers
             .CountAsync(m => m.UserId == targetUser.Id, cancellationToken);
 
-        var canInvite = !isAlreadyMember && activeCompaniesCount < 5;
+        var canInvite = !isAlreadyMember && !hasPendingInvitation && activeCompaniesCount < 5;
 
         return new JournalistSearchResultDto(
             targetUser.Id,

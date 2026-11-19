@@ -79,6 +79,14 @@ public sealed class CreateCompanyCommandHandler(
         } while (attempts < maxAttempts);
 
         var ownerId = currentUser.Id!.Value;
+
+        var activeCount = await dbContext.CompanyMembers
+            .CountAsync(m => m.UserId == ownerId, cancellationToken);
+        if (activeCount >= 5)
+        {
+            throw new BadRequestException("Bạn đã tham gia tối đa 5 tòa soạn. Không thể đăng ký thành lập thêm.", ErrorCodes.MaxCompaniesLimitReached);
+        }
+
         var company = new Company
         {
             Name = normalizedName,
@@ -90,7 +98,15 @@ public sealed class CreateCompanyCommandHandler(
         };
 
         dbContext.Companies.Add(company);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Tên, mã số thuế hoặc mã định danh của công ty bị trùng lặp.", ErrorCodes.CompanyAlreadyExists);
+        }
 
         logger.LogInformation("Nhà báo {OwnerId} đã gửi đơn thành lập công ty {CompanyName} với mã {Code}, đang chờ Admin duyệt.",
             ownerId, company.Name, company.Code);

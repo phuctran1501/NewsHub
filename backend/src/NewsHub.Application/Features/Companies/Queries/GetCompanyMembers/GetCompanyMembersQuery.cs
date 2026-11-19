@@ -50,7 +50,7 @@ public sealed class GetCompanyMembersQueryHandler(
             .AsNoTracking()
             .Where(m => m.CompanyId == request.CompanyId)
             .Include(m => m.User)
-            .OrderBy(m => m.Role) // Owner first
+            .OrderBy(m => m.Role == CompanyMemberRole.Owner ? 0 : 1)
             .ThenBy(m => m.JoinedAt)
             .Select(m => new CompanyMemberDto(
                 m.UserId,
