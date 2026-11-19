@@ -484,6 +484,71 @@ namespace NewsHub.Infrastructure.Migrations
                     b.ToTable("media_files", "public");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_read");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<DateTimeOffset?>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at");
+
+                    b.Property<Guid?>("RelatedEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("related_entity_id");
+
+                    b.Property<string>("TargetUrl")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("target_url");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RelatedEntityId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_notifications_user_unread")
+                        .HasFilter("is_read = FALSE");
+
+                    b.HasIndex("UserId", "CreatedAt")
+                        .HasDatabaseName("ix_notifications_user_created");
+
+                    b.ToTable("notifications", "public");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.ReadingHistory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -815,6 +880,17 @@ namespace NewsHub.Infrastructure.Migrations
                     b.Navigation("UploadedByUser");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.ReadingHistory", b =>
                 {
                     b.HasOne("NewsHub.Domain.Entities.Article", "Article")
@@ -909,6 +985,8 @@ namespace NewsHub.Infrastructure.Migrations
                     b.Navigation("FollowedCompanies");
 
                     b.Navigation("MediaFiles");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("OwnedCompanies");
 
