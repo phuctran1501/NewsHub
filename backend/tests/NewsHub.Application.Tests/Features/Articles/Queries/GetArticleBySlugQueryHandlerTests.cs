@@ -129,4 +129,48 @@ public class GetArticleBySlugQueryHandlerTests
             handler.Handle(new GetArticleBySlugQuery("ban-nhap-bi-mat"), CancellationToken.None));
         Assert.Equal(ErrorCodes.ArticleNotFound, ex.ErrorCode);
     }
+
+    [Fact]
+    public async Task Handle_WhenArticlePendingCompanyReviewAndUserIsCompanyOwner_ShouldAllowReadingContent()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var authorId = Guid.NewGuid();
+        var companyId = Guid.NewGuid();
+        var author = new User { Id = authorId, FullName = "Phóng Viên A", Email = "pv@newshub.vn", PasswordHash = "hash" };
+        var article = new Article
+        {
+            Id = Guid.NewGuid(),
+            AuthorId = authorId,
+            Author = author,
+            CompanyId = companyId,
+            Title = "Bài viết chờ duyệt tòa soạn",
+            Slug = "bai-viet-cho-duyet-toa-soan",
+            ContentHtml = "<p>Nội dung cần thẩm định</p>",
+            Status = ArticleStatus.PendingCompanyReview
+        };
+
+        var member = new CompanyMember
+        {
+            CompanyId = companyId,
+            UserId = ownerId,
+            Role = CompanyMemberRole.Owner
+        };
+
+        _dbContextMock.Setup(db => db.Articles).Returns(new List<Article> { article }.BuildMockDbSet().Object);
+        _dbContextMock.Setup(db => db.CompanyMembers).Returns(new List<CompanyMember> { member }.BuildMockDbSet().Object);
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+        _currentUserMock.Setup(c => c.Id).Returns(ownerId);
+        _currentUserMock.Setup(c => c.IsInRole(UserRole.Admin)).Returns(false);
+
+        var handler = CreateHandler();
+
+        // Act
+        var result = await handler.Handle(new GetArticleBySlugQuery("bai-viet-cho-duyet-toa-soan"), CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("bai-viet-cho-duyet-toa-soan", result.Slug);
+        Assert.Equal("<p>Nội dung cần thẩm định</p>", result.ContentHtml);
+    }
 }

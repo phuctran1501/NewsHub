@@ -34,6 +34,7 @@ public static class ErrorCodes
     public const string PressCardNotVerified = "PRESS_CARD_NOT_VERIFIED";
     public const string ArticleForbiddenEdit = "ARTICLE_FORBIDDEN_EDIT";
     public const string CannotDeletePublishedCompanyArticle = "CANNOT_DELETE_PUBLISHED_COMPANY_ARTICLE";
+    public const string CannotLockOwnAccount = "CANNOT_LOCK_OWN_ACCOUNT";
 
     // Resources (404)
     public const string ResourceNotFound = "RESOURCE_NOT_FOUND";
@@ -44,6 +45,9 @@ public static class ErrorCodes
     public const string MediaNotFound = "MEDIA_NOT_FOUND";
     public const string BookmarkNotFound = "BOOKMARK_NOT_FOUND";
     public const string ReadingHistoryNotFound = "READING_HISTORY_NOT_FOUND";
+    public const string ReportNotFound = "REPORT_NOT_FOUND";
+    public const string CompanyNotFound = "COMPANY_NOT_FOUND";
+    public const string RequestNotFound = "REQUEST_NOT_FOUND";
 
     // Conflicts & Bad Requests (400, 409, 429)
     public const string Conflict = "CONFLICT";
@@ -51,7 +55,24 @@ public static class ErrorCodes
     public const string CategoryInUse = "CATEGORY_IN_USE";
     public const string ArticleSlugConflict = "ARTICLE_SLUG_CONFLICT";
     public const string BookmarkAlreadyExists = "BOOKMARK_ALREADY_EXISTS";
+    public const string CompanyAlreadyExists = "COMPANY_ALREADY_EXISTS";
+    public const string InvalidCompanyStatus = "INVALID_COMPANY_STATUS";
+    public const string MaxCompaniesLimitReached = "MAX_COMPANIES_LIMIT_REACHED";
+    public const string UserIsNotJournalist = "USER_IS_NOT_A_JOURNALIST";
+    public const string AlreadyCompanyMember = "ALREADY_COMPANY_MEMBER";
+    public const string NotCompanyMember = "NOT_COMPANY_MEMBER";
+    public const string OnlyOwnerAllowed = "ONLY_OWNER_ALLOWED";
+    public const string CannotLeaveAsOwner = "CANNOT_LEAVE_AS_OWNER";
+    public const string CannotDissolveWithMembers = "CANNOT_DISSOLVE_COMPANY_WITH_MEMBERS";
+    public const string CannotRemoveSelf = "CANNOT_REMOVE_SELF";
+    public const string CannotRemoveOwner = "CANNOT_REMOVE_OWNER";
+    public const string InvitationAlreadyPending = "INVITATION_ALREADY_PENDING";
+    public const string JoinRequestAlreadyPending = "JOIN_REQUEST_ALREADY_PENDING";
+    public const string InvalidRequestStatus = "INVALID_REQUEST_STATUS";
     public const string CannotFollowOwnCompany = "CANNOT_FOLLOW_OWN_COMPANY";
+    public const string CannotUnfollowOwnCompany = "CANNOT_UNFOLLOW_OWN_COMPANY";
+    public const string ArticleHasNoCompany = "ARTICLE_HAS_NO_COMPANY";
+    public const string ArticleNotSubmittedToCompany = "ARTICLE_NOT_SUBMITTED_TO_COMPANY";
     public const string InvalidRequest = "INVALID_REQUEST";
     public const string RateLimitExceeded = "RATE_LIMIT_EXCEEDED";
     public const string ReportAlreadySubmitted = "REPORT_ALREADY_SUBMITTED";

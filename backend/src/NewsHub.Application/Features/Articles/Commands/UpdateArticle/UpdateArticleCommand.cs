@@ -106,6 +106,13 @@ public sealed class UpdateArticleCommandHandler(
 
         var oldSlug = article.Slug;
 
+        // Nếu bài viết đang chờ tòa soạn phê duyệt (PendingCompanyReview) mà tác giả chỉnh sửa lại:
+        // Tự động thu hồi về Bản nháp (Draft) để đảm bảo Ban biên tập không duyệt nhầm nội dung chưa kiểm chứng
+        if (article.Status == ArticleStatus.PendingCompanyReview)
+        {
+            article.Status = ArticleStatus.Draft;
+        }
+
         // 1. Cập nhật Tiêu đề & Tái tạo Slug nếu có thay đổi
         // Lưu ý SEO: Nếu bài viết đã xuất bản (Published), giữ nguyên Slug cũ để tránh làm chết liên kết/SEO backlinks
         if (!string.IsNullOrWhiteSpace(request.Title) && request.Title.Trim() != article.Title)
