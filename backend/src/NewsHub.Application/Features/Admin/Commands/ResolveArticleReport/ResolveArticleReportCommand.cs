@@ -5,7 +5,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Admin.Constants;
+using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Entities;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
@@ -83,6 +85,7 @@ public sealed class ResolveArticleReportCommandHandler(
         }
 
         var articleArchived = false;
+        Article? articleToArchive = null;
 
         // Nếu quản trị viên chọn gỡ bài viết khi xử lý vi phạm (Resolved)
         if (request.ArchiveArticle && request.Status == ReportStatus.Resolved && report.Article is not null)
@@ -90,22 +93,34 @@ public sealed class ResolveArticleReportCommandHandler(
             report.Article.Status = ArticleStatus.Archived;
             report.Article.UpdatedAt = now;
             articleArchived = true;
+            articleToArchive = report.Article;
+        }
 
-            // Xóa cache của bài viết và overview
-            await cacheService.RemoveAsync($"article:{report.Article.Slug}", cancellationToken);
-            await cacheService.RemoveAsync($"article:id:{report.Article.Id}", cancellationToken);
-            await cacheService.RemoveByPrefixAsync("articles:", cancellationToken);
-            await cacheService.RemoveAsync(AdminCacheKeys.AnalyticsOverview, cancellationToken);
+        // 1. Lưu thay đổi vào DB trước để đảm bảo tính nhất quán dữ liệu
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Gửi thông báo SignalR tới tác giả bài viết
+        // 2. Sau khi DB commit thành công, xóa cache chi tiết bài viết (không dùng prefix "articles:" tránh xóa mất "articles:dirty_views")
+        if (articleArchived && articleToArchive is not null)
+        {
+            try
+            {
+                await cacheService.RemoveAsync(ArticleCacheKeys.ArticleSlug(articleToArchive.Slug), cancellationToken);
+                await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(articleToArchive.Id), cancellationToken);
+                await cacheService.RemoveAsync(ArticleCacheKeys.ArticleRelated(articleToArchive.Id), cancellationToken);
+                await cacheService.RemoveAsync(AdminCacheKeys.AnalyticsOverview, cancellationToken);
+            }
+            catch
+            {
+                // Phòng ngừa lỗi nếu Redis tạm thời mất kết nối, không làm crash request sau khi đã commit DB
+            }
+
+            // 3. Gửi thông báo SignalR tới tác giả bài viết
             await notificationService.NotifyArticleStatusChangedAsync(
-                report.Article.AuthorId,
-                report.Article.Id,
+                articleToArchive.AuthorId,
+                articleToArchive.Id,
                 ArticleStatus.Archived.ToString(),
                 cancellationToken);
         }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var message = articleArchived
             ? "Đã xử lý báo cáo vi phạm và gỡ bài viết thành công."

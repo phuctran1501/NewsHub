@@ -6,6 +6,7 @@ using Moq;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Admin.Commands.ResolveArticleReport;
 using NewsHub.Application.Features.Admin.Constants;
+using NewsHub.Application.Features.Articles.Constants;
 using NewsHub.Domain.Constants;
 using NewsHub.Domain.Entities;
 using NewsHub.Domain.Enums;
@@ -157,10 +158,11 @@ public class ResolveArticleReportCommandHandlerTests
         Assert.Equal(ArticleStatus.Archived, article.Status);
         Assert.NotNull(article.UpdatedAt);
 
-        _cacheServiceMock.Verify(c => c.RemoveAsync($"article:{article.Slug}", It.IsAny<CancellationToken>()), Times.Once);
-        _cacheServiceMock.Verify(c => c.RemoveAsync($"article:id:{article.Id}", It.IsAny<CancellationToken>()), Times.Once);
-        _cacheServiceMock.Verify(c => c.RemoveByPrefixAsync("articles:", It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync(ArticleCacheKeys.ArticleSlug(article.Slug), It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync(ArticleCacheKeys.ArticleDetail(article.Id), It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync(ArticleCacheKeys.ArticleRelated(article.Id), It.IsAny<CancellationToken>()), Times.Once);
         _cacheServiceMock.Verify(c => c.RemoveAsync(AdminCacheKeys.AnalyticsOverview, It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveByPrefixAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
 
         _notificationServiceMock.Verify(n => n.NotifyArticleStatusChangedAsync(
             authorId,

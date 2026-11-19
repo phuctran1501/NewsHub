@@ -1,5 +1,6 @@
 namespace NewsHub.API.Controllers;
 
+using System.Text.Json.Serialization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ using NewsHub.Application.Features.Admin.Queries.GetArticleReports;
 using NewsHub.Domain.Enums;
 
 public sealed record ToggleUserStatusRequest(
-    bool IsActive,
+    [property: JsonRequired] bool IsActive,
     string? LockReason = null);
 
 public sealed record SendBroadcastRequest(

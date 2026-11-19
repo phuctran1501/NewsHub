@@ -108,7 +108,7 @@ public sealed class GetAdminAnalyticsOverviewQueryHandler(
         var authorsMap = await dbContext.Users
             .AsNoTracking()
             .Where(u => authorIds.Contains(u.Id))
-            .Select(u => new { u.Id, u.FullName, Email = u.Email.Value })
+            .Select(u => new { u.Id, u.FullName, Email = (string)u.Email })
             .ToDictionaryAsync(u => u.Id, cancellationToken);
 
         var topJournalists = topAuthorGroups

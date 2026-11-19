@@ -65,7 +65,7 @@ public sealed class GetAdminUsersQueryHandler(
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var search = request.SearchTerm.Trim().ToLower();
-            query = query.Where(u => u.FullName.ToLower().Contains(search) || u.Email.Value.ToLower().Contains(search));
+            query = query.Where(u => u.FullName.ToLower().Contains(search) || ((string)u.Email).ToLower().Contains(search));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -76,7 +76,7 @@ public sealed class GetAdminUsersQueryHandler(
             .Take(request.PageSize)
             .Select(u => new AdminUserSummaryDto(
                 u.Id,
-                u.Email.Value,
+                (string)u.Email,
                 u.FullName,
                 u.AvatarUrl,
                 u.PhoneNumber,
