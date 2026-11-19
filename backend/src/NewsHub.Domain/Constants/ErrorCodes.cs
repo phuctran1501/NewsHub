@@ -85,6 +85,11 @@ public static class ErrorCodes
     public const string MediaDeleteFailed = "MEDIA_DELETE_FAILED";
     public const string MediaInUse = "MEDIA_IN_USE";
 
+    // AI Services (400, 404, 502, 503)
+    public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
+    public const string AiSummaryNotFound = "AI_SUMMARY_NOT_FOUND";
+    public const string InvalidAiResponse = "INVALID_AI_RESPONSE";
+
     // Server (500)
     public const string InternalServerError = "INTERNAL_SERVER_ERROR";
 }

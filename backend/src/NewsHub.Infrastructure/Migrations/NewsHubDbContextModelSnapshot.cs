@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsHub.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
 
 #nullable disable
 
@@ -21,7 +22,61 @@ namespace NewsHub.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.AiSummary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AiModel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("gemini-3.5-flash-lite")
+                        .HasColumnName("ai_model");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.PrimitiveCollection<string>("BulletPoints")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("bullet_points");
+
+                    b.Property<float>("ConfidenceScore")
+                        .HasColumnType("real")
+                        .HasColumnName("confidence_score");
+
+                    b.PrimitiveCollection<string>("ExtractedTags")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("extracted_tags");
+
+                    b.Property<DateTimeOffset>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("Sentiment")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Neutral")
+                        .HasColumnName("sentiment");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId")
+                        .IsUnique();
+
+                    b.ToTable("ai_summaries", "public");
+                });
 
             modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
                 {
@@ -144,6 +199,40 @@ namespace NewsHub.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("article_categories", "public");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ArticleEmbedding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<Vector>("Embedding")
+                        .IsRequired()
+                        .HasColumnType("vector(768)")
+                        .HasColumnName("embedding");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId")
+                        .IsUnique();
+
+                    b.HasIndex("Embedding")
+                        .HasDatabaseName("ix_article_embeddings_cosine");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Embedding"), "hnsw");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Embedding"), new[] { "vector_cosine_ops" });
+
+                    b.ToTable("article_embeddings", "public");
                 });
 
             modelBuilder.Entity("NewsHub.Domain.Entities.ArticleReport", b =>
@@ -732,6 +821,17 @@ namespace NewsHub.Infrastructure.Migrations
                     b.ToTable("user_bookmarks", "public");
                 });
 
+            modelBuilder.Entity("NewsHub.Domain.Entities.AiSummary", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.Article", "Article")
+                        .WithOne("AiSummary")
+                        .HasForeignKey("NewsHub.Domain.Entities.AiSummary", "ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+                });
+
             modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
                 {
                     b.HasOne("NewsHub.Domain.Entities.User", "Author")
@@ -774,6 +874,17 @@ namespace NewsHub.Infrastructure.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("NewsHub.Domain.Entities.ArticleEmbedding", b =>
+                {
+                    b.HasOne("NewsHub.Domain.Entities.Article", "Article")
+                        .WithOne("ArticleEmbedding")
+                        .HasForeignKey("NewsHub.Domain.Entities.ArticleEmbedding", "ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
                 });
 
             modelBuilder.Entity("NewsHub.Domain.Entities.ArticleReport", b =>
@@ -942,7 +1053,11 @@ namespace NewsHub.Infrastructure.Migrations
 
             modelBuilder.Entity("NewsHub.Domain.Entities.Article", b =>
                 {
+                    b.Navigation("AiSummary");
+
                     b.Navigation("ArticleCategories");
+
+                    b.Navigation("ArticleEmbedding");
 
                     b.Navigation("Bookmarks");
 

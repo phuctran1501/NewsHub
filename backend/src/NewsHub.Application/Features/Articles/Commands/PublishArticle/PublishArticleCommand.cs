@@ -28,7 +28,8 @@ public sealed class PublishArticleCommandHandler(
     ICurrentUser currentUser,
     ICacheService cacheService,
     INotificationService notificationService,
-    ILogger<PublishArticleCommandHandler> logger) : IRequestHandler<PublishArticleCommand, ArticleDetailDto>
+    ILogger<PublishArticleCommandHandler> logger,
+    IBackgroundJobService? backgroundJobService = null) : IRequestHandler<PublishArticleCommand, ArticleDetailDto>
 {
     public async Task<ArticleDetailDto> Handle(
         PublishArticleCommand request,
@@ -109,6 +110,28 @@ public sealed class PublishArticleCommandHandler(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Lỗi khi phát tín hiệu thông báo xuất bản bài viết {ArticleId}", article.Id);
+        }
+
+        try
+        {
+            // Kích hoạt tác vụ nền Hangfire xử lý tóm tắt AI
+            backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
+                job.GenerateArticleSummaryAsync(article.Id, CancellationToken.None));
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi khi đưa tác vụ tóm tắt AI vào hàng đợi cho bài viết {ArticleId}", article.Id);
+        }
+
+        try
+        {
+            // Kích hoạt tác vụ nền Hangfire sinh vector nhúng
+            backgroundJobService?.Enqueue<IAiBackgroundJobs>(job =>
+                job.GenerateArticleEmbeddingAsync(article.Id, CancellationToken.None));
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi khi đưa tác vụ sinh vector nhúng vào hàng đợi cho bài viết {ArticleId}", article.Id);
         }
 
         var categories = article.ArticleCategories.Select(ac => ac.Category!).Where(c => c != null).ToList();
