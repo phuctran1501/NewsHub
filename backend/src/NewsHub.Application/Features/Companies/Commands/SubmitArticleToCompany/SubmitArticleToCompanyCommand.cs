@@ -10,7 +10,7 @@ using NewsHub.Domain.Constants;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
-public sealed record SubmitArticleToCompanyCommand(Guid ArticleId) : IRequest;
+public sealed record SubmitArticleToCompanyCommand(Guid ArticleId) : IRequest, ITransactionalRequest;
 
 public sealed class SubmitArticleToCompanyCommandValidator : AbstractValidator<SubmitArticleToCompanyCommand>
 {
@@ -81,27 +81,46 @@ public sealed class SubmitArticleToCompanyCommandHandler(
             throw new ConflictException("Bài viết đang trong trạng thái chờ tòa soạn phê duyệt.", ErrorCodes.Conflict);
         }
 
+        if (article.Status != ArticleStatus.Draft)
+        {
+            throw new BadRequestException("Chỉ bài viết ở trạng thái Bản nháp (Draft) mới có thể nộp lên tòa soạn.", ErrorCodes.InvalidRequest);
+        }
+
         article.Status = ArticleStatus.PendingCompanyReview;
         article.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("Bài viết đã bị thay đổi bởi thao tác khác.", ErrorCodes.Conflict);
+        }
 
         logger.LogInformation("Tác giả {AuthorId} đã nộp bài viết {ArticleId} lên tòa soạn {CompanyId} để chờ duyệt.",
             currentUserId, article.Id, companyId);
 
-        var company = await dbContext.Companies
-            .FirstOrDefaultAsync(c => c.Id == companyId, cancellationToken);
-
-        if (company != null)
+        try
         {
-            var notification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.ArticleStatusChanged,
-                "Bài viết mới chờ biên tập",
-                $"Nhà báo {article.Author?.FullName ?? "Phóng viên"} vừa nộp bài viết \"{article.Title}\" lên tòa soạn để chờ duyệt.",
-                article.Id
-            );
-            await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+            var company = await dbContext.Companies
+                .FirstOrDefaultAsync(c => c.Id == companyId, cancellationToken);
+
+            if (company != null)
+            {
+                var notification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.ArticleStatusChanged,
+                    "Bài viết mới chờ biên tập",
+                    $"Nhà báo {article.Author?.FullName ?? "Phóng viên"} vừa nộp bài viết \"{article.Title}\" lên tòa soạn để chờ duyệt.",
+                    article.Id
+                );
+                await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi gửi SignalR notification tới Owner khi nộp bài {ArticleId}.", article.Id);
         }
     }
 }

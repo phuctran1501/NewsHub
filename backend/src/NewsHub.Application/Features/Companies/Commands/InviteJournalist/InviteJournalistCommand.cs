@@ -110,20 +110,34 @@ public sealed class InviteJournalistCommandHandler(
         };
 
         dbContext.CompanyRequests.Add(inviteRequest);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Đã có lời mời đang chờ phản hồi gửi tới nhà báo này.", ErrorCodes.InvitationAlreadyPending);
+        }
 
         logger.LogInformation("Owner {CurrentUserId} đã gửi lời mời nhà báo {TargetUserId} gia nhập công ty {CompanyId}.",
             currentUserId, targetUser.Id, company.Id);
 
         // Bắn SignalR notification tới nhà báo được mời
-        var notification = new NotificationDto(
-            Guid.CreateVersion7(),
-            NotificationType.CompanyInvitation,
-            "Lời mời gia nhập Tòa soạn",
-            $"Tòa soạn {company.Name} đã gửi lời mời bạn tham gia đội ngũ phóng viên.",
-            company.Id
-        );
-        await notificationService.SendToUserAsync(targetUser.Id, notification, cancellationToken);
+        try
+        {
+            var notification = new NotificationDto(
+                Guid.CreateVersion7(),
+                NotificationType.CompanyInvitation,
+                "Lời mời gia nhập Tòa soạn",
+                $"Tòa soạn {company.Name} đã gửi lời mời bạn tham gia đội ngũ phóng viên.",
+                company.Id
+            );
+            await notificationService.SendToUserAsync(targetUser.Id, notification, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi gửi SignalR notification tới nhà báo {TargetUserId}.", targetUser.Id);
+        }
 
         return new CompanyRequestDto(
             inviteRequest.Id,

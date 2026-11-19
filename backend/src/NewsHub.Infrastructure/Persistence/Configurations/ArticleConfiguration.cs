@@ -76,6 +76,9 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(a => a.UpdatedAt)
             .HasColumnName("updated_at");
 
+        builder.Property(a => a.Version)
+            .IsRowVersion();
+
         // Indexes
         builder.HasIndex(a => a.AuthorId);
         builder.HasIndex(a => a.CompanyId);

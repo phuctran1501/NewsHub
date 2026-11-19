@@ -16,7 +16,7 @@ public sealed record ReviewEditorialArticleCommand(
     Guid CompanyId,
     Guid ArticleId,
     string Action,
-    string? EditorialNotes = null) : IRequest;
+    string? EditorialNotes = null) : IRequest, ITransactionalRequest;
 
 public sealed class ReviewEditorialArticleCommandValidator : AbstractValidator<ReviewEditorialArticleCommand>
 {
@@ -99,70 +99,119 @@ public sealed class ReviewEditorialArticleCommandHandler(
             article.PublishedAt = DateTimeOffset.UtcNow;
             article.UpdatedAt = DateTimeOffset.UtcNow;
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConflictException("Bài viết đã được cập nhật bởi một phiên làm việc khác.", ErrorCodes.Conflict);
+            }
 
             // Vô hiệu hóa cache bài viết và overview
-            await cacheService.RemoveAsync(ArticleCacheKeys.ArticleSlug(article.Slug), cancellationToken);
-            await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(article.Id), cancellationToken);
-            await cacheService.RemoveAsync(ArticleCacheKeys.ArticleRelated(article.Id), cancellationToken);
-            await cacheService.RemoveAsync(AdminCacheKeys.AnalyticsOverview, cancellationToken);
+            try
+            {
+                await cacheService.RemoveAsync(ArticleCacheKeys.ArticleSlug(article.Slug), cancellationToken);
+                await cacheService.RemoveAsync(ArticleCacheKeys.ArticleDetail(article.Id), cancellationToken);
+                await cacheService.RemoveAsync(ArticleCacheKeys.ArticleRelated(article.Id), cancellationToken);
+                await cacheService.RemoveAsync(AdminCacheKeys.AnalyticsOverview, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi dọn cache sau khi xuất bản bài viết {ArticleId}.", article.Id);
+            }
 
             logger.LogInformation("Owner {OwnerId} đã phê duyệt xuất bản bài viết {ArticleId} của tòa soạn {CompanyId}.",
                 currentUserId, article.Id, request.CompanyId);
 
             // Gửi SignalR tới tác giả
-            await notificationService.NotifyArticleStatusChangedAsync(
-                article.AuthorId,
-                article.Id,
-                ArticleStatus.Published.ToString(),
-                cancellationToken);
+            try
+            {
+                await notificationService.NotifyArticleStatusChangedAsync(
+                    article.AuthorId,
+                    article.Id,
+                    ArticleStatus.Published.ToString(),
+                    cancellationToken);
 
-            // Gửi SignalR phát sóng tới nhóm theo dõi tòa soạn
-            var followerNotification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.CompanyArticlePublished,
-                $"Bài viết mới từ {company.Name}",
-                $"Tòa soạn {company.Name} vừa xuất bản bài viết mới: \"{article.Title}\".",
-                article.Id,
-                $"/articles/{article.Slug}"
-            );
-            await notificationService.SendToGroupAsync($"Company_{company.Id}", followerNotification, cancellationToken);
+                // Gửi SignalR phát sóng tới nhóm theo dõi tòa soạn
+                var followerNotification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.CompanyArticlePublished,
+                    $"Bài viết mới từ {company.Name}",
+                    $"Tòa soạn {company.Name} vừa xuất bản bài viết mới: \"{article.Title}\".",
+                    article.Id,
+                    $"/articles/{article.Slug}"
+                );
+                await notificationService.SendToGroupAsync($"Company_{company.Id}", followerNotification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi gửi SignalR notification sau khi xuất bản bài viết {ArticleId}.", article.Id);
+            }
         }
         else if (request.Action == "RequestChanges")
         {
             article.Status = ArticleStatus.Draft;
             article.UpdatedAt = DateTimeOffset.UtcNow;
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConflictException("Bài viết đã được cập nhật bởi một phiên làm việc khác.", ErrorCodes.Conflict);
+            }
 
             logger.LogInformation("Owner {OwnerId} đã yêu cầu tác giả sửa đổi bài viết {ArticleId}.", currentUserId, article.Id);
 
-            var authorNotification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.ArticleStatusChanged,
-                "Yêu cầu chỉnh sửa bài viết",
-                $"Tòa soạn {company.Name} đã yêu cầu bạn chỉnh sửa bài viết \"{article.Title}\". Ghi chú: {request.EditorialNotes}",
-                article.Id
-            );
-            await notificationService.SendToUserAsync(article.AuthorId, authorNotification, cancellationToken);
+            try
+            {
+                var authorNotification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.ArticleStatusChanged,
+                    "Yêu cầu chỉnh sửa bài viết",
+                    $"Tòa soạn {company.Name} đã yêu cầu bạn chỉnh sửa bài viết \"{article.Title}\". Ghi chú: {request.EditorialNotes}",
+                    article.Id
+                );
+                await notificationService.SendToUserAsync(article.AuthorId, authorNotification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi gửi SignalR notification khi yêu cầu sửa bài viết {ArticleId}.", article.Id);
+            }
         }
         else // Reject
         {
             article.Status = ArticleStatus.Rejected;
             article.UpdatedAt = DateTimeOffset.UtcNow;
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConflictException("Bài viết đã được cập nhật bởi một phiên làm việc khác.", ErrorCodes.Conflict);
+            }
 
             logger.LogInformation("Owner {OwnerId} đã từ chối bài viết {ArticleId}.", currentUserId, article.Id);
 
-            var authorNotification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.ArticleStatusChanged,
-                "Bài viết bị từ chối phê duyệt",
-                $"Tòa soạn {company.Name} đã từ chối bài viết \"{article.Title}\". Lý do: {request.EditorialNotes}",
-                article.Id
-            );
-            await notificationService.SendToUserAsync(article.AuthorId, authorNotification, cancellationToken);
+            try
+            {
+                var authorNotification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.ArticleStatusChanged,
+                    "Bài viết bị từ chối phê duyệt",
+                    $"Tòa soạn {company.Name} đã từ chối bài viết \"{article.Title}\". Lý do: {request.EditorialNotes}",
+                    article.Id
+                );
+                await notificationService.SendToUserAsync(article.AuthorId, authorNotification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi gửi SignalR notification khi từ chối bài viết {ArticleId}.", article.Id);
+            }
         }
     }
 }

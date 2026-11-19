@@ -16,6 +16,7 @@ public class Company : IHasCreatedAt, IHasUpdatedAt
     public Guid OwnerId { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; }
+    public uint Version { get; set; }
 
     // Navigation properties
     public User? Owner { get; set; }

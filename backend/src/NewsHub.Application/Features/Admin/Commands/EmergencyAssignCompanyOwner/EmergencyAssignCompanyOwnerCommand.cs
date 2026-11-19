@@ -13,7 +13,7 @@ using NewsHub.Domain.Exceptions;
 public sealed record EmergencyAssignCompanyOwnerCommand(
     Guid CompanyId,
     Guid NewOwnerId,
-    string Reason) : IRequest;
+    string Reason) : IRequest, ITransactionalRequest;
 
 public sealed class EmergencyAssignCompanyOwnerCommandValidator : AbstractValidator<EmergencyAssignCompanyOwnerCommand>
 {
@@ -81,19 +81,37 @@ public sealed class EmergencyAssignCompanyOwnerCommandHandler(
         company.OwnerId = request.NewOwnerId;
         company.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("Quyền sở hữu tòa soạn đã bị thay đổi bởi một thao tác khác.", ErrorCodes.Conflict);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Tòa soạn đã có chủ sở hữu khác được cập nhật đồng thời.", ErrorCodes.Conflict);
+        }
 
         logger.LogWarning("Admin đã kích hoạt quyền can thiệp khẩn cấp: Chỉ định {NewOwnerId} làm Owner mới của tòa soạn {CompanyId}. Lý do: {Reason}",
             request.NewOwnerId, request.CompanyId, request.Reason);
 
         // Bắn SignalR notification tới Owner mới
-        var notification = new NotificationDto(
-            Guid.CreateVersion7(),
-            NotificationType.CompanyMembershipChanged,
-            "Chỉ định tiếp quản Tòa soạn khẩn cấp",
-            $"Quản trị viên đã chỉ định bạn làm Chủ sở hữu (Owner) của tòa soạn {company.Name}. Lý do: {request.Reason}",
-            company.Id
-        );
-        await notificationService.SendToUserAsync(request.NewOwnerId, notification, cancellationToken);
+        try
+        {
+            var notification = new NotificationDto(
+                Guid.CreateVersion7(),
+                NotificationType.CompanyMembershipChanged,
+                "Chỉ định tiếp quản Tòa soạn khẩn cấp",
+                $"Quản trị viên đã chỉ định bạn làm Chủ sở hữu (Owner) của tòa soạn {company.Name}. Lý do: {request.Reason}",
+                company.Id
+            );
+            await notificationService.SendToUserAsync(request.NewOwnerId, notification, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Không thể gửi SignalR notification tới Owner mới {NewOwnerId}.", request.NewOwnerId);
+        }
     }
 }

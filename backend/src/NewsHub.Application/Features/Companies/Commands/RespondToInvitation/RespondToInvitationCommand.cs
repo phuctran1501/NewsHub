@@ -11,7 +11,7 @@ using NewsHub.Domain.Entities;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
-public sealed record RespondToInvitationCommand(Guid RequestId, bool Accept) : IRequest;
+public sealed record RespondToInvitationCommand(Guid RequestId, bool Accept) : IRequest, ITransactionalRequest;
 
 public sealed class RespondToInvitationCommandValidator : AbstractValidator<RespondToInvitationCommand>
 {
@@ -60,6 +60,11 @@ public sealed class RespondToInvitationCommandHandler(
 
         if (request.Accept)
         {
+            if (invite.Company != null && invite.Company.Status != CompanyStatus.Approved)
+            {
+                throw new BadRequestException("Tòa soạn này không còn hoạt động hoặc chưa được phê duyệt.", ErrorCodes.InvalidCompanyStatus);
+            }
+
             // Kiểm tra giới hạn 5 công ty
             var activeCount = await dbContext.CompanyMembers
                 .CountAsync(m => m.UserId == userId, cancellationToken);
@@ -87,9 +92,20 @@ public sealed class RespondToInvitationCommandHandler(
             invite.RespondedAt = DateTimeOffset.UtcNow;
 
             logger.LogInformation("Nhà báo {UserId} đã chấp nhận lời mời gia nhập công ty {CompanyId}.", userId, invite.CompanyId);
+        }
+        else
+        {
+            invite.Status = CompanyRequestStatus.Rejected;
+            invite.RespondedAt = DateTimeOffset.UtcNow;
+            logger.LogInformation("Nhà báo {UserId} đã từ chối lời mời gia nhập công ty {CompanyId}.", userId, invite.CompanyId);
+        }
 
-            // Bắn SignalR tới Owner của công ty
-            if (invite.Company != null)
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Bắn SignalR tới Owner của công ty sau khi đã lưu DB thành công
+        if (request.Accept && invite.Company != null)
+        {
+            try
             {
                 var notification = new NotificationDto(
                     Guid.CreateVersion7(),
@@ -100,14 +116,10 @@ public sealed class RespondToInvitationCommandHandler(
                 );
                 await notificationService.SendToUserAsync(invite.Company.OwnerId, notification, cancellationToken);
             }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi gửi SignalR notification tới Owner khi chấp nhận lời mời.");
+            }
         }
-        else
-        {
-            invite.Status = CompanyRequestStatus.Rejected;
-            invite.RespondedAt = DateTimeOffset.UtcNow;
-            logger.LogInformation("Nhà báo {UserId} đã từ chối lời mời gia nhập công ty {CompanyId}.", userId, invite.CompanyId);
-        }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

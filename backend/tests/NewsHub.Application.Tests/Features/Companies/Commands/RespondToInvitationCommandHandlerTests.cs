@@ -104,7 +104,7 @@ public class RespondToInvitationCommandHandlerTests
         _currentUserMock.Setup(u => u.IsInRole(UserRole.Journalist)).Returns(true);
         _currentUserMock.Setup(u => u.Id).Returns(journalistId);
 
-        var company = new Company { Id = companyId, Name = "Công Ty A", Code = "11112222", TaxCode = "010101", OwnerId = ownerId };
+        var company = new Company { Id = companyId, Name = "Công Ty A", Code = "11112222", TaxCode = "010101", OwnerId = ownerId, Status = CompanyStatus.Approved };
         var invite = new CompanyRequest
         {
             Id = requestId,

@@ -11,7 +11,7 @@ using NewsHub.Domain.Entities;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
-public sealed record RespondToJoinRequestCommand(Guid CompanyId, Guid RequestId, bool Approve) : IRequest;
+public sealed record RespondToJoinRequestCommand(Guid CompanyId, Guid RequestId, bool Approve) : IRequest, ITransactionalRequest;
 
 public sealed class RespondToJoinRequestCommandValidator : AbstractValidator<RespondToJoinRequestCommand>
 {
@@ -107,16 +107,6 @@ public sealed class RespondToJoinRequestCommandHandler(
 
             logger.LogInformation("Owner {OwnerId} đã duyệt đơn gia nhập của nhà báo {JournalistId} vào công ty {CompanyId}.",
                 currentUserId, joinRequest.JournalistId, request.CompanyId);
-
-            // Bắn SignalR tới nhà báo nộp đơn
-            var notification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.CompanyJoinRequest,
-                "Đơn xin gia nhập đã được duyệt",
-                $"Chúc mừng! Đơn xin gia nhập tòa soạn {company.Name} của bạn đã được phê duyệt.",
-                company.Id
-            );
-            await notificationService.SendToUserAsync(joinRequest.JournalistId, notification, cancellationToken);
         }
         else
         {
@@ -128,5 +118,25 @@ public sealed class RespondToJoinRequestCommandHandler(
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Bắn SignalR tới nhà báo nộp đơn sau khi commit DB thành công
+        if (request.Approve)
+        {
+            try
+            {
+                var notification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.CompanyJoinRequest,
+                    "Đơn xin gia nhập đã được duyệt",
+                    $"Chúc mừng! Đơn xin gia nhập tòa soạn {company.Name} của bạn đã được phê duyệt.",
+                    company.Id
+                );
+                await notificationService.SendToUserAsync(joinRequest.JournalistId, notification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Lỗi gửi SignalR notification tới nhà báo {JournalistId}.", joinRequest.JournalistId);
+            }
+        }
     }
 }

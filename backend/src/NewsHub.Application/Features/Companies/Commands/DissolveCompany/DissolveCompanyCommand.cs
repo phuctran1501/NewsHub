@@ -9,7 +9,7 @@ using NewsHub.Domain.Constants;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
-public sealed record DissolveCompanyCommand(Guid CompanyId) : IRequest;
+public sealed record DissolveCompanyCommand(Guid CompanyId) : IRequest, ITransactionalRequest;
 
 public sealed class DissolveCompanyCommandValidator : AbstractValidator<DissolveCompanyCommand>
 {
@@ -70,6 +70,13 @@ public sealed class DissolveCompanyCommandHandler(
         // Chuyển trạng thái công ty sang Rejected (Giải thể) và lưu vết
         company.Status = CompanyStatus.Rejected;
         company.UpdatedAt = DateTimeOffset.UtcNow;
+
+        // Hủy toàn bộ các yêu cầu/lời mời đang Pending của công ty để tránh việc phóng viên chấp nhận vào công ty đã giải thể
+        await dbContext.CompanyRequests
+            .Where(r => r.CompanyId == request.CompanyId && r.Status == CompanyRequestStatus.Pending)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(r => r.Status, CompanyRequestStatus.Rejected)
+                .SetProperty(r => r.RespondedAt, DateTimeOffset.UtcNow), cancellationToken);
 
         // Giải phóng các bài viết nháp/chờ duyệt của Owner về cá nhân
         await dbContext.Articles

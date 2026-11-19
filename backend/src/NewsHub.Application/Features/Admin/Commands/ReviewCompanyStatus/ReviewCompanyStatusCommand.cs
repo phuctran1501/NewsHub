@@ -14,7 +14,7 @@ using NewsHub.Domain.Exceptions;
 public sealed record ReviewCompanyStatusCommand(
     Guid CompanyId,
     string Status,
-    string? RejectionReason = null) : IRequest;
+    string? RejectionReason = null) : IRequest, ITransactionalRequest;
 
 public sealed class ReviewCompanyStatusCommandValidator : AbstractValidator<ReviewCompanyStatusCommand>
 {
@@ -90,37 +90,65 @@ public sealed class ReviewCompanyStatusCommandHandler(
                 dbContext.CompanyMembers.Add(ownerMember);
             }
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConflictException("Trạng thái tòa soạn đã được thay đổi bởi quản trị viên khác.", ErrorCodes.Conflict);
+            }
 
             logger.LogInformation("Admin đã phê duyệt thành lập tòa soạn {CompanyId} ({CompanyName}).", company.Id, company.Name);
 
             // Bắn SignalR thông báo tới người sáng lập
-            var notification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.CompanyMembershipChanged,
-                "Tòa soạn đã được phê duyệt",
-                $"Chúc mừng! Hồ sơ thành lập tòa soạn {company.Name} của bạn đã được Quản trị viên phê duyệt chính thức.",
-                company.Id
-            );
-            await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+            try
+            {
+                var notification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.CompanyMembershipChanged,
+                    "Tòa soạn đã được phê duyệt",
+                    $"Chúc mừng! Hồ sơ thành lập tòa soạn {company.Name} của bạn đã được Quản trị viên phê duyệt chính thức.",
+                    company.Id
+                );
+                await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Không thể gửi SignalR notification tới Owner {OwnerId}.", company.OwnerId);
+            }
         }
         else // Rejected
         {
             company.Status = CompanyStatus.Rejected;
             company.UpdatedAt = DateTimeOffset.UtcNow;
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConflictException("Trạng thái tòa soạn đã được thay đổi bởi quản trị viên khác.", ErrorCodes.Conflict);
+            }
 
             logger.LogInformation("Admin đã từ chối thành lập tòa soạn {CompanyId}. Lý do: {Reason}", company.Id, request.RejectionReason);
 
-            var notification = new NotificationDto(
-                Guid.CreateVersion7(),
-                NotificationType.CompanyMembershipChanged,
-                "Hồ sơ thành lập tòa soạn bị từ chối",
-                $"Hồ sơ thành lập tòa soạn {company.Name} của bạn đã bị từ chối. Lý do: {request.RejectionReason}",
-                company.Id
-            );
-            await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+            try
+            {
+                var notification = new NotificationDto(
+                    Guid.CreateVersion7(),
+                    NotificationType.CompanyMembershipChanged,
+                    "Hồ sơ thành lập tòa soạn bị từ chối",
+                    $"Hồ sơ thành lập tòa soạn {company.Name} của bạn đã bị từ chối. Lý do: {request.RejectionReason}",
+                    company.Id
+                );
+                await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Không thể gửi SignalR notification tới Owner {OwnerId}.", company.OwnerId);
+            }
         }
     }
 }

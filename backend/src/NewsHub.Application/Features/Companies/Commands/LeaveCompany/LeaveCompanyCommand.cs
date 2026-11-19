@@ -9,7 +9,7 @@ using NewsHub.Domain.Constants;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
-public sealed record LeaveCompanyCommand(Guid CompanyId) : IRequest;
+public sealed record LeaveCompanyCommand(Guid CompanyId) : IRequest, ITransactionalRequest;
 
 public sealed class LeaveCompanyCommandValidator : AbstractValidator<LeaveCompanyCommand>
 {
@@ -49,6 +49,14 @@ public sealed class LeaveCompanyCommandHandler(
         }
 
         if (member.Role == CompanyMemberRole.Owner)
+        {
+            throw new BadRequestException("Chủ sở hữu không thể tự ý rời tòa soạn. Vui lòng chuyển giao quyền Owner cho thành viên khác trước khi rời.", ErrorCodes.CannotLeaveAsOwner);
+        }
+
+        var company = await dbContext.Companies
+            .FirstOrDefaultAsync(c => c.Id == request.CompanyId, cancellationToken);
+
+        if (company != null && company.OwnerId == userId)
         {
             throw new BadRequestException("Chủ sở hữu không thể tự ý rời tòa soạn. Vui lòng chuyển giao quyền Owner cho thành viên khác trước khi rời.", ErrorCodes.CannotLeaveAsOwner);
         }

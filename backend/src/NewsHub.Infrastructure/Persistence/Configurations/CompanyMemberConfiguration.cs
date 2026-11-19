@@ -35,6 +35,11 @@ public class CompanyMemberConfiguration : IEntityTypeConfiguration<CompanyMember
 
         builder.HasIndex(m => m.UserId);
 
+        // Filtered unique index: Mỗi công ty chỉ được phép có duy nhất 1 bản ghi mang vai trò Owner
+        builder.HasIndex(m => m.CompanyId)
+            .HasFilter("role = 'Owner'")
+            .IsUnique();
+
         // Relationships
         builder.HasOne(m => m.Company)
             .WithMany(c => c.Members)

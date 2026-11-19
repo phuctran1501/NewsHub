@@ -49,6 +49,9 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
         builder.Property(c => c.UpdatedAt)
             .HasColumnName("updated_at");
 
+        builder.Property(c => c.Version)
+            .IsRowVersion();
+
         // Indexes
         builder.HasIndex(c => c.Code)
             .IsUnique();

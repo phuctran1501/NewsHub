@@ -87,7 +87,14 @@ public sealed class RequestJoinCompanyCommandHandler(
         };
 
         dbContext.CompanyRequests.Add(companyRequest);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Bạn đã có đơn xin gia nhập đang chờ phản hồi từ tòa soạn này.", ErrorCodes.JoinRequestAlreadyPending);
+        }
 
         logger.LogInformation("Nhà báo {UserId} đã gửi đơn xin gia nhập công ty {CompanyId}.", userId, company.Id);
 
@@ -97,14 +104,21 @@ public sealed class RequestJoinCompanyCommandHandler(
             .FirstAsync(cancellationToken);
 
         // Bắn thông báo SignalR tới Owner của công ty
-        var notification = new NotificationDto(
-            Guid.CreateVersion7(),
-            NotificationType.CompanyJoinRequest,
-            "Đơn xin gia nhập mới",
-            $"Nhà báo {sender.FullName} vừa gửi đơn xin gia nhập tòa soạn {company.Name}.",
-            company.Id
-        );
-        await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+        try
+        {
+            var notification = new NotificationDto(
+                Guid.CreateVersion7(),
+                NotificationType.CompanyJoinRequest,
+                "Đơn xin gia nhập mới",
+                $"Nhà báo {sender.FullName} vừa gửi đơn xin gia nhập tòa soạn {company.Name}.",
+                company.Id
+            );
+            await notificationService.SendToUserAsync(company.OwnerId, notification, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Lỗi gửi SignalR notification tới Owner {OwnerId}.", company.OwnerId);
+        }
 
         return new CompanyRequestDto(
             companyRequest.Id,

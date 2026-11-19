@@ -70,7 +70,24 @@ public sealed class GetArticleBySlugQueryHandler(
             var isAuthor = currentUser.IsAuthenticated && article.AuthorId == currentUser.Id;
             var isAdmin = currentUser.IsAuthenticated && currentUser.IsInRole(UserRole.Admin);
 
-            if (!isAuthor && !isAdmin)
+            var isCompanyAuthorized = false;
+            if (article.CompanyId.HasValue && currentUser.IsAuthenticated && currentUser.Id.HasValue)
+            {
+                // Nếu bài đang chờ duyệt nội bộ: Cho phép Owner của tòa soạn xem toàn bộ nội dung để kiểm duyệt
+                if (article.Status == ArticleStatus.PendingCompanyReview)
+                {
+                    isCompanyAuthorized = await dbContext.CompanyMembers
+                        .AnyAsync(m => m.CompanyId == article.CompanyId.Value && m.UserId == currentUser.Id.Value && m.Role == CompanyMemberRole.Owner, cancellationToken);
+                }
+                // Hoặc nếu là thành viên cùng tòa soạn đọc bài viết nội bộ
+                else
+                {
+                    isCompanyAuthorized = await dbContext.CompanyMembers
+                        .AnyAsync(m => m.CompanyId == article.CompanyId.Value && m.UserId == currentUser.Id.Value, cancellationToken);
+                }
+            }
+
+            if (!isAuthor && !isAdmin && !isCompanyAuthorized)
             {
                 throw NotFoundException.WithErrorCode("Không tìm thấy bài viết yêu cầu.", ErrorCodes.ArticleNotFound);
             }
@@ -98,15 +115,15 @@ public sealed class GetArticleBySlugQueryHandler(
             article.CreatedAt,
             article.UpdatedAt);
 
-        // 4. Lưu Cache nếu bài viết đã Published
+        // 4. Lưu Cache và ghi nhận tương tác nếu bài viết đã Published
         if (article.Status == ArticleStatus.Published)
         {
             await cacheService.SetAsync(ArticleCacheKeys.ArticleSlug(article.Slug.ToLowerInvariant()), detailDto, CacheTtl, cancellationToken);
             await cacheService.SetAsync(ArticleCacheKeys.ArticleDetail(article.Id), detailDto, CacheTtl, cancellationToken);
-        }
 
-        // 5. Ghi nhận tương tác: view buffer & reading history
-        await RecordInteractionsAsync(article.Id, cancellationToken);
+            // 5. Ghi nhận tương tác: view buffer & reading history
+            await RecordInteractionsAsync(article.Id, cancellationToken);
+        }
 
         return detailDto;
     }

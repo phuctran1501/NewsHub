@@ -10,7 +10,7 @@ using NewsHub.Domain.Constants;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
-public sealed record RemoveCompanyMemberCommand(Guid CompanyId, Guid UserId) : IRequest;
+public sealed record RemoveCompanyMemberCommand(Guid CompanyId, Guid UserId) : IRequest, ITransactionalRequest;
 
 public sealed class RemoveCompanyMemberCommandValidator : AbstractValidator<RemoveCompanyMemberCommand>
 {
@@ -67,6 +67,11 @@ public sealed class RemoveCompanyMemberCommandHandler(
             throw NotFoundException.WithErrorCode("Thành viên không thuộc tòa soạn này.", ErrorCodes.NotCompanyMember);
         }
 
+        if (member.Role == CompanyMemberRole.Owner)
+        {
+            throw new BadRequestException("Không thể xóa chủ sở hữu khỏi tòa soạn.", ErrorCodes.CannotRemoveOwner);
+        }
+
         dbContext.CompanyMembers.Remove(member);
 
         // Tự động giải phóng các bài viết nháp (Draft) và chờ duyệt (PendingCompanyReview) của thành viên bị xóa về cá nhân
@@ -84,14 +89,21 @@ public sealed class RemoveCompanyMemberCommandHandler(
             currentUserId, request.UserId, request.CompanyId);
 
         // Bắn SignalR thông báo tới thành viên bị xóa
-        var companyName = member.Company?.Name ?? "Tòa soạn";
-        var notification = new NotificationDto(
-            Guid.CreateVersion7(),
-            NotificationType.CompanyMembershipChanged,
-            "Đã rời khỏi Tòa soạn",
-            $"Bạn đã được đưa ra khỏi danh sách nhân sự của {companyName}. Các bài viết nháp và chờ duyệt của bạn đã được chuyển về trang cá nhân.",
-            request.CompanyId
-        );
-        await notificationService.SendToUserAsync(request.UserId, notification, cancellationToken);
+        try
+        {
+            var companyName = member.Company?.Name ?? "Tòa soạn";
+            var notification = new NotificationDto(
+                Guid.CreateVersion7(),
+                NotificationType.CompanyMembershipChanged,
+                "Đã rời khỏi Tòa soạn",
+                $"Bạn đã được đưa ra khỏi danh sách nhân sự của {companyName}. Các bài viết nháp và chờ duyệt của bạn đã được chuyển về trang cá nhân.",
+                request.CompanyId
+            );
+            await notificationService.SendToUserAsync(request.UserId, notification, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Không thể gửi SignalR notification tới người dùng {UserId} sau khi xóa khỏi công ty.", request.UserId);
+        }
     }
 }

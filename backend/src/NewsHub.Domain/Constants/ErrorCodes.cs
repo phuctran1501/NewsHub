@@ -65,6 +65,7 @@ public static class ErrorCodes
     public const string CannotLeaveAsOwner = "CANNOT_LEAVE_AS_OWNER";
     public const string CannotDissolveWithMembers = "CANNOT_DISSOLVE_COMPANY_WITH_MEMBERS";
     public const string CannotRemoveSelf = "CANNOT_REMOVE_SELF";
+    public const string CannotRemoveOwner = "CANNOT_REMOVE_OWNER";
     public const string InvitationAlreadyPending = "INVITATION_ALREADY_PENDING";
     public const string JoinRequestAlreadyPending = "JOIN_REQUEST_ALREADY_PENDING";
     public const string InvalidRequestStatus = "INVALID_REQUEST_STATUS";

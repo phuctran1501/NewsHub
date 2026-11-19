@@ -48,6 +48,11 @@ public class CompanyRequestConfiguration : IEntityTypeConfiguration<CompanyReque
         builder.HasIndex(r => new { r.CompanyId, r.Status });
         builder.HasIndex(r => new { r.JournalistId, r.Status });
 
+        // Filtered unique index: Ngăn chặn tuyệt đối việc tạo nhiều đơn trùng lặp cùng loại đang chờ xử lý giữa công ty và nhà báo
+        builder.HasIndex(r => new { r.CompanyId, r.JournalistId, r.Type })
+            .HasFilter("status = 'Pending'")
+            .IsUnique();
+
         // Relationships
         builder.HasOne(r => r.Company)
             .WithMany(c => c.Requests)

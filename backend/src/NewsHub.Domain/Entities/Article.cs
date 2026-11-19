@@ -23,6 +23,7 @@ public class Article : IHasCreatedAt, IHasUpdatedAt
     public DateTimeOffset? PublishedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; }
+    public uint Version { get; set; }
 
     // Navigation properties
     public User? Author { get; set; }
