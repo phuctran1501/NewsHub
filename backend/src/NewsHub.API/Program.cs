@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using NewsHub.API;
 using NewsHub.API.Extensions;
 using NewsHub.API.Middleware;
@@ -44,6 +45,12 @@ builder.Services.AddAppRateLimiter();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Forwarded Headers cho môi trường Reverse Proxy Cloud (Render / Cloudflare)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 // Middleware Pipeline (thứ tự quan trọng)
 // Exception handler đứng đầu để bắt lỗi toàn bộ pipeline bên dưới
