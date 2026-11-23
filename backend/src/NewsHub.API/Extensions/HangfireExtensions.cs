@@ -66,12 +66,16 @@ public static class HangfireExtensions
 
     public static WebApplication UseHangfireRecurringJobs(this WebApplication app)
     {
-        using var scope = app.Services.CreateScope();
-        var backgroundJobService = scope.ServiceProvider.GetService<IBackgroundJobService>();
-        backgroundJobService?.AddOrUpdateRecurringJob<SyncArticleViewsJob>(
-            "sync-article-views",
-            job => job.ExecuteAsync(CancellationToken.None),
-            "*/5 * * * *");
+        // Đăng ký jobs sau khi Kestrel đã khởi động hoàn tất (non-blocking server bootstrap)
+        app.Lifetime.ApplicationStarted.Register(() =>
+        {
+            using var scope = app.Services.CreateScope();
+            var backgroundJobService = scope.ServiceProvider.GetService<IBackgroundJobService>();
+            backgroundJobService?.AddOrUpdateRecurringJob<SyncArticleViewsJob>(
+                "sync-article-views",
+                job => job.ExecuteAsync(CancellationToken.None),
+                "*/5 * * * *");
+        });
 
         return app;
     }

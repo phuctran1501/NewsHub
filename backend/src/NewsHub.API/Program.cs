@@ -7,9 +7,20 @@ using NewsHub.Application.Common.Interfaces;
 using NewsHub.Infrastructure;
 
 // Tự động load file .env nếu có ở thư mục gốc hoặc backend (Local Dev)
-DotEnvLoader.Load();
+var aspnetEnv = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+if (string.IsNullOrEmpty(aspnetEnv) || string.Equals(aspnetEnv, "Development", StringComparison.OrdinalIgnoreCase))
+{
+    DotEnvLoader.Load();
+}
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Dynamic PORT binding cho Cloud Hosts (Render cấp động qua biến môi trường PORT)
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://*:{port}");
+}
 
 // Exception Handling
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
@@ -38,7 +49,10 @@ var app = builder.Build();
 // Exception handler đứng đầu để bắt lỗi toàn bộ pipeline bên dưới
 app.UseExceptionHandler();
 
-if (app.Environment.IsDevelopment()){app.MapOpenApi();}
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("EnableOpenApi"))
+{
+    app.MapOpenApi();
+}
 
 if (!string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase))
 {

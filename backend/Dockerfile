@@ -41,8 +41,8 @@ ENV DOTNET_GCHeapHardLimit=0x16000000
 # 3. Môi trường Production
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# 4. Bind HTTP trên cổng do Render cấp động qua biến $PORT (mặc định 5000 nếu chạy local)
-ENV ASPNETCORE_URLS=http://+:${PORT:-5000}
+# 4. Bind HTTP trên cổng mặc định 5000 (sẽ được ghi đè tự động bởi $PORT trên Render)
+ENV ASPNETCORE_URLS=http://+:5000
 
 # 5. Sử dụng tài khoản phi đặc quyền 'app' có sẵn trong base image .NET
 USER app

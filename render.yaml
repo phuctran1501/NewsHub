@@ -15,6 +15,8 @@ services:
         value: "0"
       - key: DOTNET_GCHeapHardLimit
         value: "0x16000000"
+      - key: EnableOpenApi
+        value: "true"
       - key: ConnectionStrings__DefaultConnection
         sync: false
       - key: ConnectionStrings__HangfireConnection
