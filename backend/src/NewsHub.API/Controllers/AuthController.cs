@@ -17,7 +17,8 @@ using NewsHub.Application.Features.Auth.Commands.RegisterJournalist;
 public class AuthController(
     ISender mediator,
     ICorrelationIdProvider correlationIdProvider,
-    IJwtTokenGenerator jwtTokenGenerator) : ControllerBase
+    IJwtTokenGenerator jwtTokenGenerator,
+    IWebHostEnvironment environment) : ControllerBase
 {
     private const string RefreshTokenCookieName = "refreshToken";
     private const string AuthCookiePath = "/api/v1/auth";
@@ -99,28 +100,36 @@ public class AuthController(
         return Ok(ApiResponseFactory.Success(new { message = "Đăng xuất thành công." }, correlationId));
     }
 
-    private void SetRefreshTokenCookie(string refreshToken)
+    private CookieOptions CreateRefreshTokenCookieOptions(DateTimeOffset? expires = null)
     {
-        var cookieOptions = new CookieOptions
+        var isDevelopment = environment.IsDevelopment();
+        var isSecure = Request.IsHttps || !isDevelopment ||
+                       string.Equals(Request.Headers["X-Forwarded-Proto"], "https", StringComparison.OrdinalIgnoreCase);
+
+        return new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddDays(jwtTokenGenerator.RefreshTokenExpirationDays),
+            Secure = isSecure,
+            // Cross-Site (Vercel <-> Render) bắt buộc SameSite=None + Secure=true để trình duyệt gửi cookie.
+            // Local Development trên plain HTTP dùng SameSite=Lax để trình duyệt không chặn.
+            SameSite = isSecure && !isDevelopment ? SameSiteMode.None : SameSiteMode.Lax,
+            Expires = expires,
             Path = AuthCookiePath
         };
+    }
+
+    private void SetRefreshTokenCookie(string refreshToken)
+    {
+        var cookieOptions = CreateRefreshTokenCookieOptions(
+            DateTimeOffset.UtcNow.AddDays(jwtTokenGenerator.RefreshTokenExpirationDays));
 
         Response.Cookies.Append(RefreshTokenCookieName, refreshToken, cookieOptions);
     }
 
     private void DeleteRefreshTokenCookie()
     {
-        Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
-        {
-            Path = AuthCookiePath,
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax
-        });
+        var cookieOptions = CreateRefreshTokenCookieOptions();
+
+        Response.Cookies.Delete(RefreshTokenCookieName, cookieOptions);
     }
 }
