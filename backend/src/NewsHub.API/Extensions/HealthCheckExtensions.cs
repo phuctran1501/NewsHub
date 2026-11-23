@@ -13,10 +13,13 @@ public static class HealthCheckExtensions
 {
     public static IServiceCollection AddAppHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
+        var rawConnection = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+        var connectionString = rawConnection.Trim().Trim('"', '\'');
+
         services.AddHealthChecks()
             .AddNpgSql(
-                connectionString: configuration.GetConnectionString("DefaultConnection")
-                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured."),
+                connectionString: connectionString,
                 name: "postgresql",
                 failureStatus: HealthStatus.Unhealthy,
                 tags: ["ready", "db", "postgresql"])
