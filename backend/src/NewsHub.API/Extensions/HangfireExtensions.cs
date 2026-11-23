@@ -12,8 +12,14 @@ public static class HangfireExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+        // Ưu tiên chuỗi kết nối riêng cho Hangfire (Direct Port 5432 Session Mode trên Supabase)
+        // Nếu không có, fallback sang DefaultConnection (tương thích 100% Local Development)
+        var rawConnection = configuration.GetConnectionString("HangfireConnection")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Neither 'HangfireConnection' nor 'DefaultConnection' was found.");
+
+        // Defensive trim: loại bỏ khoảng trắng và dấu nháy kép/đơn thừa nếu môi trường (Docker --env-file) giữ nguyên
+        var connectionString = rawConnection.Trim().Trim('"', '\'');
 
         services.AddHangfire(cfg =>
         {

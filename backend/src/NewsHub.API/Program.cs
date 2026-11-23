@@ -40,7 +40,10 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment()){app.MapOpenApi();}
 
-app.UseHttpsRedirection();
+if (!string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
 
 // CORS đứng trước Auth và Endpoint mapping để phản hồi sớm preflight OPTIONS
 app.UseCorsPolicy();

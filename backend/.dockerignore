@@ -1,0 +1,15 @@
+**/.git
+**/.github
+**/.vs
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+**/dist
+**/*.user
+**/*.suo
+**/*.log
