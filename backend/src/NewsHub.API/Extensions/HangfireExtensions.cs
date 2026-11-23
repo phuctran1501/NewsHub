@@ -12,8 +12,14 @@ public static class HangfireExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+        // Ưu tiên chuỗi kết nối riêng cho Hangfire (Direct Port 5432 Session Mode trên Supabase)
+        // Nếu không có, fallback sang DefaultConnection (tương thích 100% Local Development)
+        var rawConnection = configuration.GetConnectionString("HangfireConnection")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Neither 'HangfireConnection' nor 'DefaultConnection' was found.");
+
+        // Defensive trim: loại bỏ khoảng trắng và dấu nháy kép/đơn thừa nếu môi trường (Docker --env-file) giữ nguyên
+        var connectionString = rawConnection.Trim().Trim('"', '\'');
 
         services.AddHangfire(cfg =>
         {
@@ -60,12 +66,16 @@ public static class HangfireExtensions
 
     public static WebApplication UseHangfireRecurringJobs(this WebApplication app)
     {
-        using var scope = app.Services.CreateScope();
-        var backgroundJobService = scope.ServiceProvider.GetService<IBackgroundJobService>();
-        backgroundJobService?.AddOrUpdateRecurringJob<SyncArticleViewsJob>(
-            "sync-article-views",
-            job => job.ExecuteAsync(CancellationToken.None),
-            "*/5 * * * *");
+        // Đăng ký jobs sau khi Kestrel đã khởi động hoàn tất (non-blocking server bootstrap)
+        app.Lifetime.ApplicationStarted.Register(() =>
+        {
+            using var scope = app.Services.CreateScope();
+            var backgroundJobService = scope.ServiceProvider.GetService<IBackgroundJobService>();
+            backgroundJobService?.AddOrUpdateRecurringJob<SyncArticleViewsJob>(
+                "sync-article-views",
+                job => job.ExecuteAsync(CancellationToken.None),
+                "*/5 * * * *");
+        });
 
         return app;
     }

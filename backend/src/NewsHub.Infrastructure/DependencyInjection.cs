@@ -18,8 +18,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
+        var rawConnection = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+        var connectionString = rawConnection.Trim().Trim('"', '\'');
 
         services.AddDbContext<NewsHubDbContext>(options =>
         {

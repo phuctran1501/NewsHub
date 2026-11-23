@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: newshub-api-staging
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore
+    healthCheckPath: /health/live
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DOTNET_gcServer
+        value: "0"
+      - key: DOTNET_GCHeapHardLimit
+        value: "0x16000000"
+      - key: EnableOpenApi
+        value: "true"
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: ConnectionStrings__HangfireConnection
+        sync: false
+      - key: Jwt__SecretKey
+        sync: false
+      - key: Jwt__Issuer
+        value: NewsHubAPI
+      - key: Jwt__Audience
+        value: NewsHubClients
+      - key: Jwt__AccessTokenExpirationMinutes
+        value: "15"
+      - key: Jwt__RefreshTokenExpirationDays
+        value: "7"
+      - key: Cloudinary__CloudName
+        sync: false
+      - key: Cloudinary__ApiKey
+        sync: false
+      - key: Cloudinary__ApiSecret
+        sync: false
+      - key: Redis__ConnectionString
+        sync: false
+      - key: Redis__InstanceName
+        value: "NewsHub:"
+      - key: Gemini__ApiKey
+        sync: false
+      - key: Gemini__ModelName
+        value: "gemini-1.5-flash"
+      - key: Gemini__EmbeddingModel
+        value: "text-embedding-004"
+      - key: Hangfire__DashboardPath
+        value: "/hangfire"
+      - key: Hangfire__DashboardUsername
+        value: "admin"
+      - key: Hangfire__DashboardPassword
+        sync: false
+      - key: Cors__AllowedOrigins__0
+        value: "https://newshub.vercel.app"
