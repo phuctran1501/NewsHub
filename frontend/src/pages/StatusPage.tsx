@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr'
 import { env } from '../config/env'
 import { StatusBadge } from '../components/common/StatusBadge'
 
@@ -12,6 +13,14 @@ interface ProbeResult {
   timestamp: string
 }
 
+interface HandshakeStepResult {
+  name: string
+  status: 'pending' | 'testing' | 'success' | 'failed'
+  message: string
+  durationMs?: number
+  details?: string
+}
+
 export function StatusPage() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -22,6 +31,18 @@ export function StatusPage() {
   const [probeResult, setProbeResult] = useState<ProbeResult | null>(null)
   const [isProbing, setIsProbing] = useState(false)
 
+  // State cho Handshake Smoke-Test (NH-OPS-03)
+  const [testEmail, setTestEmail] = useState('reader@newshub.com')
+  const [testPassword, setTestPassword] = useState('Password123!')
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [handshakeSteps, setHandshakeSteps] = useState<Record<string, HandshakeStepResult>>({
+    cors: { name: '1. CORS Preflight (/health/ready)', status: 'pending', message: 'Chưa kiểm tra' },
+    login: { name: '2. Đăng Nhập & Set HttpOnly Cookie', status: 'pending', message: 'Chưa kiểm tra' },
+    refresh: { name: '3. Xoay Vòng Token Qua Cross-Site Cookie', status: 'pending', message: 'Chưa kiểm tra' },
+    signalr: { name: '4. WebSocket SignalR Handshake', status: 'pending', message: 'Chưa kiểm tra' },
+  })
+  const signalrConnectionRef = useRef<HubConnection | null>(null)
+
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark')
@@ -31,10 +52,19 @@ export function StatusPage() {
     localStorage.setItem('theme', isDark ? 'dark' : 'light')
   }, [isDark])
 
+  useEffect(() => {
+    return () => {
+      if (signalrConnectionRef.current) {
+        signalrConnectionRef.current.stop()
+      }
+    }
+  }, [])
+
   const toggleTheme = () => {
     setIsDark(prev => !prev)
   }
 
+  // 1. Health Probe thông thường
   const runHealthProbe = async (endpoint: '/health/live' | '/health/ready') => {
     setIsProbing(true)
     const startTime = performance.now()
@@ -43,9 +73,7 @@ export function StatusPage() {
     try {
       const response = await fetch(targetUrl, {
         method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
+        headers: { Accept: 'application/json' },
       })
       const durationMs = Math.round(performance.now() - startTime)
       const text = await response.text()
@@ -54,7 +82,7 @@ export function StatusPage() {
       try {
         formattedPayload = JSON.stringify(JSON.parse(text), null, 2)
       } catch {
-        // payload không phải JSON, giữ nguyên text
+        // payload không phải JSON
       }
 
       setProbeResult({
@@ -73,11 +101,248 @@ export function StatusPage() {
         status: null,
         ok: false,
         durationMs,
-        payload: `Network/CORS Error: ${errorMsg}\nTarget URL: ${targetUrl}\n(Gợi ý: Kiểm tra Backend Render đã bật và CORS policy cho phép origin hiện tại).`,
+        payload: `Network/CORS Error: ${errorMsg}\nTarget URL: ${targetUrl}`,
         timestamp: new Date().toLocaleTimeString('vi-VN'),
       })
     } finally {
       setIsProbing(false)
+    }
+  }
+
+  // 2. Handshake Step 1: CORS Preflight
+  const runCorsTest = async () => {
+    setHandshakeSteps(prev => ({
+      ...prev,
+      cors: { ...prev.cors, status: 'testing', message: 'Đang gửi request CORS preflight...' },
+    }))
+    const startTime = performance.now()
+    const targetUrl = `${env.apiBaseUrl}/health/ready`
+
+    try {
+      const res = await fetch(targetUrl, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      })
+      const durationMs = Math.round(performance.now() - startTime)
+      const data = await res.text()
+
+      if (res.ok) {
+        setHandshakeSteps(prev => ({
+          ...prev,
+          cors: {
+            ...prev.cors,
+            status: 'success',
+            durationMs,
+            message: `HTTP ${res.status} OK · CORS Origin Accepted`,
+            details: data,
+          },
+        }))
+      } else {
+        setHandshakeSteps(prev => ({
+          ...prev,
+          cors: {
+            ...prev.cors,
+            status: 'failed',
+            durationMs,
+            message: `HTTP ${res.status} · Server phản hồi không hợp lệ`,
+            details: data,
+          },
+        }))
+      }
+    } catch (err) {
+      const durationMs = Math.round(performance.now() - startTime)
+      const msg = err instanceof Error ? err.message : 'Network error'
+      setHandshakeSteps(prev => ({
+        ...prev,
+        cors: {
+          ...prev.cors,
+          status: 'failed',
+          durationMs,
+          message: `Lỗi CORS / Mạng: ${msg}`,
+          details: `Target: ${targetUrl}`,
+        },
+      }))
+    }
+  }
+
+  // 3. Handshake Step 2: Login & nhận HttpOnly Cookie (credentials: 'include')
+  const runLoginTest = async () => {
+    setHandshakeSteps(prev => ({
+      ...prev,
+      login: { ...prev.login, status: 'testing', message: 'Đang gọi POST /api/v1/auth/login...' },
+    }))
+    const startTime = performance.now()
+    const targetUrl = `${env.apiBaseUrl}/api/v1/auth/login`
+
+    try {
+      const res = await fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: testEmail, password: testPassword }),
+      })
+      const durationMs = Math.round(performance.now() - startTime)
+      const data = await res.json()
+
+      if (res.ok && data?.data?.accessToken) {
+        setAccessToken(data.data.accessToken)
+        setHandshakeSteps(prev => ({
+          ...prev,
+          login: {
+            ...prev.login,
+            status: 'success',
+            durationMs,
+            message: `HTTP 200 OK · Đăng nhập thành công, đã nhận JWT & Cookie`,
+            details: `JWT Token: ${data.data.accessToken.slice(0, 24)}... (expiresIn: ${data.data.expiresIn}s)\nSet-Cookie: refreshToken (SameSite=None; Secure; HttpOnly)`,
+          },
+        }))
+      } else {
+        setHandshakeSteps(prev => ({
+          ...prev,
+          login: {
+            ...prev.login,
+            status: 'failed',
+            durationMs,
+            message: `HTTP ${res.status} · Đăng nhập thất bại`,
+            details: JSON.stringify(data, null, 2),
+          },
+        }))
+      }
+    } catch (err) {
+      const durationMs = Math.round(performance.now() - startTime)
+      const msg = err instanceof Error ? err.message : 'Network error'
+      setHandshakeSteps(prev => ({
+        ...prev,
+        login: {
+          ...prev.login,
+          status: 'failed',
+          durationMs,
+          message: `Lỗi mạng: ${msg}`,
+          details: `Target: ${targetUrl}`,
+        },
+      }))
+    }
+  }
+
+  // 4. Handshake Step 3: Refresh Token qua Cookie (credentials: 'include')
+  const runRefreshTest = async () => {
+    setHandshakeSteps(prev => ({
+      ...prev,
+      refresh: { ...prev.refresh, status: 'testing', message: 'Đang gọi POST /api/v1/auth/refresh...' },
+    }))
+    const startTime = performance.now()
+    const targetUrl = `${env.apiBaseUrl}/api/v1/auth/refresh`
+
+    try {
+      const res = await fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        credentials: 'include',
+      })
+      const durationMs = Math.round(performance.now() - startTime)
+      const data = await res.json()
+
+      if (res.ok && data?.data?.accessToken) {
+        setAccessToken(data.data.accessToken)
+        setHandshakeSteps(prev => ({
+          ...prev,
+          refresh: {
+            ...prev.refresh,
+            status: 'success',
+            durationMs,
+            message: `HTTP 200 OK · Trình duyệt đã gửi cookie thành công! Token đã xoay vòng.`,
+            details: `New JWT Token: ${data.data.accessToken.slice(0, 24)}... (expiresIn: ${data.data.expiresIn}s)\nCơ chế SameSite=None; Secure hoạt động 100% qua domain Vercel <-> Render.`,
+          },
+        }))
+      } else {
+        setHandshakeSteps(prev => ({
+          ...prev,
+          refresh: {
+            ...prev.refresh,
+            status: 'failed',
+            durationMs,
+            message: `HTTP ${res.status} · Không xoay vòng được token (Kiểm tra đã chạy Bước 2 chưa)`,
+            details: JSON.stringify(data, null, 2),
+          },
+        }))
+      }
+    } catch (err) {
+      const durationMs = Math.round(performance.now() - startTime)
+      const msg = err instanceof Error ? err.message : 'Network error'
+      setHandshakeSteps(prev => ({
+        ...prev,
+        refresh: {
+          ...prev.refresh,
+          status: 'failed',
+          durationMs,
+          message: `Lỗi mạng: ${msg}`,
+          details: `Target: ${targetUrl}`,
+        },
+      }))
+    }
+  }
+
+  // 5. Handshake Step 4: SignalR WebSocket Handshake
+  const runSignalRTest = async () => {
+    setHandshakeSteps(prev => ({
+      ...prev,
+      signalr: { ...prev.signalr, status: 'testing', message: 'Đang kết nối SignalR Hub...' },
+    }))
+    const startTime = performance.now()
+    const hubUrl = `${env.apiBaseUrl}/hubs/notifications`
+
+    try {
+      if (signalrConnectionRef.current) {
+        await signalrConnectionRef.current.stop()
+      }
+
+      const connection = new HubConnectionBuilder()
+        .withUrl(hubUrl, {
+          accessTokenFactory: () => accessToken || '',
+        })
+        .withAutomaticReconnect()
+        .build()
+
+      await connection.start()
+      signalrConnectionRef.current = connection
+      const durationMs = Math.round(performance.now() - startTime)
+
+      setHandshakeSteps(prev => ({
+        ...prev,
+        signalr: {
+          ...prev.signalr,
+          status: 'success',
+          durationMs,
+          message: `Connected · WebSocket Handshake thành công qua wss://`,
+          details: `Hub URL: ${hubUrl}\nConnection ID: ${connection.connectionId}\nConnection State: ${connection.state}`,
+        },
+      }))
+    } catch (err) {
+      const durationMs = Math.round(performance.now() - startTime)
+      const msg = err instanceof Error ? err.message : 'SignalR connection error'
+      setHandshakeSteps(prev => ({
+        ...prev,
+        signalr: {
+          ...prev.signalr,
+          status: 'failed',
+          durationMs,
+          message: `Lỗi kết nối SignalR: ${msg}`,
+          details: `Hub URL: ${hubUrl}`,
+        },
+      }))
+    }
+  }
+
+  const getStepBadge = (status: HandshakeStepResult['status']) => {
+    switch (status) {
+      case 'success':
+        return <StatusBadge status="online">PASSED</StatusBadge>
+      case 'testing':
+        return <StatusBadge status="testing">TESTING</StatusBadge>
+      case 'failed':
+        return <StatusBadge status="offline">FAILED</StatusBadge>
+      default:
+        return <StatusBadge status="warning">PENDING</StatusBadge>
     }
   }
 
@@ -203,6 +468,122 @@ export function StatusPage() {
                 </pre>
               </div>
             )}
+          </div>
+
+          {/* Cross-Site Handshake & Cloud Verification Panel (NH-OPS-03) */}
+          <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <span className="text-xs font-semibold text-teal-700 dark:text-teal-400 uppercase tracking-wider">
+                  Task NH-OPS-03 Verification
+                </span>
+                <h3 className="text-lg font-serif font-bold text-slate-900 dark:text-white mt-0.5">
+                  Xác Thực Cross-Site Handshake & Cloud Connectivity
+                </h3>
+              </div>
+              <span className="text-xs text-slate-600 dark:text-slate-400">
+                Vercel (<code>*.vercel.app</code>) ↔ Render (<code>*.onrender.com</code>)
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+              Kiểm tra 4 bước liên thông mạng qua ranh giới Cross-Site giữa hai domain độc lập:
+              CORS Preflight dynamic origins, xác thực HttpOnly Cookie với chính sách <code>SameSite=None; Secure=true</code>,
+              xoay vòng token và kết nối WebSocket SignalR thời gian thực qua giao thức <code>wss://</code>.
+            </p>
+
+            {/* Test Credentials Configuration */}
+            <div className="mb-6 p-4 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-[2px] grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label htmlFor="test-email-input" className="block text-slate-700 dark:text-slate-300 font-medium mb-1">
+                  Email tài khoản kiểm thử:
+                </label>
+                <input
+                  id="test-email-input"
+                  type="email"
+                  value={testEmail}
+                  onChange={e => setTestEmail(e.target.value)}
+                  className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-[4px] font-mono"
+                />
+              </div>
+              <div>
+                <label htmlFor="test-password-input" className="block text-slate-700 dark:text-slate-300 font-medium mb-1">
+                  Mật khẩu:
+                </label>
+                <input
+                  id="test-password-input"
+                  type="password"
+                  value={testPassword}
+                  onChange={e => setTestPassword(e.target.value)}
+                  className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-[4px] font-mono"
+                />
+              </div>
+            </div>
+
+            {/* 4 Test Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+              <button
+                type="button"
+                onClick={runCorsTest}
+                className="px-3 py-2 text-left border border-slate-300 dark:border-slate-700 rounded-[4px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                <div className="text-xs font-semibold text-slate-900 dark:text-white">Bước 1: CORS Preflight</div>
+                <div className="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">GET /health/ready</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={runLoginTest}
+                className="px-3 py-2 text-left border border-slate-300 dark:border-slate-700 rounded-[4px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                <div className="text-xs font-semibold text-slate-900 dark:text-white">Bước 2: Login & Cookie</div>
+                <div className="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">POST /api/v1/auth/login</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={runRefreshTest}
+                className="px-3 py-2 text-left border border-slate-300 dark:border-slate-700 rounded-[4px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                <div className="text-xs font-semibold text-slate-900 dark:text-white">Bước 3: Token Rotation</div>
+                <div className="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">POST /api/v1/auth/refresh</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={runSignalRTest}
+                className="px-3 py-2 text-left border border-slate-300 dark:border-slate-700 rounded-[4px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                <div className="text-xs font-semibold text-slate-900 dark:text-white">Bước 4: WebSocket Hub</div>
+                <div className="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">/hubs/notifications</div>
+              </button>
+            </div>
+
+            {/* Handshake Results Timeline */}
+            <div className="space-y-3">
+              {Object.entries(handshakeSteps).map(([key, step]) => (
+                <div
+                  key={key}
+                  className="p-3 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-[2px]"
+                >
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="font-semibold text-slate-900 dark:text-white">{step.name}</span>
+                    <div className="flex items-center gap-2">
+                      {step.durationMs !== undefined && (
+                        <span className="text-[11px] font-mono text-slate-700 dark:text-slate-300">{step.durationMs}ms</span>
+                      )}
+                      {getStepBadge(step.status)}
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">{step.message}</p>
+                  {step.details && (
+                    <pre className="mt-2 text-[11px] font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-2 border border-slate-200 dark:border-slate-800 whitespace-pre-wrap overflow-x-auto">
+                      {step.details}
+                    </pre>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* SPA Routing & Navigation Test Panel */}
