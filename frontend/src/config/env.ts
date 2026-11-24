@@ -3,7 +3,7 @@
  */
 const rawApiBaseUrl =
   import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? 'http://localhost:5000' : 'https://newshub-api-staging.onrender.com')
+  (import.meta.env.DEV ? 'http://localhost:5141' : 'https://newshub-api-staging.onrender.com')
 
 export const env = {
   // Defensive normalize: loại bỏ khoảng trắng và dấu gạch chéo cuối nếu người dùng nhập dư

@@ -51,15 +51,24 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-text-main dark:text-dark-text-main">
-          Tạo tài khoản
+    <div className="space-y-6">
+      <motion.div
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+        className="space-y-3 text-center"
+      >
+        <h1 className="text-[32px] sm:text-[40px] font-extrabold leading-[1.12] tracking-[-0.03em] text-neutral-text-main dark:text-dark-text-main">
+          Tạo <span className="text-primary dark:text-secondary">tài khoản mới</span>
         </h1>
-        <p className="mx-auto max-w-sm text-sm leading-relaxed text-neutral-text-muted dark:text-dark-text-muted">
+        <div
+          aria-hidden="true"
+          className="mx-auto h-1 w-12 rounded-full bg-primary dark:bg-secondary"
+        />
+        <p className="mx-auto max-w-sm text-sm sm:text-[15px] leading-relaxed text-neutral-text-muted dark:text-dark-text-muted">
           Chọn vai trò để tham gia cộng đồng độc giả hoặc bắt đầu tác nghiệp báo chí.
         </p>
-      </div>
+      </motion.div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList
