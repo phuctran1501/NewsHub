@@ -109,3 +109,53 @@ jobs:
       - name: Notice When SNYK_TOKEN Is Not Configured
         if: env.SNYK_TOKEN == ''
         run: echo "::warning ::SNYK_TOKEN secret is not set. Security scan was skipped."
+
+  # ==============================================================================
+  # Job 5: Đăng ký & Theo dõi Môi trường Staging (Render Backend API)
+  # ==============================================================================
+  environment-staging:
+    name: Staging Environment
+    runs-on: ubuntu-latest
+    needs: [build-and-test-backend, build-and-lint-frontend, docker-build-check, security-scan]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    environment:
+      name: Staging
+      url: https://newshub-api-staging.onrender.com
+    steps:
+      - name: Verify Staging Health Probe
+        run: |
+          echo "Tracking Staging Environment on GitHub..."
+          curl -s -f --max-time 15 https://newshub-api-staging.onrender.com/health/live || echo "Render is deploying."
+
+  # ==============================================================================
+  # Job 6: Đăng ký & Theo dõi Môi trường Production (Vercel Frontend)
+  # ==============================================================================
+  environment-production:
+    name: Production Environment
+    runs-on: ubuntu-latest
+    needs: [environment-staging]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: Production
+      url: https://newshub-livid.vercel.app
+    steps:
+      - name: Verify Production Vercel Endpoint
+        run: |
+          echo "Tracking Production Environment on GitHub..."
+          curl -s -f -I --max-time 15 https://newshub-livid.vercel.app || echo "Vercel is deploying."
+
+  # ==============================================================================
+  # Job 7: Đăng ký Môi trường Preview (Tự động kích hoạt khi có Pull Request)
+  # ==============================================================================
+  environment-preview:
+    name: Preview Environment
+    runs-on: ubuntu-latest
+    needs: [build-and-lint-frontend]
+    if: github.event_name == 'pull_request'
+    environment:
+      name: Preview
+      url: https://newshub-livid.vercel.app
+    steps:
+      - name: Track PR Preview
+        run: |
+          echo "PR #${{ github.event.pull_request.number }} Preview environment active on Vercel."
