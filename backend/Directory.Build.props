@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Kích hoạt tạo và kiểm tra gói NuGet qua packages.lock.json để phục vụ caching CI/CD và Reproducible Builds -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>
