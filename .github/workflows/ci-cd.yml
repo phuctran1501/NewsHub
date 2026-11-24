@@ -157,4 +157,5 @@ jobs:
       url: https://newshub-livid.vercel.app
     steps:
       - name: Track PR Preview
-        run: echo "PR #${{ github.event.pull_request.number }} Preview environment active on Vercel."
+        run: |
+          echo "PR #${{ github.event.pull_request.number }} Preview environment active on Vercel."
