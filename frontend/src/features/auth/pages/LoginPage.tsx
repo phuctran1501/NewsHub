@@ -4,7 +4,9 @@ import { ROUTES } from '@/routes/paths'
 import { getSafeRedirectPath } from '@/utils/validation'
 import { LoginForm } from '../components/LoginForm'
 
-interface LocationRedirectState {
+interface LoginLocationState {
+  registered?: boolean
+  prefilledEmail?: string
   from?: {
     pathname?: string
     search?: string
@@ -17,11 +19,12 @@ export function LoginPage() {
   const [searchParams] = useSearchParams()
   const prefersReducedMotion = useReducedMotion()
 
-  const registered = searchParams.get('registered') === '1'
-  const prefilledEmail = searchParams.get('email') ?? ''
+  const navState = location.state as LoginLocationState | null
+  const registered = Boolean(navState?.registered || searchParams.get('registered') === '1')
+  const prefilledEmail = navState?.prefilledEmail ?? ''
   const rawRedirect = searchParams.get('redirect')
 
-  const stateFrom = (location.state as LocationRedirectState | null)?.from
+  const stateFrom = navState?.from
   const fallbackFromState = stateFrom?.pathname
     ? `${stateFrom.pathname}${stateFrom.search ?? ''}`
     : ROUTES.HOME

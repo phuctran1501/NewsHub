@@ -9,15 +9,7 @@ export const MAX_AVATAR_FILE_BYTES = 5 * 1024 * 1024
 export const BIO_MAX_LENGTH = 500
 export const PRESS_CARD_MAX_LENGTH = 50
 
-export interface PasswordCriteriaState {
-  minLength: boolean
-  maxLength: boolean
-  hasUppercase: boolean
-  hasLowercase: boolean
-  hasDigit: boolean
-}
-
-export function getPasswordCriteria(password: string): PasswordCriteriaState {
+function getPasswordCriteria(password: string) {
   return {
     minLength: password.length >= 8,
     maxLength: password.length <= 100,
@@ -139,18 +131,27 @@ export function extractFieldErrors(error: AppClientError): Record<string, string
   return mapped
 }
 
+function hasAsciiControlChars(input: string): boolean {
+  for (let i = 0; i < input.length; i++) {
+    if (input.charCodeAt(i) <= 0x1f) return true
+  }
+  return false
+}
+
 /**
  * Ngăn chặn lỗ hổng Open Redirect: chỉ cho phép đường dẫn nội bộ bắt đầu bằng đúng 1 dấu `/`,
- * ký tự thứ hai khác `/` và `\`, và không tự trỏ ngược lại `/auth/*`.
+ * không chứa ký tự điều khiển ASCII, ký tự thứ hai khác `/` và `\`, và không tự trỏ ngược lại `/auth`.
  */
 export function getSafeRedirectPath(raw: string | null | undefined, fallback = '/'): string {
   if (!raw) return fallback
   const trimmed = raw.trim()
-  if (!trimmed.startsWith('/')) return fallback
+  if (!trimmed.startsWith('/') || hasAsciiControlChars(trimmed)) {
+    return fallback
+  }
   if (trimmed.length > 1 && (trimmed[1] === '/' || trimmed[1] === '\\')) {
     return fallback
   }
-  if (trimmed.startsWith('/auth/login') || trimmed.startsWith('/auth/register')) {
+  if (trimmed === '/auth' || trimmed.startsWith('/auth/') || trimmed.startsWith('/auth?')) {
     return fallback
   }
   return trimmed

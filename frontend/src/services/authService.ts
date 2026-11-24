@@ -7,7 +7,6 @@ import type {
   RefreshTokenResponseData,
   RegisterJournalistRequest,
   RegisterReaderRequest,
-  UserProfile,
 } from '@/types/auth'
 import { apiClient, refreshAccessTokenSingleFlight, unwrapData } from './apiClient'
 import { clearAccessToken, setAccessToken } from './tokenStore'
@@ -38,10 +37,6 @@ export const authService = {
 
   async refreshToken(): Promise<RefreshTokenResponseData> {
     return refreshAccessTokenSingleFlight()
-  },
-
-  async getMyProfile(): Promise<UserProfile> {
-    return unwrapData(apiClient.get<ApiResponse<UserProfile>>('/api/v1/account/me'))
   },
 
   async logout(): Promise<void> {

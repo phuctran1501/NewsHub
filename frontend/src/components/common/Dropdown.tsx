@@ -18,19 +18,39 @@ export interface DropdownItem {
 
 interface DropdownProps {
   trigger: ReactNode
+  headerTitle?: string
   headerLabel?: string
   items: DropdownItem[]
   align?: 'start' | 'center' | 'end'
 }
 
-export function Dropdown({ trigger, headerLabel, items, align = 'end' }: DropdownProps) {
+export function Dropdown({
+  trigger,
+  headerTitle,
+  headerLabel,
+  items,
+  align = 'end',
+}: DropdownProps) {
+  const hasHeader = Boolean(headerTitle || headerLabel)
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align={align}>
-        {headerLabel && (
+        {hasHeader && (
           <>
-            <DropdownMenuLabel>{headerLabel}</DropdownMenuLabel>
+            <DropdownMenuLabel className="space-y-0.5">
+              {headerTitle && (
+                <p className="truncate text-xs font-semibold text-neutral-text-main dark:text-dark-text-main">
+                  {headerTitle}
+                </p>
+              )}
+              {headerLabel && (
+                <p className="truncate text-[11px] font-normal text-neutral-text-muted dark:text-dark-text-muted">
+                  {headerLabel}
+                </p>
+              )}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
           </>
         )}

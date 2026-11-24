@@ -65,10 +65,13 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
   const [isSaving, setIsSaving] = useState(false)
 
   const normalizedPhonePreview = normalizeVietnamPhone(phoneNumber)
+  const effectiveTypedPhone = phoneNumber.trim()
+    ? (normalizedPhonePreview ?? phoneNumber.trim())
+    : ''
 
   const isDirty =
     fullName.trim() !== user.fullName ||
-    phoneNumber.trim() !== (user.phoneNumber ?? '') ||
+    effectiveTypedPhone !== (user.phoneNumber ?? '') ||
     bio.trim() !== (user.bio ?? '') ||
     (isJournalist && pressCardNumber.trim() !== (user.pressCardNumber ?? ''))
 
@@ -301,7 +304,6 @@ export function ProfilePage() {
 
   const resolvedRole = resolveUserRoleName(user.role)
   const roleBadge = getRoleBadgeMeta(resolvedRole)
-  const formSyncKey = `${user.id}:${user.updatedAt ?? ''}`
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -373,7 +375,7 @@ export function ProfilePage() {
         <div className="lg:col-span-8 space-y-6">
           <section className="rounded-2xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-6">
             <ProfileDetailsForm
-              key={formSyncKey}
+              key={user.id}
               user={user}
               roleName={resolvedRole}
               onProfileUpdated={updateCurrentUser}

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
@@ -15,11 +15,17 @@ import {
 } from '@/utils/validation'
 import { PasswordInput } from './PasswordInput'
 
-interface RegisterJournalistFormProps {
+export type RegisterRoleOption = 'reader' | 'journalist'
+
+interface RegisterFormProps {
+  role: RegisterRoleOption
   onRegistered: (registeredEmail: string) => void
 }
 
-export function RegisterJournalistForm({ onRegistered }: RegisterJournalistFormProps) {
+export function RegisterForm({ role, onRegistered }: RegisterFormProps) {
+  const prefersReducedMotion = useReducedMotion()
+  const isJournalist = role === 'journalist'
+
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,7 +44,7 @@ export function RegisterJournalistForm({ onRegistered }: RegisterJournalistFormP
     const emailErr = validateEmail(email)
     const passErr = validatePassword(password)
     const phoneErr = validateVietnamPhone(phoneNumber)
-    const cardErr = validatePressCardNumber(pressCardNumber, true)
+    const cardErr = isJournalist ? validatePressCardNumber(pressCardNumber, true) : null
 
     if (nameErr) nextErrors.fullName = nameErr
     if (emailErr) nextErrors.email = emailErr
@@ -58,13 +64,25 @@ export function RegisterJournalistForm({ onRegistered }: RegisterJournalistFormP
 
     try {
       const normalizedEmail = email.trim()
-      await authService.registerJournalist({
-        fullName: fullName.trim(),
-        email: normalizedEmail,
-        password,
-        phoneNumber: phoneNumber.trim() ? phoneNumber.trim() : null,
-        pressCardNumber: pressCardNumber.trim(),
-      })
+      const normalizedPhone = phoneNumber.trim() ? phoneNumber.trim() : null
+
+      if (isJournalist) {
+        await authService.registerJournalist({
+          fullName: fullName.trim(),
+          email: normalizedEmail,
+          password,
+          phoneNumber: normalizedPhone,
+          pressCardNumber: pressCardNumber.trim(),
+        })
+      } else {
+        await authService.registerReader({
+          fullName: fullName.trim(),
+          email: normalizedEmail,
+          password,
+          phoneNumber: normalizedPhone,
+        })
+      }
+
       onRegistered(normalizedEmail)
     } catch (err: unknown) {
       const clientErr = toAppClientError(err)
@@ -162,24 +180,39 @@ export function RegisterJournalistForm({ onRegistered }: RegisterJournalistFormP
         disabled={isSubmitting}
       />
 
-      <Input
-        name="pressCardNumber"
-        label="Số thẻ nhà báo *"
-        placeholder="NB-2026-00123"
-        value={pressCardNumber}
-        onChange={(e) => {
-          setPressCardNumber(e.target.value)
-          if (fieldErrors.pressCardNumber) {
-            setFieldErrors((prev) => ({ ...prev, pressCardNumber: '' }))
-          }
-        }}
-        error={fieldErrors.pressCardNumber}
-        disabled={isSubmitting}
-      />
+      <AnimatePresence initial={false}>
+        {isJournalist && (
+          <motion.div
+            key="press-card-field"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <div className="pt-0.5">
+              <Input
+                name="pressCardNumber"
+                label="Số thẻ nhà báo *"
+                placeholder="NB-2026-00123"
+                value={pressCardNumber}
+                onChange={(e) => {
+                  setPressCardNumber(e.target.value)
+                  if (fieldErrors.pressCardNumber) {
+                    setFieldErrors((prev) => ({ ...prev, pressCardNumber: '' }))
+                  }
+                }}
+                error={fieldErrors.pressCardNumber}
+                disabled={isSubmitting}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="pt-1">
         <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isSubmitting}>
-          Tạo tài khoản Nhà báo
+          {isJournalist ? 'Tạo tài khoản Nhà báo' : 'Tạo tài khoản Độc giả'}
         </Button>
       </div>
     </form>

@@ -4,6 +4,7 @@ import { Button } from '@/components/common/Button'
 import { Dropdown } from '@/components/common/Dropdown'
 import { Logo } from '@/components/common/Logo'
 import { ThemeToggle } from '@/components/common/ThemeToggle'
+import { UserAvatar } from '@/components/common/UserAvatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/routes/paths'
@@ -11,13 +12,6 @@ import { NavigationBar } from './NavigationBar'
 
 interface HeaderProps {
   onOpenSearch: () => void
-}
-
-function getInitials(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/)
-  if (parts.length === 0) return 'NH'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
 }
 
 export function Header({ onOpenSearch }: HeaderProps) {
@@ -82,24 +76,20 @@ export function Header({ onOpenSearch }: HeaderProps) {
               </Tooltip>
 
               <Dropdown
+                headerTitle={user.fullName}
                 headerLabel={user.email}
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 rounded-full border border-neutral-border dark:border-dark-border pl-1.5 pr-3 py-1 text-xs font-semibold text-neutral-text-main dark:text-dark-text-main hover:border-primary dark:hover:border-secondary transition-colors cursor-pointer"
+                    aria-label="Mở menu tài khoản cá nhân"
+                    className="inline-flex items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-secondary cursor-pointer"
                   >
-                    {user.avatarUrl ? (
-                      <img
-                        src={user.avatarUrl}
-                        alt={user.fullName}
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="w-6 h-6 rounded-full border border-neutral-border dark:border-dark-border flex items-center justify-center text-[10px] font-bold text-primary dark:text-secondary">
-                        {getInitials(user.fullName)}
-                      </span>
-                    )}
-                    <span className="hidden sm:inline max-w-30 truncate">{user.fullName}</span>
+                    <UserAvatar
+                      fullName={user.fullName}
+                      avatarUrl={user.avatarUrl}
+                      size="md"
+                      className="hover:border-primary dark:hover:border-secondary transition-colors"
+                    />
                   </button>
                 }
                 items={[

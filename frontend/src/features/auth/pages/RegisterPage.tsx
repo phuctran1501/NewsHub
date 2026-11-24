@@ -1,14 +1,11 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/routes/paths'
 import { getSafeRedirectPath } from '@/utils/validation'
-import { RegisterJournalistForm } from '../components/RegisterJournalistForm'
-import { RegisterReaderForm } from '../components/RegisterReaderForm'
+import { RegisterForm, type RegisterRoleOption } from '../components/RegisterForm'
 
-type RegisterTabValue = 'reader' | 'journalist'
-
-const REGISTER_TABS: ReadonlyArray<{ value: RegisterTabValue; label: string }> = [
+const REGISTER_TABS: ReadonlyArray<{ value: RegisterRoleOption; label: string }> = [
   { value: 'reader', label: 'Độc giả' },
   { value: 'journalist', label: 'Nhà báo' },
 ]
@@ -18,7 +15,7 @@ export function RegisterPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const prefersReducedMotion = useReducedMotion()
 
-  const activeTab: RegisterTabValue =
+  const activeTab: RegisterRoleOption =
     searchParams.get('tab') === 'journalist' ? 'journalist' : 'reader'
 
   const rawRedirect = searchParams.get('redirect')
@@ -30,7 +27,7 @@ export function RegisterPage() {
       : ROUTES.AUTH.LOGIN
 
   function handleTabChange(nextValue: string) {
-    const nextTab: RegisterTabValue = nextValue === 'journalist' ? 'journalist' : 'reader'
+    const nextTab: RegisterRoleOption = nextValue === 'journalist' ? 'journalist' : 'reader'
     const nextParams = new URLSearchParams(searchParams)
     if (nextTab === 'journalist') {
       nextParams.set('tab', 'journalist')
@@ -41,13 +38,13 @@ export function RegisterPage() {
   }
 
   function handleRegistrationSuccess(registeredEmail: string) {
-    const params = new URLSearchParams()
-    params.set('registered', '1')
-    params.set('email', registeredEmail)
-    if (safeRedirect !== ROUTES.HOME) {
-      params.set('redirect', safeRedirect)
-    }
-    navigate(`${ROUTES.AUTH.LOGIN}?${params.toString()}`, { replace: true })
+    navigate(loginHref, {
+      replace: true,
+      state: {
+        registered: true,
+        prefilledEmail: registeredEmail,
+      },
+    })
   }
 
   return (
@@ -102,21 +99,7 @@ export function RegisterPage() {
         </TabsList>
 
         <div className="mt-5">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeTab}
-              initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-              transition={{ duration: 0.16, ease: 'easeOut' }}
-            >
-              {activeTab === 'reader' ? (
-                <RegisterReaderForm onRegistered={handleRegistrationSuccess} />
-              ) : (
-                <RegisterJournalistForm onRegistered={handleRegistrationSuccess} />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <RegisterForm role={activeTab} onRegistered={handleRegistrationSuccess} />
         </div>
       </Tabs>
 

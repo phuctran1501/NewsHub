@@ -1,6 +1,9 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { Upload } from 'lucide-react'
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Button } from '@/components/common/Button'
+import { UserAvatar } from '@/components/common/UserAvatar'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { accountService } from '@/services/accountService'
 import { toAppClientError } from '@/services/apiClient'
 import { mediaService } from '@/services/mediaService'
@@ -10,13 +13,6 @@ import { validateAvatarFile } from '@/utils/validation'
 interface AvatarUploaderProps {
   user: UserProfile
   onAvatarUpdated: (updatedUser: UserProfile) => void
-}
-
-function getInitials(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return 'NH'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
 }
 
 export function AvatarUploader({ user, onAvatarUpdated }: AvatarUploaderProps) {
@@ -99,19 +95,7 @@ export function AvatarUploader({ user, onAvatarUpdated }: AvatarUploaderProps) {
 
   return (
     <div className="flex flex-col items-center text-center space-y-3">
-      <div className="relative h-24 w-24 rounded-full border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg overflow-hidden flex items-center justify-center">
-        {displayedAvatar ? (
-          <img
-            src={displayedAvatar}
-            alt={`Ảnh đại diện của ${user.fullName}`}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-2xl font-bold text-primary dark:text-secondary select-none">
-            {getInitials(user.fullName)}
-          </span>
-        )}
-      </div>
+      <UserAvatar fullName={user.fullName} avatarUrl={displayedAvatar} size="xl" />
 
       <input
         ref={fileInputRef}
@@ -152,17 +136,37 @@ export function AvatarUploader({ user, onAvatarUpdated }: AvatarUploaderProps) {
         Hỗ trợ JPG, PNG, WebP (tối đa 5MB, tự động tối ưu WebP).
       </p>
 
-      {errorMsg && (
-        <p role="alert" className="text-xs text-status-rejected">
-          {errorMsg}
-        </p>
-      )}
+      <AnimatePresence mode="wait">
+        {errorMsg && (
+          <motion.div
+            key="avatar-err"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="w-full text-left"
+          >
+            <Alert variant="destructive">
+              <AlertDescription className="mt-0">{errorMsg}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      {successMsg && !errorMsg && (
-        <p role="status" className="text-xs text-emerald-700 dark:text-emerald-400">
-          {successMsg}
-        </p>
-      )}
+        {successMsg && !errorMsg && (
+          <motion.div
+            key="avatar-ok"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="w-full text-left"
+          >
+            <Alert variant="success" role="status">
+              <AlertDescription className="mt-0">{successMsg}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
