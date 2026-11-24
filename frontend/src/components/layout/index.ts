@@ -1,5 +1,6 @@
 export * from './AuthLayout'
 export * from './CmsLayout'
+export * from './cmsNavItems'
 export * from './Footer'
 export * from './Header'
 export * from './MobileBottomNav'

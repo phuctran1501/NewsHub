@@ -1,9 +1,14 @@
-import { Bell, Menu, X } from 'lucide-react'
+import { Bell, Menu } from 'lucide-react'
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Button } from '../common/Button'
-import { Logo } from '../common/Logo'
-import { ThemeToggle } from '../common/ThemeToggle'
+import { NavLink, Outlet, ScrollRestoration, useNavigate } from 'react-router-dom'
+import { Button } from '@/components/common/Button'
+import { Logo } from '@/components/common/Logo'
+import { PageTransition } from '@/components/common/PageTransition'
+import { ThemeToggle } from '@/components/common/ThemeToggle'
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { ROUTES } from '@/routes/paths'
+import { cn } from '@/utils/cn'
+import { CMS_NAV_ITEMS } from './cmsNavItems'
 import { Sidebar } from './Sidebar'
 
 export function CmsLayout() {
@@ -13,61 +18,47 @@ export function CmsLayout() {
 
   return (
     <div className="min-h-screen flex bg-neutral-bg dark:bg-dark-bg text-neutral-text-main dark:text-dark-text-main">
+      <ScrollRestoration />
       <Sidebar
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
       />
 
-      {isMobileDrawerOpen && (
-        <div
-          className="fixed inset-0 z-50 flex md:hidden bg-black/45"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              setIsMobileDrawerOpen(false)
-            }
-          }}
-        >
-          <div className="w-64 h-full bg-neutral-surface dark:bg-dark-surface border-r border-neutral-border dark:border-dark-border p-4 space-y-5">
-            <div className="flex items-center justify-between">
-              <Logo variant="horizontal" size="sm" />
-              <button
-                type="button"
-                onClick={() => setIsMobileDrawerOpen(false)}
-                aria-label="Đóng menu"
-                className="p-1.5 rounded-[8px] text-neutral-text-muted dark:text-dark-text-muted"
-              >
-                <X size={16} strokeWidth={1.75} />
-              </button>
-            </div>
+      <Sheet open={isMobileDrawerOpen} onOpenChange={setIsMobileDrawerOpen}>
+        <SheetContent side="left" className="space-y-6">
+          <SheetTitle className="sr-only">Điều hướng Bàn làm việc Tòa soạn</SheetTitle>
+          <SheetDescription className="sr-only">
+            Chọn phân mục quản trị bài viết hoặc hệ thống.
+          </SheetDescription>
 
-            <nav className="space-y-1 text-xs font-medium">
-              {[
-                { label: 'Tổng quan', to: '/cms' },
-                { label: 'Bài viết của tôi', to: '/cms/articles' },
-                { label: 'Soạn bài mới', to: '/cms/editor' },
-                { label: 'Duyệt bài Tòa soạn', to: '/cms/review' },
-                { label: 'Quản trị Hệ thống', to: '/cms/admin' },
-              ].map((item) => (
+          <Logo variant="horizontal" size="sm" />
+
+          <nav className="space-y-1 text-xs font-medium">
+            {CMS_NAV_ITEMS.map((item) => {
+              const IconComponent = item.icon
+              return (
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  end={item.to === '/cms'}
+                  end={item.end}
                   onClick={() => setIsMobileDrawerOpen(false)}
                   className={({ isActive }) =>
-                    `block px-3 py-2.5 rounded-[10px] ${
+                    cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-colors',
                       isActive
                         ? 'bg-sidebar-active dark:bg-dark-border font-semibold text-primary dark:text-secondary'
-                        : 'text-neutral-text-muted dark:text-dark-text-muted'
-                    }`
+                        : 'text-neutral-text-muted dark:text-dark-text-muted hover:text-neutral-text-main dark:hover:text-dark-text-main',
+                    )
                   }
                 >
-                  {item.label}
+                  <IconComponent size={16} strokeWidth={1.75} className="shrink-0" />
+                  <span>{item.label}</span>
                 </NavLink>
-              ))}
-            </nav>
-          </div>
-        </div>
-      )}
+              )
+            })}
+          </nav>
+        </SheetContent>
+      </Sheet>
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-30 h-16 border-b border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md px-6 flex items-center justify-between gap-4">
@@ -87,13 +78,13 @@ export function CmsLayout() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Button variant="primary" size="sm" onClick={() => navigate('/cms/editor')}>
+            <Button variant="primary" size="sm" onClick={() => navigate(ROUTES.CMS.EDITOR)}>
               Viết bài mới
             </Button>
             <ThemeToggle />
             <button
               type="button"
-              onClick={() => navigate('/me/notifications')}
+              onClick={() => navigate(ROUTES.NOTIFICATIONS)}
               aria-label="Thông báo"
               className="inline-flex items-center justify-center w-9 h-9 rounded-[10px] border border-neutral-border dark:border-dark-border text-neutral-text-muted dark:text-dark-text-muted hover:text-neutral-text-main dark:hover:text-dark-text-main transition-colors cursor-pointer"
             >
@@ -103,7 +94,9 @@ export function CmsLayout() {
         </header>
 
         <main className="flex-1 p-6 lg:p-8 mx-auto w-full max-w-7xl">
-          <Outlet />
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </main>
       </div>
     </div>

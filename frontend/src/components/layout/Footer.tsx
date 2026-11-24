@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Logo } from '../common/Logo'
+import { Logo } from '@/components/common/Logo'
+import { Separator } from '@/components/ui/separator'
+import { ROUTES } from '@/routes/paths'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -50,17 +52,23 @@ export function Footer() {
             </h2>
             <ul className="space-y-2 text-neutral-text-muted dark:text-dark-text-muted">
               <li>
-                <Link to="/auth/register" className="hover:text-primary dark:hover:text-secondary">
+                <Link
+                  to={ROUTES.AUTH.REGISTER}
+                  className="hover:text-primary dark:hover:text-secondary"
+                >
                   Đăng ký Thẻ Nhà báo
                 </Link>
               </li>
               <li>
-                <Link to="/cms" className="hover:text-primary dark:hover:text-secondary">
+                <Link to={ROUTES.CMS.ROOT} className="hover:text-primary dark:hover:text-secondary">
                   Bàn làm việc Phóng viên
                 </Link>
               </li>
               <li>
-                <Link to="/?section=companies" className="hover:text-primary dark:hover:text-secondary">
+                <Link
+                  to="/?section=companies"
+                  className="hover:text-primary dark:hover:text-secondary"
+                >
                   Danh bạ Tòa soạn số
                 </Link>
               </li>
@@ -79,7 +87,9 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-neutral-border dark:border-dark-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-text-muted dark:text-dark-text-muted">
+        <Separator className="my-8" />
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-text-muted dark:text-dark-text-muted">
           <p>© {currentYear} Thời Báo Số NewsHub. Bảo lưu mọi quyền.</p>
           <p>Kiến trúc Multi-Tenant Digital Newsroom</p>
         </div>

@@ -1,5 +1,7 @@
-import { Badge } from '../components/common/Badge'
-import { ArticleCardSkeleton } from '../components/common/Skeleton'
+import { motion } from 'framer-motion'
+import { Badge } from '@/components/common/Badge'
+import { ArticleCardSkeleton } from '@/components/common/Skeleton'
+import { Separator } from '@/components/ui/separator'
 
 const EDITORIAL_HIGHLIGHTS = [
   {
@@ -26,7 +28,12 @@ export function HomePage() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12 lg:py-10 space-y-12">
       <section aria-labelledby="lead-story-heading" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <article className="lg:col-span-8 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface overflow-hidden hover:border-primary dark:hover:border-secondary transition-colors duration-150">
+        <motion.article
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          className="lg:col-span-8 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface overflow-hidden hover:border-primary dark:hover:border-secondary transition-colors duration-150"
+        >
           <div className="aspect-video w-full border-b border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg flex items-center justify-center px-6 text-center">
             <span className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
               Khung ảnh tiêu điểm tỷ lệ 16:9 — dữ liệu bài xuất bản kết nối tại NH-UI-03
@@ -51,13 +58,17 @@ export function HomePage() {
 
             <p className="text-base leading-[1.7] text-neutral-text-muted dark:text-dark-text-muted max-w-[70ch]">
               Hệ thống nền tảng giao diện NewsHub đã sẵn sàng với kiến trúc phẳng 2D, bộ linh kiện
-              nguyên tử đồng bộ và cơ chế tự động làm mới phiên xác thực qua HttpOnly Cookie.
+              shadcn/ui đồng bộ, chuyển động tinh tế và cơ chế tự động làm mới phiên xác thực qua
+              HttpOnly Cookie.
             </p>
           </div>
-        </article>
+        </motion.article>
 
-        <aside
+        <motion.aside
           aria-labelledby="briefing-heading"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.24, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
           className="lg:col-span-4 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-6 flex flex-col justify-between"
         >
           <div className="space-y-5">
@@ -86,10 +97,13 @@ export function HomePage() {
             </div>
           </div>
 
-          <p className="pt-5 border-t border-neutral-border dark:border-dark-border text-xs text-neutral-text-muted dark:text-dark-text-muted">
-            Luồng tin trực tiếp từ API sẽ được tích hợp trong bước tiếp theo.
-          </p>
-        </aside>
+          <div className="pt-5">
+            <Separator className="mb-4" />
+            <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
+              Luồng tin trực tiếp từ API sẽ được tích hợp trong bước tiếp theo.
+            </p>
+          </div>
+        </motion.aside>
       </section>
 
       <section aria-labelledby="latest-feed-heading" className="space-y-5">

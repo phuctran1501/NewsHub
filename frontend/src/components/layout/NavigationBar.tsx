@@ -1,4 +1,7 @@
+import { motion } from 'framer-motion'
 import { NavLink, useSearchParams } from 'react-router-dom'
+import { ROUTES } from '@/routes/paths'
+import { cn } from '@/utils/cn'
 
 export interface NavCategoryItem {
   label: string
@@ -7,7 +10,7 @@ export interface NavCategoryItem {
 }
 
 const DEFAULT_NAV_ITEMS: NavCategoryItem[] = [
-  { label: 'Trang chủ', to: '/' },
+  { label: 'Trang chủ', to: ROUTES.HOME },
   { label: 'Thời sự', to: '/?category=thoi-su', categorySlug: 'thoi-su' },
   { label: 'Kinh tế', to: '/?category=kinh-te', categorySlug: 'kinh-te' },
   { label: 'Công nghệ', to: '/?category=cong-nghe', categorySlug: 'cong-nghe' },
@@ -20,15 +23,12 @@ interface NavigationBarProps {
   className?: string
 }
 
-export function NavigationBar({
-  items = DEFAULT_NAV_ITEMS,
-  className = '',
-}: NavigationBarProps) {
+export function NavigationBar({ items = DEFAULT_NAV_ITEMS, className }: NavigationBarProps) {
   const [searchParams] = useSearchParams()
   const currentCategory = searchParams.get('category') ?? searchParams.get('section')
 
   return (
-    <nav aria-label="Danh mục báo chí" className={`hidden lg:flex items-center gap-7 ${className}`}>
+    <nav aria-label="Danh mục báo chí" className={cn('hidden lg:flex items-center gap-7', className)}>
       {items.map((item) => {
         const isItemActive = item.categorySlug
           ? currentCategory === item.categorySlug
@@ -39,18 +39,21 @@ export function NavigationBar({
             key={item.label}
             to={item.to}
             className={() =>
-              `relative py-5 text-sm transition-colors duration-150 ${
+              cn(
+                'relative py-5 text-sm transition-colors duration-150',
                 isItemActive
                   ? 'font-semibold text-primary dark:text-secondary'
-                  : 'font-medium text-neutral-text-muted dark:text-dark-text-muted hover:text-neutral-text-main dark:hover:text-dark-text-main'
-              }`
+                  : 'font-medium text-neutral-text-muted dark:text-dark-text-muted hover:text-neutral-text-main dark:hover:text-dark-text-main',
+              )
             }
           >
             {item.label}
             {isItemActive && (
-              <span
+              <motion.span
+                layoutId="public-nav-active-indicator"
+                transition={{ type: 'spring', stiffness: 450, damping: 38 }}
                 aria-hidden="true"
-                className="absolute inset-x-0 bottom-0 h-[2px] bg-primary dark:bg-secondary"
+                className="absolute inset-x-0 bottom-0 h-0.5 bg-primary dark:bg-secondary"
               />
             )}
           </NavLink>

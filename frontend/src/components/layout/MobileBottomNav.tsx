@@ -1,6 +1,8 @@
 import { Bookmark, Home, LayoutGrid, Search, User } from 'lucide-react'
 import { NavLink, useLocation, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
+import { ROUTES } from '@/routes/paths'
+import { cn } from '@/utils/cn'
 
 export function MobileBottomNav() {
   const { isAuthenticated } = useAuth()
@@ -11,8 +13,8 @@ export function MobileBottomNav() {
   const navItems = [
     {
       label: 'Trang chủ',
-      to: '/',
-      isActive: location.pathname === '/' && !section && !searchParams.get('category'),
+      to: ROUTES.HOME,
+      isActive: location.pathname === ROUTES.HOME && !section && !searchParams.get('category'),
       icon: Home,
     },
     {
@@ -29,14 +31,16 @@ export function MobileBottomNav() {
     },
     {
       label: 'Đã lưu',
-      to: isAuthenticated ? '/?section=bookmarks' : '/auth/login',
+      to: isAuthenticated ? '/?section=bookmarks' : ROUTES.AUTH.LOGIN,
       isActive: section === 'bookmarks',
       icon: Bookmark,
     },
     {
       label: 'Tài khoản',
-      to: isAuthenticated ? '/cms' : '/auth/login',
-      isActive: location.pathname.startsWith('/auth') || location.pathname.startsWith('/cms'),
+      to: isAuthenticated ? ROUTES.CMS.ROOT : ROUTES.AUTH.LOGIN,
+      isActive:
+        location.pathname.startsWith(ROUTES.AUTH.ROOT) ||
+        location.pathname.startsWith(ROUTES.CMS.ROOT),
       icon: User,
     },
   ]
@@ -52,11 +56,12 @@ export function MobileBottomNav() {
           <NavLink
             key={item.label}
             to={item.to}
-            className={`flex flex-col items-center justify-center gap-1 text-[11px] transition-colors ${
+            className={cn(
+              'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
               item.isActive
                 ? 'font-semibold text-primary dark:text-secondary'
-                : 'font-medium text-neutral-text-muted dark:text-dark-text-muted'
-            }`}
+                : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
+            )}
           >
             <IconComponent size={18} strokeWidth={1.75} />
             <span>{item.label}</span>
