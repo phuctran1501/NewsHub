@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1200" fill="none">
+  <defs>
+    <linearGradient id="pressSky" x1="500" y1="0" x2="500" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#091528" />
+      <stop offset="42%" stop-color="#122A52" />
+      <stop offset="76%" stop-color="#1B4B7A" />
+      <stop offset="100%" stop-color="#6FC3E8" />
+    </linearGradient>
+    <linearGradient id="pressHarbor" x1="500" y1="790" x2="500" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F294E" />
+      <stop offset="50%" stop-color="#0A1A35" />
+      <stop offset="100%" stop-color="#071122" />
+    </linearGradient>
+    <linearGradient id="beaconGlow" x1="500" y1="240" x2="500" y2="780" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A6E1FA" stop-opacity="0.26" />
+      <stop offset="100%" stop-color="#0D9488" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Editorial Twilight Canvas -->
+  <rect width="1000" height="820" fill="url(#pressSky)" />
+
+  <!-- Global Press Meridian & Signal Orbitals -->
+  <circle cx="500" cy="410" r="340" stroke="#A6E1FA" stroke-opacity="0.16" stroke-width="1.25" />
+  <circle cx="500" cy="410" r="245" stroke="#6FC3E8" stroke-opacity="0.24" stroke-width="1.25" stroke-dasharray="6 8" />
+  <circle cx="500" cy="410" r="155" stroke="#D6F1FC" stroke-opacity="0.3" stroke-width="1.25" />
+  <ellipse cx="500" cy="410" rx="340" ry="120" stroke="#A6E1FA" stroke-opacity="0.16" stroke-width="1.2" />
+  <ellipse cx="500" cy="410" rx="125" ry="340" stroke="#A6E1FA" stroke-opacity="0.14" stroke-width="1.2" />
+
+  <!-- Signal Nodes -->
+  <circle cx="260" cy="312" r="5" fill="#A6E1FA" />
+  <circle cx="742" cy="312" r="5" fill="#0D9488" />
+  <circle cx="655" cy="410" r="4.5" fill="#F0F9FF" />
+  <circle cx="345" cy="410" r="4.5" fill="#A6E1FA" />
+
+  <!-- Subtle Beacon Cone -->
+  <polygon points="500,250 220,790 780,790" fill="url(#beaconGlow)" />
+
+  <!-- Architectural Newsrooms & Press Headquarters Panorama -->
+  <path d="M0 736L180 688L350 724L660 676L840 712L1000 680V800H0V736Z" fill="#183A6E" />
+
+  <g fill="#122A52">
+    <rect x="48" y="540" width="96" height="260" />
+    <rect x="166" y="492" width="110" height="308" />
+    <rect x="298" y="556" width="94" height="244" />
+    <rect x="608" y="544" width="98" height="256" />
+    <rect x="726" y="484" width="114" height="316" />
+    <rect x="860" y="552" width="92" height="248" />
+  </g>
+
+  <!-- Central NewsHub Grand Press Tower -->
+  <rect x="416" y="346" width="168" height="454" fill="#0D2142" stroke="#2D5AA0" stroke-width="1.5" />
+  <rect x="444" y="298" width="112" height="48" fill="#122A52" stroke="#3B6FC2" stroke-width="1.5" />
+  <rect x="497" y="218" width="6" height="80" fill="#A6E1FA" />
+  <circle cx="500" cy="214" r="9" fill="#0D9488" />
+  <circle cx="500" cy="214" r="4" fill="#F0F9FF" />
+
+  <!-- Illuminated convergence emblem on Tower Crown -->
+  <g transform="translate(472, 372) scale(1.4)">
+    <path d="M16.5 5L27 5L35 13V14H16.5V5Z" fill="#D6F1FC" />
+    <path d="M35 16.5V27L27 35H26V16.5H35Z" fill="#A6E1FA" />
+    <path d="M23.5 35H13L5 27V26H23.5V35Z" fill="#D6F1FC" />
+    <path d="M5 23.5V13L13 5H14V23.5H5Z" fill="#A6E1FA" />
+    <path d="M20 16.2L23.8 20L20 23.8L16.2 20L20 16.2Z" fill="#0D9488" />
+  </g>
+
+  <!-- Illuminated Architectural Columns on Central Press Tower -->
+  <g fill="#A6E1FA" fill-opacity="0.65">
+    <rect x="444" y="454" width="8" height="304" rx="4" />
+    <rect x="468" y="454" width="8" height="304" rx="4" />
+    <rect x="496" y="454" width="8" height="304" rx="4" fill="#D6F1FC" />
+    <rect x="524" y="454" width="8" height="304" rx="4" />
+    <rect x="548" y="454" width="8" height="304" rx="4" />
+  </g>
+
+  <!-- Flanking Editorial Windows -->
+  <g fill="#D6F1FC" fill-opacity="0.55">
+    <rect x="190" y="524" width="62" height="8" rx="4" />
+    <rect x="190" y="548" width="62" height="8" rx="4" />
+    <rect x="190" y="572" width="42" height="8" rx="4" />
+    <rect x="190" y="612" width="62" height="8" rx="4" />
+    <rect x="190" y="636" width="50" height="8" rx="4" />
+
+    <rect x="750" y="518" width="66" height="8" rx="4" />
+    <rect x="750" y="542" width="66" height="8" rx="4" />
+    <rect x="750" y="566" width="46" height="8" rx="4" />
+    <rect x="750" y="606" width="66" height="8" rx="4" />
+    <rect x="750" y="630" width="54" height="8" rx="4" />
+  </g>
+
+  <!-- Horizon Quay & Reflection -->
+  <rect x="0" y="784" width="1000" height="16" fill="#081326" />
+  <line x1="0" y1="784" x2="1000" y2="784" stroke="#6FC3E8" stroke-opacity="0.6" stroke-width="2" />
+  <rect x="0" y="800" width="1000" height="400" fill="url(#pressHarbor)" />
+
+  <g fill="#6FC3E8">
+    <rect x="430" y="822" width="140" height="3.5" rx="1.75" fill="#A6E1FA" fill-opacity="0.65" />
+    <rect x="452" y="842" width="96" height="3" rx="1.5" fill-opacity="0.45" />
+    <rect x="418" y="864" width="164" height="2.5" rx="1.25" fill-opacity="0.3" />
+    <rect x="468" y="886" width="64" height="2.5" rx="1.25" fill="#0D9488" fill-opacity="0.55" />
+  </g>
+</svg>

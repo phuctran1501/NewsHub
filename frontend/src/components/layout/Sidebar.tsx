@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { Logo } from '@/components/common/Logo'
+import { UserAvatar } from '@/components/common/UserAvatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/routes/paths'
@@ -116,15 +117,15 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
       </div>
 
       <div className="p-3.5 border-t border-neutral-border dark:border-dark-border">
-        <div
+        <NavLink
+          to={ROUTES.PROFILE}
+          title="Hồ sơ cá nhân"
           className={cn(
-            'flex items-center text-xs',
+            'flex items-center rounded-[10px] py-1.5 text-xs hover:bg-neutral-bg dark:hover:bg-dark-border/50 transition-colors',
             isCollapsed ? 'justify-center' : 'gap-2.5 px-1.5',
           )}
         >
-          <div className="w-8 h-8 rounded-full border border-neutral-border dark:border-dark-border flex items-center justify-center font-semibold text-primary dark:text-secondary shrink-0">
-            {user ? user.fullName.slice(0, 2).toUpperCase() : 'NH'}
-          </div>
+          <UserAvatar fullName={user?.fullName} avatarUrl={user?.avatarUrl} size="sm" />
           {!isCollapsed && (
             <div className="min-w-0">
               <p className="font-semibold text-neutral-text-main dark:text-dark-text-main truncate">
@@ -135,7 +136,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
               </p>
             </div>
           )}
-        </div>
+        </NavLink>
       </div>
     </aside>
   )

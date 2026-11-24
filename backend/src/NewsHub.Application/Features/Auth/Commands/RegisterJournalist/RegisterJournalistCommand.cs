@@ -49,11 +49,13 @@ public sealed class RegisterJournalistCommandValidator : AbstractValidator<Regis
                 .WithMessage("Số điện thoại không đúng định dạng nhà mạng Việt Nam (+84).");
         });
 
-        When(x => !string.IsNullOrWhiteSpace(x.PressCardNumber), () =>
-        {
-            RuleFor(x => x.PressCardNumber!)
-                .MaximumLength(50).WithMessage("Số thẻ nhà báo không được vượt quá 50 ký tự.");
-        });
+        RuleFor(x => x.PressCardNumber)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty().WithMessage("Số thẻ nhà báo không được để trống.")
+            .Must(card => !string.IsNullOrWhiteSpace(card))
+            .WithMessage("Số thẻ nhà báo không được để trống.")
+            .Must(card => card!.Trim().Length <= 50)
+            .WithMessage("Số thẻ nhà báo không được vượt quá 50 ký tự.");
 
         RuleFor(x => x.Bio)
             .MaximumLength(500).WithMessage("Tiểu sử không được vượt quá 500 ký tự.");

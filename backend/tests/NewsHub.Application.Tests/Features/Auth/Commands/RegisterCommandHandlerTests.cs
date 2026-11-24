@@ -115,8 +115,26 @@ public class RegisterCommandHandlerTests
     [Fact]
     public void Validator_WithValidInputs_ShouldPass()
     {
-        var command = new RegisterCommand("valid@domain.com", "Valid123!@#", "Valid User");
+        var command = new RegisterCommand("valid@domain.com", "Valid123!@#", "Valid User", "0912345678");
         var result = _validator.TestValidate(command);
         Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public async Task Handle_WithValidPhoneNumber_ShouldNormalizeToE164()
+    {
+        var users = new List<User>().BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Users).Returns(users.Object);
+        _dbContextMock.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<string>())).Returns("hashed");
+
+        var handler = new RegisterCommandHandler(_dbContextMock.Object, _passwordHasherMock.Object);
+        var command = new RegisterCommand("phoneuser@example.com", "ValidPassword123!", "Phone Reader", "0987 654 321");
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        Assert.Equal("+84987654321", result.PhoneNumber);
+        _dbContextMock.Verify(db => db.Users.Add(
+            It.Is<User>(u => u.PhoneNumber == "+84987654321")), Times.Once);
     }
 }
