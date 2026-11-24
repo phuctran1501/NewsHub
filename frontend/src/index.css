@@ -1,61 +1,119 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
- * ── NewsHub Design System ─────────────────────────────────────────────────────
- * Xây dựng trên TailwindCSS v4 CSS-first configuration.
- * Font: Inter (UI, Body), Merriweather (Display, Headlines).
- * Triết lý Impeccable: Modern Editorial, Zero-Shadow, Zero-Glassmorphism, Crisp Edges.
- * ──────────────────────────────────────────────────────────────────────────────
+ * ── NewsHub Design System (Pure 2D • SmartHire Palette) ─────────────────────
+ * Tailwind CSS v4 CSS-first configuration.
+ * - Brand Wordmark Font: Playfair Display (độc quyền cho chữ NewsHub 1 màu)
+ * - UI & Body Font: Inter
+ * - Triết lý Impeccable: Pure 2D Flat Craft, Strict Zero-3D, Minimal Colorless Icons
+ * ────────────────────────────────────────────────────────────────────────────
  */
 
 @theme {
   /* Typography */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-serif: "Merriweather", ui-serif, Georgia, "Times New Roman", serif;
+  --font-brand: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Editorial Brand Colors */
-  --color-primary: #0f172a;
-  --color-primary-hover: #1e293b;
+  /* Primary Brand Colors */
+  --color-primary: #1b3b6f;
+  --color-primary-hover: #122a52;
+  --color-primary-electric: #173eff;
+  --color-primary-electric-hover: #3758f9;
+
+  /* Secondary & Editorial Accents */
+  --color-secondary: #a6e1fa;
+  --color-secondary-light: #d6f1fc;
+  --color-secondary-dark: #6fc3e8;
+  --color-sidebar-active: #eaf0f6;
   --color-accent-ai: #6366f1;
   --color-accent-ai-hover: #4f46e5;
   --color-accent-action: #0d9488;
   --color-accent-action-hover: #0f766e;
+  --color-accent-crimson: #dc2626;
+  --color-accent-crimson-hover: #b91c1c;
 
-  /* Surfaces & Borders (Light) */
-  --color-neutral-bg: #ffffff;
-  --color-neutral-surface: #f8fafc;
+  /* Neutral Surfaces & Text (Light Mode) */
+  --color-neutral-bg: #f7fafc;
+  --color-neutral-surface: #ffffff;
   --color-neutral-border: #e2e8f0;
-  --color-neutral-text-main: #0f172a;
+  --color-neutral-text-main: #1a202c;
   --color-neutral-text-muted: #64748b;
 
-  /* Surfaces & Borders (Dark) */
-  --color-dark-bg: #090d16;
-  --color-dark-surface: #0f172a;
+  /* Neutral Surfaces & Text (Dark Mode) */
+  --color-dark-bg: #11131b;
+  --color-dark-surface: #1a1d25;
   --color-dark-border: #1e293b;
-  --color-dark-text-main: #f8fafc;
+  --color-dark-text-main: #ffffff;
   --color-dark-text-muted: #94a3b8;
 
-  /* Status */
-  --color-status-published: #10b981;
+  /* Editorial Status Colors */
+  --color-status-published: #22c55e;
   --color-status-pending: #f59e0b;
   --color-status-rejected: #ef4444;
 }
 
 @layer base {
   html {
+    color-scheme: light;
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-underline-offset: 4px;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
     font-family: var(--font-sans);
     background-color: var(--color-neutral-bg);
     color: var(--color-neutral-text-main);
+    caret-color: var(--color-primary);
   }
 
   .dark body {
     background-color: var(--color-dark-bg);
     color: var(--color-dark-text-main);
+    caret-color: var(--color-secondary);
+  }
+
+  ::selection {
+    background-color: var(--color-secondary-light);
+    color: var(--color-primary);
+  }
+
+  .dark ::selection {
+    background-color: rgba(166, 225, 250, 0.24);
+    color: var(--color-dark-text-main);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-neutral-bg);
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: var(--color-dark-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #334155;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 }
