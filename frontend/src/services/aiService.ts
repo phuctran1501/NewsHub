@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../types/api'
+import type { ApiResponse } from '@/types/api'
 import { apiClient, unwrapData } from './apiClient'
 
 export interface SuggestedCategoryItem {

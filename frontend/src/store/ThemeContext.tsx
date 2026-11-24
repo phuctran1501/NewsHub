@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { ResolvedTheme, ThemeMode } from '../types/theme'
+import type { ResolvedTheme, ThemeMode } from '@/types/theme'
+import { safeGetStorageItem, safeSetStorageItem } from '@/utils/storage'
 import { ThemeContext } from './themeContextDef'
 
 const THEME_STORAGE_KEY = 'newshub-theme'
@@ -10,8 +11,7 @@ function getSystemTheme(): ResolvedTheme {
 }
 
 function readInitialTheme(): ThemeMode {
-  if (typeof window === 'undefined') return 'system'
-  const saved = window.localStorage.getItem(THEME_STORAGE_KEY)
+  const saved = safeGetStorageItem(THEME_STORAGE_KEY)
   if (saved === 'light' || saved === 'dark' || saved === 'system') {
     return saved
   }
@@ -40,7 +40,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = useCallback((nextMode: ThemeMode) => {
     setThemeState(nextMode)
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextMode)
+    safeSetStorageItem(THEME_STORAGE_KEY, nextMode)
   }, [])
 
   const toggleTheme = useCallback(() => {

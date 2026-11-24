@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,12 +35,12 @@ export function Dropdown({ trigger, headerLabel, items, align = 'end' }: Dropdow
           </>
         )}
         {items.map((item) => (
-          <div key={item.key}>
+          <Fragment key={item.key}>
             {item.separatorBefore && <DropdownMenuSeparator />}
             <DropdownMenuItem tone={item.tone} onSelect={item.onSelect}>
               {item.label}
             </DropdownMenuItem>
-          </div>
+          </Fragment>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

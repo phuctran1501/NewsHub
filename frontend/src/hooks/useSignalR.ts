@@ -5,8 +5,8 @@ import {
   type HubConnection,
 } from '@microsoft/signalr'
 import { useEffect, useRef, useState } from 'react'
-import { env } from '../config/env'
-import { getAccessToken } from '../services/tokenStore'
+import { env } from '@/config/env'
+import { getAccessToken } from '@/services/tokenStore'
 
 interface UseSignalROptions {
   enabled?: boolean
@@ -25,6 +25,8 @@ export function useSignalR(options: UseSignalROptions = {}) {
       return
     }
 
+    let isDisposed = false
+
     const connection = new HubConnectionBuilder()
       .withUrl(`${env.apiBaseUrl}${hubPath}`, {
         accessTokenFactory: () => getAccessToken() ?? '',
@@ -35,16 +37,27 @@ export function useSignalR(options: UseSignalROptions = {}) {
 
     connectionRef.current = connection
 
-    connection.onreconnecting(() => setConnectionState(HubConnectionState.Reconnecting))
-    connection.onreconnected(() => setConnectionState(HubConnectionState.Connected))
-    connection.onclose(() => setConnectionState(HubConnectionState.Disconnected))
+    connection.onreconnecting(() => {
+      if (!isDisposed) setConnectionState(HubConnectionState.Reconnecting)
+    })
+    connection.onreconnected(() => {
+      if (!isDisposed) setConnectionState(HubConnectionState.Connected)
+    })
+    connection.onclose(() => {
+      if (!isDisposed) setConnectionState(HubConnectionState.Disconnected)
+    })
 
     connection
       .start()
-      .then(() => setConnectionState(HubConnectionState.Connected))
-      .catch(() => setConnectionState(HubConnectionState.Disconnected))
+      .then(() => {
+        if (!isDisposed) setConnectionState(HubConnectionState.Connected)
+      })
+      .catch(() => {
+        if (!isDisposed) setConnectionState(HubConnectionState.Disconnected)
+      })
 
     return () => {
+      isDisposed = true
       connectionRef.current = null
       void connection.stop()
     }

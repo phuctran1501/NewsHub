@@ -1,4 +1,4 @@
-import type { PagedApiResponse } from '../types/api'
+import type { PagedApiResponse } from '@/types/api'
 import { apiClient, unwrapPaged } from './apiClient'
 
 export interface CompanyDirectoryItem {

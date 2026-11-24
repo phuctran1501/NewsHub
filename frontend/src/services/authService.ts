@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../types/api'
+import type { ApiResponse } from '@/types/api'
 import type {
   LoginRequest,
   LoginResponseData,
@@ -6,7 +6,7 @@ import type {
   RegisterJournalistRequest,
   RegisterReaderRequest,
   UserProfile,
-} from '../types/auth'
+} from '@/types/auth'
 import { apiClient, refreshAccessTokenSingleFlight, unwrapData } from './apiClient'
 import { clearAccessToken, setAccessToken } from './tokenStore'
 
@@ -30,8 +30,7 @@ export const authService = {
   },
 
   async refreshToken(): Promise<RefreshTokenResponseData> {
-    const accessToken = await refreshAccessTokenSingleFlight()
-    return { accessToken, tokenType: 'Bearer', expiresIn: 900 }
+    return refreshAccessTokenSingleFlight()
   },
 
   async getMyProfile(): Promise<UserProfile> {

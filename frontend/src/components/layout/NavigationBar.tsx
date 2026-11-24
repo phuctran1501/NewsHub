@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { NavLink, useSearchParams } from 'react-router-dom'
+import { NavLink, useLocation, useSearchParams } from 'react-router-dom'
 import { ROUTES } from '@/routes/paths'
 import { cn } from '@/utils/cn'
 
@@ -24,15 +24,17 @@ interface NavigationBarProps {
 }
 
 export function NavigationBar({ items = DEFAULT_NAV_ITEMS, className }: NavigationBarProps) {
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const currentCategory = searchParams.get('category') ?? searchParams.get('section')
+  const isOnHomeRoute = location.pathname === ROUTES.HOME
 
   return (
     <nav aria-label="Danh mục báo chí" className={cn('hidden lg:flex items-center gap-7', className)}>
       {items.map((item) => {
         const isItemActive = item.categorySlug
-          ? currentCategory === item.categorySlug
-          : !currentCategory
+          ? isOnHomeRoute && currentCategory === item.categorySlug
+          : isOnHomeRoute && !currentCategory
 
         return (
           <NavLink

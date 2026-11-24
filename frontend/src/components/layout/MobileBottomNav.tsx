@@ -4,70 +4,103 @@ import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/routes/paths'
 import { cn } from '@/utils/cn'
 
-export function MobileBottomNav() {
+interface MobileBottomNavProps {
+  isSearchOpen: boolean
+  onOpenSearch: () => void
+}
+
+export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavProps) {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const section = searchParams.get('section')
 
-  const navItems = [
-    {
-      label: 'Trang chủ',
-      to: ROUTES.HOME,
-      isActive: location.pathname === ROUTES.HOME && !section && !searchParams.get('category'),
-      icon: Home,
-    },
-    {
-      label: 'Chuyên mục',
-      to: '/?section=categories',
-      isActive: section === 'categories' || Boolean(searchParams.get('category')),
-      icon: LayoutGrid,
-    },
-    {
-      label: 'Tìm kiếm',
-      to: '/?section=search',
-      isActive: section === 'search',
-      icon: Search,
-    },
-    {
-      label: 'Đã lưu',
-      to: isAuthenticated ? '/?section=bookmarks' : ROUTES.AUTH.LOGIN,
-      isActive: section === 'bookmarks',
-      icon: Bookmark,
-    },
-    {
-      label: 'Tài khoản',
-      to: isAuthenticated ? ROUTES.CMS.ROOT : ROUTES.AUTH.LOGIN,
-      isActive:
-        location.pathname.startsWith(ROUTES.AUTH.ROOT) ||
-        location.pathname.startsWith(ROUTES.CMS.ROOT),
-      icon: User,
-    },
-  ]
+  const isHomeActive =
+    !isSearchOpen &&
+    location.pathname === ROUTES.HOME &&
+    !section &&
+    !searchParams.get('category')
+
+  const isCategoriesActive =
+    !isSearchOpen && (section === 'categories' || Boolean(searchParams.get('category')))
+
+  const isBookmarksActive = !isSearchOpen && section === 'bookmarks'
+
+  const isAccountActive =
+    !isSearchOpen &&
+    (location.pathname.startsWith(ROUTES.AUTH.ROOT) ||
+      location.pathname.startsWith(ROUTES.CMS.ROOT))
 
   return (
     <nav
       aria-label="Điều hướng di động"
       className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 h-16 border-t border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md md:hidden"
     >
-      {navItems.map((item) => {
-        const IconComponent = item.icon
-        return (
-          <NavLink
-            key={item.label}
-            to={item.to}
-            className={cn(
-              'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
-              item.isActive
-                ? 'font-semibold text-primary dark:text-secondary'
-                : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
-            )}
-          >
-            <IconComponent size={18} strokeWidth={1.75} />
-            <span>{item.label}</span>
-          </NavLink>
-        )
-      })}
+      <NavLink
+        to={ROUTES.HOME}
+        className={cn(
+          'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
+          isHomeActive
+            ? 'font-semibold text-primary dark:text-secondary'
+            : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
+        )}
+      >
+        <Home size={18} strokeWidth={1.75} />
+        <span>Trang chủ</span>
+      </NavLink>
+
+      <NavLink
+        to="/?section=categories"
+        className={cn(
+          'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
+          isCategoriesActive
+            ? 'font-semibold text-primary dark:text-secondary'
+            : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
+        )}
+      >
+        <LayoutGrid size={18} strokeWidth={1.75} />
+        <span>Chuyên mục</span>
+      </NavLink>
+
+      <button
+        type="button"
+        onClick={onOpenSearch}
+        className={cn(
+          'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors cursor-pointer',
+          isSearchOpen
+            ? 'font-semibold text-primary dark:text-secondary'
+            : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
+        )}
+      >
+        <Search size={18} strokeWidth={1.75} />
+        <span>Tìm kiếm</span>
+      </button>
+
+      <NavLink
+        to={isAuthenticated ? '/?section=bookmarks' : ROUTES.AUTH.LOGIN}
+        className={cn(
+          'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
+          isBookmarksActive
+            ? 'font-semibold text-primary dark:text-secondary'
+            : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
+        )}
+      >
+        <Bookmark size={18} strokeWidth={1.75} />
+        <span>Đã lưu</span>
+      </NavLink>
+
+      <NavLink
+        to={isAuthenticated ? ROUTES.CMS.ROOT : ROUTES.AUTH.LOGIN}
+        className={cn(
+          'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
+          isAccountActive
+            ? 'font-semibold text-primary dark:text-secondary'
+            : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
+        )}
+      >
+        <User size={18} strokeWidth={1.75} />
+        <span>Tài khoản</span>
+      </NavLink>
     </nav>
   )
 }

@@ -4,14 +4,14 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { env } from '../config/env'
+import { env } from '@/config/env'
 import {
   AppClientError,
   type ApiErrorResponse,
   type ApiResponse,
   type PagedApiResponse,
-} from '../types/api'
-import type { RefreshTokenResponseData } from '../types/auth'
+} from '@/types/api'
+import type { RefreshTokenResponseData } from '@/types/auth'
 import { getAccessToken, notifyAuthFailure, setAccessToken } from './tokenStore'
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
@@ -31,7 +31,7 @@ const AUTH_BYPASS_PATHS = [
   '/api/v1/auth/logout',
 ]
 
-let refreshPromise: Promise<string> | null = null
+let refreshPromise: Promise<RefreshTokenResponseData> | null = null
 let failedQueue: QueuedRequest[] = []
 
 function flushQueue(error: unknown, token: string | null = null): void {
@@ -91,9 +91,9 @@ export function toAppClientError(error: unknown): AppClientError {
 
 /**
  * Thực thi xoay vòng Refresh Token đơn luồng (Single-Flight Mutex) qua HttpOnly Cookie.
- * Đảm bảo nhiều lời gọi đồng thời chỉ phát sinh duy nhất 1 HTTP POST /api/v1/auth/refresh.
+ * Có timeout 15s bảo vệ tránh treo hàng đợi failedQueue khi kết nối mạng bị kẹt.
  */
-export async function refreshAccessTokenSingleFlight(): Promise<string> {
+export async function refreshAccessTokenSingleFlight(): Promise<RefreshTokenResponseData> {
   if (refreshPromise) {
     return refreshPromise
   }
@@ -104,14 +104,15 @@ export async function refreshAccessTokenSingleFlight(): Promise<string> {
       {},
       {
         withCredentials: true,
+        timeout: 15000,
         headers: { 'Content-Type': 'application/json' },
       },
     )
     .then((response) => {
-      const nextToken = response.data.data.accessToken
-      setAccessToken(nextToken)
-      flushQueue(null, nextToken)
-      return nextToken
+      const refreshData = response.data.data
+      setAccessToken(refreshData.accessToken)
+      flushQueue(null, refreshData.accessToken)
+      return refreshData
     })
     .catch((err: unknown) => {
       const normalized = toAppClientError(err)
@@ -166,8 +167,8 @@ apiClient.interceptors.response.use(
         })
       }
 
-      const freshToken = await refreshAccessTokenSingleFlight()
-      originalRequest.headers.Authorization = `Bearer ${freshToken}`
+      const refreshData = await refreshAccessTokenSingleFlight()
+      originalRequest.headers.Authorization = `Bearer ${refreshData.accessToken}`
       return apiClient(originalRequest)
     }
 

@@ -4,7 +4,7 @@ import type {
   LoginRequest,
   UserProfile,
   UserRoleName,
-} from '../types/auth'
+} from '@/types/auth'
 
 export interface AuthContextValue {
   user: UserProfile | null
