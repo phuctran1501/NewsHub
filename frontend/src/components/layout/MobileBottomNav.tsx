@@ -29,6 +29,7 @@ export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavP
   const isAccountActive =
     !isSearchOpen &&
     (location.pathname.startsWith(ROUTES.AUTH.ROOT) ||
+      location.pathname === ROUTES.PROFILE ||
       location.pathname.startsWith(ROUTES.CMS.ROOT))
 
   return (
@@ -90,7 +91,7 @@ export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavP
       </NavLink>
 
       <NavLink
-        to={isAuthenticated ? ROUTES.CMS.ROOT : ROUTES.AUTH.LOGIN}
+        to={isAuthenticated ? ROUTES.PROFILE : ROUTES.AUTH.LOGIN}
         className={cn(
           'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
           isAccountActive

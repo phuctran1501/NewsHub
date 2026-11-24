@@ -103,6 +103,11 @@ export function Header({ onOpenSearch }: HeaderProps) {
                   </button>
                 }
                 items={[
+                  {
+                    key: 'profile',
+                    label: 'Hồ sơ cá nhân',
+                    onSelect: () => navigate(ROUTES.PROFILE),
+                  },
                   ...(roleName === 'Journalist' || roleName === 'Admin'
                     ? [
                         {

@@ -1,5 +1,7 @@
 import type { ApiResponse } from '@/types/api'
 import type {
+  AuthUserResponseDto,
+  JournalistResponseDto,
   LoginRequest,
   LoginResponseData,
   RefreshTokenResponseData,
@@ -19,13 +21,18 @@ export const authService = {
     return data
   },
 
-  async registerReader(payload: RegisterReaderRequest): Promise<UserProfile> {
-    return unwrapData(apiClient.post<ApiResponse<UserProfile>>('/api/v1/auth/register', payload))
+  async registerReader(payload: RegisterReaderRequest): Promise<AuthUserResponseDto> {
+    return unwrapData(
+      apiClient.post<ApiResponse<AuthUserResponseDto>>('/api/v1/auth/register', payload),
+    )
   },
 
-  async registerJournalist(payload: RegisterJournalistRequest): Promise<UserProfile> {
+  async registerJournalist(payload: RegisterJournalistRequest): Promise<JournalistResponseDto> {
     return unwrapData(
-      apiClient.post<ApiResponse<UserProfile>>('/api/v1/auth/register-journalist', payload),
+      apiClient.post<ApiResponse<JournalistResponseDto>>(
+        '/api/v1/auth/register-journalist',
+        payload,
+      ),
     )
   },
 

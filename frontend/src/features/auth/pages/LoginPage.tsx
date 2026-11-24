@@ -1,0 +1,56 @@
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { ROUTES } from '@/routes/paths'
+import { getSafeRedirectPath } from '@/utils/validation'
+import { LoginForm } from '../components/LoginForm'
+
+interface LocationRedirectState {
+  from?: {
+    pathname?: string
+    search?: string
+  }
+}
+
+export function LoginPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+
+  const registered = searchParams.get('registered') === '1'
+  const prefilledEmail = searchParams.get('email') ?? ''
+  const rawRedirect = searchParams.get('redirect')
+
+  const stateFrom = (location.state as LocationRedirectState | null)?.from
+  const fallbackFromState = stateFrom?.pathname
+    ? `${stateFrom.pathname}${stateFrom.search ?? ''}`
+    : ROUTES.HOME
+
+  const safeRedirect = getSafeRedirectPath(rawRedirect ?? fallbackFromState, ROUTES.HOME)
+
+  const registerHref =
+    safeRedirect !== ROUTES.HOME
+      ? `${ROUTES.AUTH.REGISTER}?redirect=${encodeURIComponent(safeRedirect)}`
+      : ROUTES.AUTH.REGISTER
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1.5 text-center">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-text-main dark:text-dark-text-main">
+          Đăng nhập
+        </h1>
+        <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
+          Truy cập không gian đọc báo cá nhân hóa và bàn làm việc tòa soạn số NewsHub.
+        </p>
+      </div>
+
+      <LoginForm
+        key={prefilledEmail}
+        initialEmail={prefilledEmail}
+        showRegisteredBanner={registered}
+        registerHref={registerHref}
+        onSuccess={() => {
+          navigate(safeRedirect, { replace: true })
+        }}
+      />
+    </div>
+  )
+}

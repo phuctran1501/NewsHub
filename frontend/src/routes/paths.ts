@@ -1,5 +1,6 @@
 export const ROUTES = {
   HOME: '/',
+  PROFILE: '/me/profile',
   NOTIFICATIONS: '/me/notifications',
   AUTH: {
     ROOT: '/auth',
