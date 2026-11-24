@@ -1,2 +1,4 @@
-// Module xác thực người dùng & quản lý hồ sơ (NH-UI-02)
-export {}
+export { LoginModal } from './components/LoginModal'
+export { LoginPage } from './pages/LoginPage'
+export { ProfilePage } from './pages/ProfilePage'
+export { RegisterPage } from './pages/RegisterPage'

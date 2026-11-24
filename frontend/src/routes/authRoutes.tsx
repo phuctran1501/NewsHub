@@ -1,19 +1,32 @@
 import { Navigate, type RouteObject } from 'react-router-dom'
 import { AuthLayout } from '@/components/layout/AuthLayout'
-import { AuthScaffoldPage } from '@/pages/AuthScaffoldPage'
+import { LoginPage, RegisterPage } from '@/features/auth'
+import { GuestOnlyRoute } from './GuestOnlyRoute'
 import { ROUTES } from './paths'
 
 export const authRoutes: RouteObject = {
   path: ROUTES.AUTH.ROOT,
-  element: <AuthLayout />,
+  element: (
+    <GuestOnlyRoute>
+      <AuthLayout />
+    </GuestOnlyRoute>
+  ),
   children: [
     {
       index: true,
       element: <Navigate to={ROUTES.AUTH.LOGIN} replace />,
     },
     {
+      path: 'login',
+      element: <LoginPage />,
+    },
+    {
+      path: 'register',
+      element: <RegisterPage />,
+    },
+    {
       path: '*',
-      element: <AuthScaffoldPage />,
+      element: <Navigate to={ROUTES.AUTH.LOGIN} replace />,
     },
   ],
 }

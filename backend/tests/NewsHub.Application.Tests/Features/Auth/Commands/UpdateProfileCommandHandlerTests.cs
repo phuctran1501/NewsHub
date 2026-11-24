@@ -183,4 +183,40 @@ public class UpdateProfileCommandHandlerTests
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == nameof(UpdateProfileCommand.PressCardNumber));
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Validator_WhenPressCardNumberWhitespace_ShouldFail(string emptyCard)
+    {
+        var command = new UpdateProfileCommand("Name", null, null, null, emptyCard);
+        var result = _validator.TestValidate(command);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(UpdateProfileCommand.PressCardNumber));
+    }
+
+    [Fact]
+    public async Task Handle_WhenReaderAttemptsToSetPressCardNumber_ShouldThrowBadRequestException()
+    {
+        var userId = Guid.NewGuid();
+        var reader = new User
+        {
+            Id = userId,
+            Email = "reader@example.com",
+            PasswordHash = "hash",
+            FullName = "Reader",
+            Role = UserRole.User,
+            IsActive = true
+        };
+
+        var users = new List<User> { reader }.BuildMockDbSet();
+        _dbContextMock.Setup(db => db.Users).Returns(users.Object);
+        _currentUserMock.Setup(c => c.Id).Returns(userId);
+        _currentUserMock.Setup(c => c.IsAuthenticated).Returns(true);
+
+        var handler = new UpdateProfileCommandHandler(_dbContextMock.Object, _currentUserMock.Object);
+        var command = new UpdateProfileCommand(null, null, null, null, "NB-FAKE-01");
+
+        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+    }
 }

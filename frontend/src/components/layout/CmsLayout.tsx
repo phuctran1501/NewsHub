@@ -5,7 +5,9 @@ import { Button } from '@/components/common/Button'
 import { Logo } from '@/components/common/Logo'
 import { PageTransition } from '@/components/common/PageTransition'
 import { ThemeToggle } from '@/components/common/ThemeToggle'
+import { UserAvatar } from '@/components/common/UserAvatar'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/routes/paths'
 import { cn } from '@/utils/cn'
 import { CMS_NAV_ITEMS } from './cmsNavItems'
@@ -13,6 +15,7 @@ import { Sidebar } from './Sidebar'
 
 export function CmsLayout() {
   const navigate = useNavigate()
+  const { user, logout } = useAuth()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false)
 
@@ -57,6 +60,38 @@ export function CmsLayout() {
               )
             })}
           </nav>
+
+          {user && (
+            <div className="mt-auto border-t border-neutral-border dark:border-dark-border pt-4 space-y-2">
+              <NavLink
+                to={ROUTES.PROFILE}
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className="flex items-center gap-2.5 rounded-[10px] px-2 py-2 text-xs hover:bg-neutral-bg dark:hover:bg-dark-border/50 transition-colors"
+              >
+                <UserAvatar fullName={user.fullName} avatarUrl={user.avatarUrl} size="sm" />
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-neutral-text-main dark:text-dark-text-main">
+                    {user.fullName}
+                  </p>
+                  <p className="truncate text-[11px] text-neutral-text-muted dark:text-dark-text-muted">
+                    Hồ sơ cá nhân
+                  </p>
+                </div>
+              </NavLink>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                fullWidth
+                onClick={() => {
+                  setIsMobileDrawerOpen(false)
+                  void logout()
+                }}
+              >
+                Đăng xuất
+              </Button>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { accountService } from '@/services/accountService'
 import { authService } from '@/services/authService'
 import {
   clearAccessToken,
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function bootstrapSession() {
       try {
         const refreshed = await authService.refreshToken()
-        const profile = await authService.getMyProfile()
+        const profile = await accountService.getMyProfile()
         if (!cancelled) {
           setTokenState(refreshed.accessToken)
           setUser(profile)

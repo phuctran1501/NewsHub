@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Auth.DTOs;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 using NewsHub.Domain.ValueObjects;
 
@@ -50,10 +51,15 @@ public sealed class UpdateProfileCommandValidator : AbstractValidator<UpdateProf
                 .WithMessage("Số điện thoại không đúng định dạng nhà mạng Việt Nam (+84).");
         });
 
-        When(x => !string.IsNullOrWhiteSpace(x.PressCardNumber), () =>
+        When(x => x.PressCardNumber != null, () =>
         {
             RuleFor(x => x.PressCardNumber!)
-                .MaximumLength(50).WithMessage("Số thẻ nhà báo không được vượt quá 50 ký tự.");
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage("Số thẻ nhà báo không được để trống.")
+                .Must(card => !string.IsNullOrWhiteSpace(card))
+                .WithMessage("Số thẻ nhà báo không được để trống.")
+                .Must(card => card.Trim().Length <= 50)
+                .WithMessage("Số thẻ nhà báo không được vượt quá 50 ký tự.");
         });
     }
 }
@@ -103,9 +109,12 @@ public sealed class UpdateProfileCommandHandler(
 
         if (request.PressCardNumber != null)
         {
-            user.PressCardNumber = string.IsNullOrWhiteSpace(request.PressCardNumber)
-                ? null
-                : request.PressCardNumber.Trim();
+            if (user.Role != UserRole.Journalist)
+            {
+                throw new BadRequestException("Chỉ tài khoản Nhà báo mới được cập nhật số thẻ nhà báo.", ErrorCodes.ValidationFailed);
+            }
+
+            user.PressCardNumber = request.PressCardNumber.Trim();
         }
 
         user.UpdatedAt = DateTimeOffset.UtcNow;

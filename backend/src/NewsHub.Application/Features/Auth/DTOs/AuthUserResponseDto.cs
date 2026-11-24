@@ -7,4 +7,5 @@ public sealed record AuthUserResponseDto(
     string Email,
     string FullName,
     UserRole Role,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? PhoneNumber = null);

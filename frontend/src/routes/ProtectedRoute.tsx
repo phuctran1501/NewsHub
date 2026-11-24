@@ -23,11 +23,21 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={ROUTES.AUTH.LOGIN} state={{ from: location }} replace />
+    const requestedPath = `${location.pathname}${location.search}`
+    const loginTarget =
+      requestedPath && requestedPath !== ROUTES.HOME
+        ? `${ROUTES.AUTH.LOGIN}?redirect=${encodeURIComponent(requestedPath)}`
+        : ROUTES.AUTH.LOGIN
+
+    return <Navigate to={loginTarget} state={{ from: location }} replace />
   }
 
   if (allowedRoles && (!roleName || !allowedRoles.includes(roleName))) {
-    return <Navigate to={ROUTES.HOME} replace />
+    const fallbackPath =
+      roleName === 'Journalist' && location.pathname.startsWith(ROUTES.CMS.ADMIN)
+        ? ROUTES.CMS.ROOT
+        : ROUTES.HOME
+    return <Navigate to={fallbackPath} replace />
   }
 
   return <>{children}</>

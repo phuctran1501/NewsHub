@@ -1,11 +1,12 @@
 import type { ApiResponse } from '@/types/api'
 import type {
+  AuthUserResponseDto,
+  JournalistResponseDto,
   LoginRequest,
   LoginResponseData,
   RefreshTokenResponseData,
   RegisterJournalistRequest,
   RegisterReaderRequest,
-  UserProfile,
 } from '@/types/auth'
 import { apiClient, refreshAccessTokenSingleFlight, unwrapData } from './apiClient'
 import { clearAccessToken, setAccessToken } from './tokenStore'
@@ -19,22 +20,23 @@ export const authService = {
     return data
   },
 
-  async registerReader(payload: RegisterReaderRequest): Promise<UserProfile> {
-    return unwrapData(apiClient.post<ApiResponse<UserProfile>>('/api/v1/auth/register', payload))
+  async registerReader(payload: RegisterReaderRequest): Promise<AuthUserResponseDto> {
+    return unwrapData(
+      apiClient.post<ApiResponse<AuthUserResponseDto>>('/api/v1/auth/register', payload),
+    )
   },
 
-  async registerJournalist(payload: RegisterJournalistRequest): Promise<UserProfile> {
+  async registerJournalist(payload: RegisterJournalistRequest): Promise<JournalistResponseDto> {
     return unwrapData(
-      apiClient.post<ApiResponse<UserProfile>>('/api/v1/auth/register-journalist', payload),
+      apiClient.post<ApiResponse<JournalistResponseDto>>(
+        '/api/v1/auth/register-journalist',
+        payload,
+      ),
     )
   },
 
   async refreshToken(): Promise<RefreshTokenResponseData> {
     return refreshAccessTokenSingleFlight()
-  },
-
-  async getMyProfile(): Promise<UserProfile> {
-    return unwrapData(apiClient.get<ApiResponse<UserProfile>>('/api/v1/account/me'))
   },
 
   async logout(): Promise<void> {

@@ -57,3 +57,26 @@ export const badgeVariants = cva(
 )
 
 export type BadgeVariantProps = VariantProps<typeof badgeVariants>
+
+export const alertVariants = cva(
+  'relative w-full rounded-[12px] border px-3.5 py-2.5 text-xs leading-relaxed',
+  {
+    variants: {
+      variant: {
+        default:
+          'border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg text-neutral-text-main dark:text-dark-text-main',
+        success:
+          'border-status-published/35 bg-status-published/10 text-emerald-800 dark:text-emerald-300',
+        warning:
+          'border-status-pending/45 bg-status-pending/10 text-amber-800 dark:text-amber-300',
+        destructive:
+          'border-status-rejected/40 bg-status-rejected/10 text-status-rejected',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  },
+)
+
+export type AlertVariantProps = VariantProps<typeof alertVariants>

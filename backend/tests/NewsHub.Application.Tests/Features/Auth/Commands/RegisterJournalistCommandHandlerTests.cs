@@ -104,7 +104,7 @@ public class RegisterJournalistCommandHandlerTests
             .Returns("hashed");
 
         var handler = new RegisterJournalistCommandHandler(_dbContextMock.Object, _passwordHasherMock.Object);
-        var command = new RegisterJournalistCommand("concurrent.journalist@news.com", "ValidPassword123!", "Jane", null, null, null);
+        var command = new RegisterJournalistCommand("concurrent.journalist@news.com", "ValidPassword123!", "Jane", null, "PRESS-01", null);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ConflictException>(() => handler.Handle(command, CancellationToken.None));
@@ -122,6 +122,18 @@ public class RegisterJournalistCommandHandlerTests
         var result = _validator.TestValidate(command);
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == nameof(RegisterJournalistCommand.PhoneNumber));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Validator_WhenPressCardNumberIsEmpty_ShouldFail(string? emptyCard)
+    {
+        var command = new RegisterJournalistCommand("j@news.com", "Valid123!@", "Jane", "0987654321", emptyCard, null);
+        var result = _validator.TestValidate(command);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(RegisterJournalistCommand.PressCardNumber));
     }
 
     [Fact]
