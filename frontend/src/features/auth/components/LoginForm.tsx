@@ -1,7 +1,9 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useAuth } from '@/hooks/useAuth'
 import { toAppClientError } from '@/services/apiClient'
 import type { UserProfile } from '@/types/auth'
@@ -101,43 +103,61 @@ export function LoginForm({
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-4">
-      {showRegisteredBanner && !formError && !isRateLimited && (
-        <div
-          role="status"
-          className="rounded-[10px] border border-status-published/35 bg-status-published/10 px-3.5 py-2.5 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed"
-        >
-          Đăng ký tài khoản thành công. Vui lòng nhập mật khẩu để đăng nhập vào hệ thống.
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {showRegisteredBanner && !formError && !isRateLimited && (
+          <motion.div
+            key="registered"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="success" role="status">
+              <AlertDescription className="mt-0">
+                Đăng ký tài khoản thành công. Vui lòng nhập mật khẩu để đăng nhập.
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      {isRateLimited && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="rounded-[10px] border border-status-pending/45 bg-status-pending/10 px-3.5 py-2.5 text-xs text-amber-800 dark:text-amber-300 leading-relaxed"
-        >
-          <p className="font-semibold">Tạm khóa đăng nhập do thao tác quá nhanh</p>
-          <p className="mt-0.5">
-            Bạn đã thử đăng nhập vượt quá giới hạn 5 lần/phút. Vui lòng đợi{' '}
-            <span className="font-mono font-bold">{rateLimitSeconds}s</span> trước khi thử lại.
-          </p>
-        </div>
-      )}
+        {isRateLimited && (
+          <motion.div
+            key="ratelimit"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="warning" aria-live="polite">
+              <AlertTitle>Tạm khóa đăng nhập do thao tác quá nhanh</AlertTitle>
+              <AlertDescription>
+                Bạn đã thử đăng nhập vượt quá giới hạn 5 lần/phút. Vui lòng đợi{' '}
+                <span className="font-mono font-bold">{rateLimitSeconds}s</span> trước khi thử lại.
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      {formError && !isRateLimited && (
-        <div
-          role="alert"
-          className="rounded-[10px] border border-status-rejected/40 bg-status-rejected/10 px-3.5 py-2.5 text-xs text-status-rejected leading-relaxed"
-        >
-          {formError}
-        </div>
-      )}
+        {formError && !isRateLimited && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="destructive">
+              <AlertDescription className="mt-0">{formError}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Input
         name="email"
         type="email"
         label="Địa chỉ Email"
-        placeholder="banbienTap@newshub.vn"
+        placeholder="name@example.com"
         autoComplete="email"
         value={email}
         onChange={(e) => {
@@ -153,7 +173,7 @@ export function LoginForm({
       <PasswordInput
         name="password"
         label="Mật khẩu"
-        placeholder="Nhập mật khẩu của bạn"
+        placeholder="••••••••"
         autoComplete="current-password"
         value={password}
         onChange={(e) => {
@@ -180,13 +200,13 @@ export function LoginForm({
       </div>
 
       {registerHref && (
-        <p className="pt-2 text-center text-xs text-neutral-text-muted dark:text-dark-text-muted">
-          Chưa có tài khoản NewsHub?{' '}
+        <p className="pt-2 text-center text-xs sm:text-sm text-neutral-text-muted dark:text-dark-text-muted">
+          Bạn là người mới?{' '}
           <Link
             to={registerHref}
-            className="font-semibold text-primary dark:text-secondary hover:underline"
+            className="font-bold text-neutral-text-main dark:text-dark-text-main hover:text-primary dark:hover:text-secondary transition-colors"
           >
-            Đăng ký tài khoản mới
+            Đăng ký tài khoản
           </Link>
         </p>
       )}

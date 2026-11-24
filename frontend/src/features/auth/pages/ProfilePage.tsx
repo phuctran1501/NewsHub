@@ -1,7 +1,10 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/useAuth'
 import { accountService } from '@/services/accountService'
@@ -132,23 +135,35 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
         </p>
       </div>
 
-      {formError && (
-        <div
-          role="alert"
-          className="rounded-[10px] border border-status-rejected/40 bg-status-rejected/10 px-3.5 py-2.5 text-xs text-status-rejected leading-relaxed"
-        >
-          {formError}
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {formError && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="destructive">
+              <AlertDescription className="mt-0">{formError}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      {successMsg && (
-        <div
-          role="status"
-          className="rounded-[10px] border border-status-published/35 bg-status-published/10 px-3.5 py-2.5 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed"
-        >
-          {successMsg}
-        </div>
-      )}
+        {successMsg && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="success" role="status">
+              <AlertDescription className="mt-0">{successMsg}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
@@ -216,12 +231,7 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label
-            htmlFor={bioFieldId}
-            className="block text-xs font-semibold text-neutral-text-main dark:text-dark-text-main"
-          >
-            Tiểu sử giới thiệu
-          </label>
+          <Label htmlFor={bioFieldId}>Tiểu sử giới thiệu</Label>
           <span className="font-mono text-[11px] text-neutral-text-muted dark:text-dark-text-muted">
             {bio.length}/{BIO_MAX_LENGTH}
           </span>

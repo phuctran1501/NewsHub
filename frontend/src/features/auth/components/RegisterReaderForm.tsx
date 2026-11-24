@@ -1,6 +1,8 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toAppClientError } from '@/services/apiClient'
 import { authService } from '@/services/authService'
 import {
@@ -8,6 +10,7 @@ import {
   validateEmail,
   validateFullName,
   validatePassword,
+  validateVietnamPhone,
 } from '@/utils/validation'
 import { PasswordInput } from './PasswordInput'
 
@@ -19,6 +22,7 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,10 +35,12 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
     const nameErr = validateFullName(fullName)
     const emailErr = validateEmail(email)
     const passErr = validatePassword(password)
+    const phoneErr = validateVietnamPhone(phoneNumber)
 
     if (nameErr) nextErrors.fullName = nameErr
     if (emailErr) nextErrors.email = emailErr
     if (passErr) nextErrors.password = passErr
+    if (phoneErr) nextErrors.phoneNumber = phoneErr
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors)
@@ -52,6 +58,7 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
         fullName: fullName.trim(),
         email: normalizedEmail,
         password,
+        phoneNumber: phoneNumber.trim() ? phoneNumber.trim() : null,
       })
       onRegistered(normalizedEmail)
     } catch (err: unknown) {
@@ -76,15 +83,21 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
   }
 
   return (
-    <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-4">
-      {formError && (
-        <div
-          role="alert"
-          className="rounded-[10px] border border-status-rejected/40 bg-status-rejected/10 px-3.5 py-2.5 text-xs text-status-rejected leading-relaxed"
-        >
-          {formError}
-        </div>
-      )}
+    <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-3.5">
+      <AnimatePresence mode="wait">
+        {formError && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="destructive">
+              <AlertDescription className="mt-0">{formError}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Input
         name="fullName"
@@ -104,7 +117,7 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
         name="email"
         type="email"
         label="Địa chỉ Email *"
-        placeholder="docgia@example.com"
+        placeholder="name@example.com"
         autoComplete="email"
         value={email}
         onChange={(e) => {
@@ -118,7 +131,7 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
       <PasswordInput
         name="password"
         label="Mật khẩu *"
-        placeholder="Tối thiểu 8 ký tự, gồm chữ hoa, thường và số"
+        placeholder="Nhập mật khẩu"
         autoComplete="new-password"
         value={password}
         onChange={(e) => {
@@ -127,7 +140,21 @@ export function RegisterReaderForm({ onRegistered }: RegisterReaderFormProps) {
         }}
         error={fieldErrors.password}
         disabled={isSubmitting}
-        showStrengthChecklist
+      />
+
+      <Input
+        name="phoneNumber"
+        type="tel"
+        label="Số điện thoại"
+        placeholder="0912 345 678"
+        autoComplete="tel"
+        value={phoneNumber}
+        onChange={(e) => {
+          setPhoneNumber(e.target.value)
+          if (fieldErrors.phoneNumber) setFieldErrors((prev) => ({ ...prev, phoneNumber: '' }))
+        }}
+        error={fieldErrors.phoneNumber}
+        disabled={isSubmitting}
       />
 
       <div className="pt-1">

@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1200" fill="none">
+  <defs>
+    <linearGradient id="dawnSky" x1="500" y1="0" x2="500" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B1930" />
+      <stop offset="36%" stop-color="#15315C" />
+      <stop offset="68%" stop-color="#2B5B9E" />
+      <stop offset="88%" stop-color="#7CC8EC" />
+      <stop offset="100%" stop-color="#D6F1FC" />
+    </linearGradient>
+    <linearGradient id="harborWater" x1="500" y1="790" x2="500" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#132D59" />
+      <stop offset="45%" stop-color="#0D2040" />
+      <stop offset="100%" stop-color="#081326" />
+    </linearGradient>
+    <linearGradient id="sunBeam" x1="500" y1="340" x2="500" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F0F9FF" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#A6E1FA" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Atmospheric Morning Sky -->
+  <rect width="1000" height="820" fill="url(#dawnSky)" />
+
+  <!-- Subtle Celestial Meridian Arcs -->
+  <circle cx="560" cy="540" r="390" stroke="#A6E1FA" stroke-opacity="0.16" stroke-width="1.2" />
+  <circle cx="560" cy="540" r="290" stroke="#D6F1FC" stroke-opacity="0.22" stroke-width="1.2" stroke-dasharray="5 7" />
+
+  <!-- Rising Morning Sun Disc & Crisp Atmospheric Halo -->
+  <circle cx="560" cy="535" r="148" fill="#E0F4FE" fill-opacity="0.22" />
+  <circle cx="560" cy="535" r="106" fill="#F0F9FF" />
+  <polygon points="560,390 290,800 830,800" fill="url(#sunBeam)" />
+
+  <!-- Soft High-Altitude Clouds (Flat 2D Minimalist) -->
+  <path d="M110 270H290C301 270 310 261 310 250C310 239 301 230 290 230H254C246 212 228 200 206 200C181 200 160 217 155 240H110C99 240 90 249 90 260C90 266 95 270 110 270Z" fill="#A6E1FA" fill-opacity="0.14" />
+  <path d="M700 210H880C890 210 898 202 898 192C898 182 890 174 880 174H835C827 156 809 144 788 144C765 144 746 159 740 180H700C690 180 682 188 682 198C682 205 688 210 700 210Z" fill="#D6F1FC" fill-opacity="0.16" />
+
+  <!-- Distant Mountain / Peninsula Silhouette -->
+  <path d="M0 742L190 676L375 718L590 658L815 706L1000 664V800H0V742Z" fill="#234B86" />
+
+  <!-- Background Skyline Layer (Muted Editorial Blue) -->
+  <g fill="#1B3B6F">
+    <rect x="58" y="548" width="76" height="252" />
+    <rect x="152" y="486" width="92" height="314" />
+    <polygon points="152,486 198,442 244,486" />
+    <rect x="278" y="522" width="84" height="278" />
+    <rect x="658" y="472" width="98" height="328" />
+    <rect x="682" y="438" width="50" height="34" />
+    <rect x="780" y="534" width="88" height="266" />
+    <rect x="886" y="502" width="74" height="298" />
+  </g>
+
+  <!-- Midground Architectural Skyline & Press Landmark Spire -->
+  <g fill="#122A52">
+    <rect x="24" y="616" width="88" height="184" />
+    <rect x="128" y="574" width="104" height="226" />
+    <!-- Iconic Editorial Press Spire -->
+    <rect x="382" y="430" width="112" height="370" />
+    <rect x="398" y="392" width="80" height="38" />
+    <polygon points="438,314 416,392 460,392" />
+    <rect x="436" y="274" width="4" height="44" fill="#A6E1FA" />
+    <!-- Arched Conservatory / Library Pavilion -->
+    <rect x="514" y="586" width="166" height="214" />
+    <rect x="706" y="556" width="118" height="244" />
+    <rect x="844" y="604" width="132" height="196" />
+  </g>
+
+  <!-- Warm Ice-Blue Lit Architectural Windows & Arches -->
+  <g fill="#D6F1FC" fill-opacity="0.82">
+    <!-- Press Spire Vertical Light Strips -->
+    <rect x="404" y="454" width="8" height="280" rx="4" />
+    <rect x="424" y="454" width="8" height="280" rx="4" />
+    <rect x="444" y="454" width="8" height="280" rx="4" />
+    <rect x="464" y="454" width="8" height="280" rx="4" />
+
+    <!-- Library Tall Arched Windows -->
+    <path d="M538 688V626C538 614 547 605 558 605C569 605 578 614 578 626V688H538Z" />
+    <path d="M594 688V626C594 614 603 605 614 605C625 605 634 614 634 626V688H594Z" />
+    <path d="M650 688V626C650 614 655 609 662 609C669 609 674 614 674 626V688H650Z" fill-opacity="0.5" />
+  </g>
+
+  <!-- Subtle Lit Window Grid on Flanking Towers -->
+  <g fill="#A6E1FA" fill-opacity="0.55">
+    <rect x="148" y="598" width="14" height="6" rx="2" />
+    <rect x="172" y="598" width="14" height="6" rx="2" />
+    <rect x="196" y="598" width="14" height="6" rx="2" />
+    <rect x="148" y="618" width="14" height="6" rx="2" />
+    <rect x="196" y="618" width="14" height="6" rx="2" />
+    <rect x="148" y="638" width="14" height="6" rx="2" />
+    <rect x="172" y="638" width="14" height="6" rx="2" />
+
+    <rect x="728" y="582" width="16" height="6" rx="2" />
+    <rect x="756" y="582" width="16" height="6" rx="2" />
+    <rect x="784" y="582" width="16" height="6" rx="2" />
+    <rect x="728" y="604" width="16" height="6" rx="2" />
+    <rect x="784" y="604" width="16" height="6" rx="2" />
+    <rect x="756" y="626" width="16" height="6" rx="2" />
+    <rect x="784" y="626" width="16" height="6" rx="2" />
+  </g>
+
+  <!-- Foreground Modern Suspension Promenade & Horizon Deck -->
+  <rect x="0" y="782" width="1000" height="16" fill="#0B1930" />
+  <line x1="0" y1="782" x2="1000" y2="782" stroke="#A6E1FA" stroke-opacity="0.65" stroke-width="2" />
+
+  <!-- Calm Harbor Reflection Water -->
+  <rect x="0" y="798" width="1000" height="402" fill="url(#harborWater)" />
+
+  <!-- Minimalist Sun Shimmer Reflections on Water -->
+  <g fill="#A6E1FA">
+    <rect x="478" y="818" width="164" height="4" rx="2" fill="#D6F1FC" fill-opacity="0.75" />
+    <rect x="496" y="836" width="128" height="3.5" rx="1.75" fill-opacity="0.55" />
+    <rect x="518" y="854" width="84" height="3" rx="1.5" fill-opacity="0.42" />
+    <rect x="464" y="874" width="192" height="2.5" rx="1.25" fill-opacity="0.28" />
+    <rect x="510" y="896" width="102" height="2.5" rx="1.25" fill-opacity="0.22" />
+    <rect x="534" y="918" width="54" height="2" rx="1" fill-opacity="0.18" />
+  </g>
+
+  <!-- Origami Paper Swifts / Morning Dispatches Gliding Across Dawn Sky -->
+  <g fill="#F0F9FF">
+    <polygon points="312,356 344,344 328,364 334,374" />
+    <polygon points="328,364 344,344 352,360" fill="#A6E1FA" />
+
+    <polygon points="642,318 678,304 660,328 666,338" />
+    <polygon points="660,328 678,304 688,322" fill="#A6E1FA" />
+
+    <polygon points="714,368 740,358 727,375 731,383" fill-opacity="0.85" />
+    <polygon points="256,412 278,403 267,418 271,425" fill-opacity="0.75" />
+  </g>
+</svg>

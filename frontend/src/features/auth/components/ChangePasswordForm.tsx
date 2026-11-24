@@ -1,5 +1,7 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/common/Button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { accountService } from '@/services/accountService'
 import { toAppClientError } from '@/services/apiClient'
 import { extractFieldErrors, validatePassword } from '@/utils/validation'
@@ -93,23 +95,35 @@ export function ChangePasswordForm() {
         </p>
       </div>
 
-      {formError && (
-        <div
-          role="alert"
-          className="rounded-[10px] border border-status-rejected/40 bg-status-rejected/10 px-3.5 py-2.5 text-xs text-status-rejected leading-relaxed"
-        >
-          {formError}
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {formError && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="destructive">
+              <AlertDescription className="mt-0">{formError}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      {successMsg && (
-        <div
-          role="status"
-          className="rounded-[10px] border border-status-published/35 bg-status-published/10 px-3.5 py-2.5 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed"
-        >
-          {successMsg}
-        </div>
-      )}
+        {successMsg && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          >
+            <Alert variant="success" role="status">
+              <AlertDescription className="mt-0">{successMsg}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <PasswordInput
         name="currentPassword"
@@ -131,7 +145,7 @@ export function ChangePasswordForm() {
         <PasswordInput
           name="newPassword"
           label="Mật khẩu mới *"
-          placeholder="Tối thiểu 8 ký tự"
+          placeholder="Nhập mật khẩu mới"
           autoComplete="new-password"
           value={newPassword}
           onChange={(e) => {
@@ -142,7 +156,6 @@ export function ChangePasswordForm() {
           }}
           error={fieldErrors.newPassword}
           disabled={isSubmitting}
-          showStrengthChecklist
         />
 
         <PasswordInput

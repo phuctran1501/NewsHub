@@ -39,6 +39,7 @@ export interface RegisterReaderRequest {
   fullName: string
   email: string
   password: string
+  phoneNumber?: string | null
 }
 
 export interface RegisterJournalistRequest {
@@ -56,6 +57,7 @@ export interface AuthUserResponseDto {
   fullName: string
   role: UserRoleValue | UserRoleName
   createdAt: string
+  phoneNumber?: string | null
 }
 
 export interface JournalistResponseDto {

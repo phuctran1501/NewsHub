@@ -33,12 +33,12 @@ export function LoginPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1.5 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-text-main dark:text-dark-text-main">
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-text-main dark:text-dark-text-main">
           Đăng nhập
         </h1>
-        <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
-          Truy cập không gian đọc báo cá nhân hóa và bàn làm việc tòa soạn số NewsHub.
+        <p className="mx-auto max-w-sm text-sm leading-relaxed text-neutral-text-muted dark:text-dark-text-muted">
+          Chào mừng bạn quay lại hệ sinh thái báo điện tử và tòa soạn số NewsHub.
         </p>
       </div>
 

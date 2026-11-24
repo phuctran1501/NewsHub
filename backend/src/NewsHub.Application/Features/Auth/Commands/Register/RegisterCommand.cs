@@ -15,7 +15,8 @@ using NewsHub.Domain.ValueObjects;
 public sealed record RegisterCommand(
     string Email,
     string Password,
-    string FullName) : IRequest<AuthUserResponseDto>, ITransactionalRequest;
+    string FullName,
+    string? PhoneNumber = null) : IRequest<AuthUserResponseDto>, ITransactionalRequest;
 
 public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
@@ -38,6 +39,13 @@ public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand
             .NotEmpty().WithMessage("Họ tên không được để trống.")
             .Must(name => name.Trim().Length >= 2 && name.Trim().Length <= 100)
             .WithMessage("Họ tên phải từ 2 đến 100 ký tự.");
+
+        When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
+        {
+            RuleFor(x => x.PhoneNumber!)
+                .Must(PhoneNumber.IsValid)
+                .WithMessage("Số điện thoại không đúng định dạng nhà mạng Việt Nam (+84).");
+        });
     }
 }
 
@@ -65,6 +73,7 @@ public sealed class RegisterCommandHandler(
             Email = new Email(normalizedEmail),
             PasswordHash = passwordHash,
             FullName = request.FullName.Trim(),
+            PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : PhoneNumber.Normalize(request.PhoneNumber),
             Role = UserRole.User,
             IsActive = true
         };
@@ -84,6 +93,7 @@ public sealed class RegisterCommandHandler(
             user.Email.Value,
             user.FullName,
             user.Role,
-            user.CreatedAt);
+            user.CreatedAt,
+            user.PhoneNumber);
     }
 }
