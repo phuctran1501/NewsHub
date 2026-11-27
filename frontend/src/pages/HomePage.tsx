@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { CategoryStreamSection } from '@/features/articles/components/CategoryStreamSection'
 import { HeroSpotlightSection } from '@/features/articles/components/HeroSpotlightSection'
 import { HomeCtaSection } from '@/features/articles/components/HomeCtaSection'
-import { MostReadSection } from '@/features/articles/components/MostReadSection'
 import { TrendingTopicsBar } from '@/features/articles/components/TrendingTopicsBar'
 import { usePublishedArticles } from '@/features/articles/hooks/usePublishedArticles'
 import { useCategories } from '@/features/categories/hooks/useCategories'
@@ -120,8 +119,6 @@ export function HomePage() {
         />
 
         <CategoryStreamSection categories={categories} />
-
-        <MostReadSection />
 
         <PressEcosystemMarquee />
 
