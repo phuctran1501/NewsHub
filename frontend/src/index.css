@@ -189,3 +189,45 @@
 .nh-toast-root[data-expanded] .nh-toast-content {
   opacity: 1;
 }
+
+
+/* Shared Brand Aperture Loading (Mẫu A — Pure 2D flat) */
+@keyframes nhApertureRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes nhApertureCorePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.76);
+  }
+}
+
+.nh-aperture-spin {
+  animation: nhApertureRotate 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.nh-aperture-core {
+  transform-origin: 20px 20px;
+  animation: nhApertureCorePulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nh-aperture-spin,
+  .nh-aperture-core {
+    animation: none;
+  }
+}

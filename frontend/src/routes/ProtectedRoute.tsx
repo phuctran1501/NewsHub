@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { Spinner } from '@/components/common/Spinner'
+import { Loading } from '@/components/common/Loading'
 import { useAuth } from '@/hooks/useAuth'
 import type { UserRoleName } from '@/types/auth'
 import { ROUTES } from './paths'
@@ -16,9 +16,12 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (isInitializing) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <Spinner size="lg" label="Đang kiểm tra phiên đăng nhập" />
-      </div>
+      <Loading
+        mode="section"
+        size="lg"
+        label="Đang kiểm tra phiên đăng nhập..."
+        className="min-h-[50vh]"
+      />
     )
   }
 

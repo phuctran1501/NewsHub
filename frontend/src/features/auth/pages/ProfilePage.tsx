@@ -291,7 +291,7 @@ export function ProfilePage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-6 lg:px-12 py-8 lg:py-10 space-y-6">
       <section className="overflow-hidden rounded-2xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface">
-        <div className="relative h-24 bg-primary dark:bg-[#122a52] overflow-hidden">
+        <div className="relative h-24 bg-primary dark:bg-primary-hover overflow-hidden">
           <svg
             aria-hidden="true"
             width="160"

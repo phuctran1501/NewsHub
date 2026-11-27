@@ -44,7 +44,7 @@ function StackedToastList() {
 
             <div className="flex shrink-0 items-center gap-1.5">
               {item.actionProps && (
-                <Toast.Action className="inline-flex h-7 items-center justify-center rounded-[8px] bg-primary px-2.5 text-[11px] font-semibold text-white hover:bg-primary-hover dark:bg-secondary dark:text-dark-bg dark:hover:bg-secondary-dark transition-colors cursor-pointer" />
+                <Toast.Action className="inline-flex h-7 items-center justify-center rounded-lg bg-primary px-2.5 text-[11px] font-semibold text-white hover:bg-primary-hover dark:bg-secondary dark:text-dark-bg dark:hover:bg-secondary-dark transition-colors cursor-pointer" />
               )}
 
               <Toast.Close
@@ -67,7 +67,7 @@ export function Toaster() {
       <Toast.Portal>
         <Toast.Viewport
           aria-label="Thông báo hệ thống"
-          className="fixed right-4 bottom-20 sm:right-6 sm:bottom-6 z-[60] w-[360px] max-w-[calc(100vw-2rem)] outline-none"
+          className="fixed right-4 bottom-20 sm:right-6 sm:bottom-6 z-60 w-90 max-w-[calc(100vw-2rem)] outline-none"
         >
           <StackedToastList />
         </Toast.Viewport>

@@ -93,7 +93,7 @@ export function RegisterPage() {
                         : { type: 'spring', stiffness: 430, damping: 34 }
                     }
                     aria-hidden="true"
-                    className="absolute inset-0 rounded-[8px] bg-primary dark:bg-secondary"
+                    className="absolute inset-0 rounded-lg bg-primary dark:bg-secondary"
                   />
                 )}
                 <span className="relative z-10">{tab.label}</span>

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import { Spinner } from '@/components/common/Spinner'
+import { Loading } from '@/components/common/Loading'
 import { useAuth } from '@/hooks/useAuth'
 import { getSafeRedirectPath } from '@/utils/validation'
 import { ROUTES } from './paths'
@@ -14,11 +14,7 @@ export function GuestOnlyRoute({ children }: GuestOnlyRouteProps) {
   const [searchParams] = useSearchParams()
 
   if (isInitializing) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-bg dark:bg-dark-bg">
-        <Spinner size="lg" label="Đang kiểm tra phiên đăng nhập" />
-      </div>
-    )
+    return <Loading mode="fullscreen" size="lg" label="Đang kiểm tra phiên đăng nhập..." />
   }
 
   if (isAuthenticated) {
