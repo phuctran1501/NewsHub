@@ -5,6 +5,7 @@ import { HeroSpotlightSection } from '@/features/articles/components/HeroSpotlig
 import { usePublishedArticles } from '@/features/articles/hooks/usePublishedArticles'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { FeaturedNewsroomsSection } from '@/features/companies/components/FeaturedNewsroomsSection'
+import { PressEcosystemMarquee } from '@/features/companies/components/PressEcosystemMarquee'
 import { HeroSearchSection } from '@/features/search/components/HeroSearchSection'
 import { useAuth } from '@/hooks/useAuth'
 import { buildArticleDetailPath } from '@/routes/paths'
@@ -114,6 +115,8 @@ export function HomePage() {
         />
 
         <CategoryStreamSection categories={categories} />
+
+        <PressEcosystemMarquee />
 
         <FeaturedNewsroomsSection />
       </div>

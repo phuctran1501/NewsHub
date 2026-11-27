@@ -255,8 +255,77 @@
   animation-play-state: paused;
 }
 
+/* 2D Border Beam Search (Pure 2D hairline beam, primary Light / secondary Dark) */
+@keyframes nhBorderBeamSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nh-search-beam {
+  position: relative;
+  padding: 1.5px;
+  overflow: hidden;
+  background: var(--color-neutral-border);
+  transition: background-color 150ms ease;
+}
+
+.dark .nh-search-beam {
+  background: var(--color-dark-border);
+}
+
+.nh-search-beam::before {
+  content: '';
+  position: absolute;
+  inset: -140%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 285deg,
+    var(--color-primary) 322deg,
+    transparent 360deg
+  );
+  animation: nhBorderBeamSpin 4.5s linear infinite;
+  pointer-events: none;
+}
+
+.dark .nh-search-beam::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 285deg,
+    var(--color-secondary) 322deg,
+    transparent 360deg
+  );
+}
+
+.nh-search-beam:focus-within {
+  background: var(--color-primary);
+}
+
+.dark .nh-search-beam:focus-within {
+  background: var(--color-secondary);
+}
+
+/* Press Ecosystem Logo Marquee (Pure 2D, pauses on hover) */
+.nh-press-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: max-content;
+  animation: nhTickerScroll 28s linear infinite;
+}
+
+.nh-press-marquee:hover .nh-press-marquee-track {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nh-ticker-track {
+  .nh-ticker-track,
+  .nh-press-marquee-track {
     animation: none;
+  }
+
+  .nh-search-beam::before {
+    animation: none;
+    opacity: 0;
   }
 }

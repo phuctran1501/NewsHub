@@ -65,44 +65,46 @@ export function HeroSearchSection() {
       </div>
 
       <form onSubmit={handleHeroSearch} className="space-y-3">
-        <div className="flex items-center gap-2.5 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg p-1.5 pl-4 focus-within:border-primary dark:focus-within:border-secondary transition-colors duration-150">
-          <Search
-            size={16}
-            strokeWidth={1.75}
-            className="shrink-0 text-neutral-text-muted dark:text-dark-text-muted"
-            aria-hidden="true"
-          />
-
-          <div className="relative flex-1 min-w-0">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              maxLength={200}
-              aria-label="Tìm kiếm bài viết với NewsHub AI"
-              className="w-full bg-transparent py-2 text-sm text-neutral-text-main dark:text-dark-text-main outline-none"
+        <div className="nh-search-beam rounded-xl">
+          <div className="relative z-10 flex items-center gap-2.5 rounded-[10.5px] bg-neutral-bg dark:bg-dark-bg p-1.5 pl-4">
+            <Search
+              size={16}
+              strokeWidth={1.75}
+              className="shrink-0 text-neutral-text-muted dark:text-dark-text-muted"
+              aria-hidden="true"
             />
-            {!searchQuery && (
-              <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={placeholderIndex}
-                    initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                    transition={{ duration: 0.22, ease: 'easeOut' }}
-                    className="truncate text-sm text-neutral-text-muted dark:text-dark-text-muted"
-                  >
-                    {ROTATING_PLACEHOLDERS[placeholderIndex]}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
-            )}
-          </div>
 
-          <Button type="submit" variant="primary" size="sm" className="h-9 px-4 shrink-0">
-            Tìm kiếm
-          </Button>
+            <div className="relative flex-1 min-w-0">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                maxLength={200}
+                aria-label="Tìm kiếm bài viết với NewsHub AI"
+                className="w-full bg-transparent py-2 text-sm text-neutral-text-main dark:text-dark-text-main outline-none"
+              />
+              {!searchQuery && (
+                <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={placeholderIndex}
+                      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="truncate text-sm text-neutral-text-muted dark:text-dark-text-muted"
+                    >
+                      {ROTATING_PLACEHOLDERS[placeholderIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+
+            <Button type="submit" variant="primary" size="sm" className="h-9 px-4 shrink-0">
+              Tìm kiếm
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-text-muted dark:text-dark-text-muted">
