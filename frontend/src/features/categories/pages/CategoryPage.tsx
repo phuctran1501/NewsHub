@@ -5,7 +5,6 @@ import { Pagination } from '@/components/common/Pagination'
 import { ArticleCardSkeleton, Skeleton } from '@/components/common/Skeleton'
 import { ArticleCard } from '@/features/articles/components/ArticleCard'
 import { usePublishedArticles } from '@/features/articles/hooks/usePublishedArticles'
-import { usePublicCompanies } from '@/features/companies/hooks/usePublicCompanies'
 import { buildCategoryPath, ROUTES } from '@/routes/paths'
 import { AppClientError } from '@/types/api'
 import type { ArticleSortBy } from '@/types/article'
@@ -46,6 +45,9 @@ export function CategoryPage() {
     error: categoryError,
   } = useCategoryBySlug(slug)
 
+  const matchedFromList = categories.find((c) => c.slug === slug)
+  const displayCategory = categoryDetail ?? matchedFromList
+
   const {
     data: articlesResponse,
     isLoading: isLoadingArticles,
@@ -59,16 +61,9 @@ export function CategoryPage() {
       pageSize: PAGE_SIZE,
       sortBy,
     },
-    { enabled: Boolean(slug) && !isCategoryError },
+    { enabled: Boolean(displayCategory) && !isCategoryError },
   )
 
-  const { data: companiesResponse } = usePublicCompanies({ pageNumber: 1, pageSize: 50 })
-  const companyNameById = new Map(
-    (companiesResponse?.data ?? []).map((company) => [company.id, company.name]),
-  )
-
-  const matchedFromList = categories.find((c) => c.slug === slug)
-  const displayCategory = categoryDetail ?? matchedFromList
   const articles = articlesResponse?.data ?? []
   const meta = articlesResponse?.meta
   const totalArticleCount = meta?.totalCount ?? matchedFromList?.articleCount ?? 0
@@ -236,11 +231,7 @@ export function CategoryPage() {
             )}
           >
             {articles.map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                companyName={article.companyId ? companyNameById.get(article.companyId) : undefined}
-              />
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
 

@@ -26,6 +26,7 @@ export interface ArticleSummaryDto {
   status: string
   author: AuthorSummaryDto
   companyId: string | null
+  companyName?: string | null
   coverImage: CoverImageDto | null
   readingTimeMinutes: number
   viewCount: number

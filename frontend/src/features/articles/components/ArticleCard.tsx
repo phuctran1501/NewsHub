@@ -8,13 +8,13 @@ import { formatRelativeTime } from '@/utils/date'
 
 interface ArticleCardProps {
   article: ArticleSummaryDto
-  companyName?: string | null
   className?: string
 }
 
-export function ArticleCard({ article, companyName, className }: ArticleCardProps) {
+export function ArticleCard({ article, className }: ArticleCardProps) {
   const primaryCategory = article.categories[0]
   const articleHref = buildArticleDetailPath(article.slug)
+  const companyName = article.companyName
 
   return (
     <article

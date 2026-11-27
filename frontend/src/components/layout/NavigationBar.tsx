@@ -40,12 +40,14 @@ export function NavigationBar({ items, className }: NavigationBarProps) {
         ]
       : FALLBACK_NAV_ITEMS)
 
+  const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
+
   return (
     <nav aria-label="Danh mục báo chí" className={cn('hidden lg:flex items-center gap-7', className)}>
       {navItems.map((item) => {
         const isItemActive = item.categorySlug
-          ? location.pathname === buildCategoryPath(item.categorySlug)
-          : location.pathname === ROUTES.HOME
+          ? normalizedPathname === buildCategoryPath(item.categorySlug)
+          : normalizedPathname === ROUTES.HOME
 
         return (
           <NavLink

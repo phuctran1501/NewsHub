@@ -17,9 +17,7 @@ interface CommandSearchModalProps {
   onClose: () => void
 }
 
-const FALLBACK_DESTINATIONS = [
-  { label: 'Trang chủ Thời Báo Số', to: ROUTES.HOME },
-  { label: 'Tìm kiếm ngữ nghĩa AI', to: ROUTES.SEARCH },
+const FALLBACK_CATEGORY_DESTINATIONS = [
   { label: 'Chuyên mục Thời sự', to: buildCategoryPath('thoi-su') },
   { label: 'Chuyên mục Kinh tế', to: buildCategoryPath('kinh-te') },
   { label: 'Chuyên mục Công nghệ', to: buildCategoryPath('cong-nghe') },
@@ -31,24 +29,22 @@ export function CommandSearchModal({ isOpen, onClose }: CommandSearchModalProps)
   const [query, setQuery] = useState('')
   const { data: categories } = useCategories()
 
-  const searchLabel = isAuthenticated ? 'Tìm kiếm ngữ nghĩa AI' : 'Tìm kiếm bài viết'
+  const searchLabel = isAuthenticated ? 'Tìm kiếm thông minh' : 'Tìm kiếm bài viết'
   const searchRoute = isAuthenticated ? ROUTES.SEARCH : buildSearchPath(undefined, 'keyword')
 
-  const quickDestinations =
+  const categoryDestinations =
     categories && categories.length > 0
-      ? [
-          { label: 'Trang chủ Thời Báo Số', to: ROUTES.HOME },
-          { label: searchLabel, to: searchRoute },
-          ...categories.slice(0, 4).map((cat) => ({
-            label: `Chuyên mục ${cat.name}`,
-            to: buildCategoryPath(cat.slug),
-          })),
-        ]
-      : [
-          { label: 'Trang chủ Thời Báo Số', to: ROUTES.HOME },
-          { label: searchLabel, to: searchRoute },
-          ...FALLBACK_DESTINATIONS.slice(2),
-        ]
+      ? categories.slice(0, 4).map((cat) => ({
+          label: `Chuyên mục ${cat.name}`,
+          to: buildCategoryPath(cat.slug),
+        }))
+      : FALLBACK_CATEGORY_DESTINATIONS
+
+  const quickDestinations = [
+    { label: 'Trang chủ Thời Báo Số', to: ROUTES.HOME },
+    { label: searchLabel, to: searchRoute },
+    ...categoryDestinations,
+  ]
 
   const handleClose = () => {
     setQuery('')

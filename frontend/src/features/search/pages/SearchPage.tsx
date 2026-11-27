@@ -8,10 +8,8 @@ import { Loading } from '@/components/common/Loading'
 import { Pagination } from '@/components/common/Pagination'
 import { ArticleCardSkeleton } from '@/components/common/Skeleton'
 import { ArticleCard } from '@/features/articles/components/ArticleCard'
-import { usePublicCompanies } from '@/features/companies/hooks/usePublicCompanies'
 import { useAuth } from '@/hooks/useAuth'
 import { AppClientError } from '@/types/api'
-import type { ArticleSortBy } from '@/types/article'
 import type { SearchMode } from '@/types/search'
 import { cn } from '@/utils/cn'
 import { SemanticResultCard } from '../components/SemanticResultCard'
@@ -29,24 +27,18 @@ function parseMode(raw: string | null): SearchMode {
   return raw === 'keyword' ? 'keyword' : 'ai'
 }
 
-function parseSortBy(raw: string | null): ArticleSortBy {
-  if (raw === 'mostread' || raw === 'oldest') return raw
-  return 'latest'
-}
-
 function parsePage(raw: string | null): number {
   const parsed = Number.parseInt(raw ?? '1', 10)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
 export function SearchPage() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isInitializing } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const activeQuery = (searchParams.get('q') ?? '').trim()
   const requestedMode = parseMode(searchParams.get('mode'))
   const mode: SearchMode = isAuthenticated ? requestedMode : 'keyword'
-  const sortBy = parseSortBy(searchParams.get('sortBy'))
   const pageNumber = parsePage(searchParams.get('page'))
 
   const [inputValue, setInputValue] = useState(activeQuery)
@@ -57,37 +49,33 @@ export function SearchPage() {
     setInputValue(activeQuery)
   }
 
-  const aiSearch = useAiSemanticSearch(activeQuery, 10, isAuthenticated && mode === 'ai')
+  const aiSearch = useAiSemanticSearch(
+    activeQuery,
+    10,
+    !isInitializing && isAuthenticated && mode === 'ai',
+  )
   const keywordSearch = useKeywordSearch(
     {
       query: activeQuery,
       pageNumber,
       pageSize: KEYWORD_PAGE_SIZE,
-      sortBy,
+      sortBy: 'latest',
     },
-    mode === 'keyword',
-  )
-
-  const { data: companiesResponse } = usePublicCompanies({ pageNumber: 1, pageSize: 50 })
-  const companyNameById = new Map(
-    (companiesResponse?.data ?? []).map((company) => [company.id, company.name]),
+    !isInitializing && mode === 'keyword',
   )
 
   function navigateSearch(next: {
     q?: string
     mode?: SearchMode
     page?: number
-    sortBy?: ArticleSortBy
   }) {
     const nextParams = new URLSearchParams()
     const finalQ = (next.q ?? activeQuery).trim()
     const finalMode = next.mode ?? mode
-    const finalSort = next.sortBy ?? sortBy
     const finalPage = next.page ?? 1
 
     if (finalQ) nextParams.set('q', finalQ)
     if (finalMode === 'keyword') nextParams.set('mode', 'keyword')
-    if (finalMode === 'keyword' && finalSort !== 'latest') nextParams.set('sortBy', finalSort)
     if (finalMode === 'keyword' && finalPage > 1) nextParams.set('page', String(finalPage))
 
     setSearchParams(nextParams)
@@ -208,18 +196,18 @@ export function SearchPage() {
               )}
             </div>
 
-            {mode === 'ai' && (
-              <span>Tối đa 2000 ký tự</span>
-            )}
+            {mode === 'ai' && <span>Tối đa 200 ký tự</span>}
           </div>
         </form>
       </section>
 
-      {!activeQuery ? (
+      {isInitializing && activeQuery ? (
+        <Loading mode="section" size="md" label="Đang tải kết quả tìm kiếm..." />
+      ) : !activeQuery ? (
         isAuthenticated ? (
           <section className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-6 sm:p-8 space-y-4">
             <h2 className="text-base font-bold text-neutral-text-main dark:text-dark-text-main">
-              Gợi ý câu hỏi tìm kiếm ngữ nghĩa
+              Gợi ý câu hỏi tìm kiếm thông minh
             </h2>
             <p className="text-sm text-neutral-text-muted dark:text-dark-text-muted">
               Nhập một câu hỏi tự nhiên hoặc chọn nhanh một chủ đề bên dưới để khám phá kho bài viết
@@ -256,14 +244,14 @@ export function SearchPage() {
           />
         ) : isAiRateLimited ? (
           <EmptyState
-            title="Bạn đang thao tác tìm kiếm AI quá nhanh"
-            description="Hệ thống giới hạn 30 lượt tìm kiếm ngữ nghĩa mỗi phút để đảm bảo hiệu năng. Bạn có thể chuyển sang tìm kiếm từ khóa ngay."
+            title="Bạn đang thao tác tìm kiếm thông minh quá nhanh"
+            description="Hệ thống giới hạn 30 lượt tìm kiếm thông minh mỗi phút để đảm bảo hiệu năng. Bạn có thể chuyển sang tìm kiếm từ khóa ngay."
             actionLabel="Chuyển sang tìm theo từ khóa"
             onAction={() => navigateSearch({ mode: 'keyword', page: 1 })}
           />
         ) : aiSearch.isError ? (
           <EmptyState
-            title="Không thể thực hiện tìm kiếm ngữ nghĩa AI"
+            title="Không thể thực hiện tìm kiếm thông minh"
             description="Dịch vụ tìm kiếm vector tạm thời gián đoạn. Bạn có thể thử lại hoặc tìm bằng từ khóa tiêu đề."
             actionLabel="Chuyển sang tìm theo từ khóa"
             onAction={() => navigateSearch({ mode: 'keyword', page: 1 })}
@@ -271,7 +259,7 @@ export function SearchPage() {
         ) : (aiSearch.data?.length ?? 0) === 0 ? (
           <EmptyState
             title="Chưa tìm thấy bài viết khớp ngữ nghĩa"
-            description={`Không có bài viết nào đạt ngưỡng tương đồng ngữ nghĩa cho "${activeQuery}". Hãy thử diễn đạt ngắn gọn hơn hoặc tìm theo từ khóa tiêu đề.`}
+            description={`Không có bài viết nào đạt ngưỡng tương đồng cho "${activeQuery}". Hãy thử diễn đạt ngắn gọn hơn hoặc tìm theo từ khóa tiêu đề.`}
             actionLabel="Thử tìm theo từ khóa"
             onAction={() => navigateSearch({ mode: 'keyword', page: 1 })}
           />
@@ -300,10 +288,10 @@ export function SearchPage() {
           title="Không có bài viết nào khớp từ khóa"
           description={
             isAuthenticated
-              ? `Không tìm thấy tiêu đề nào chứa "${activeQuery}". Hãy thử chuyển sang Tìm kiếm AI (Ngữ nghĩa) để mở rộng theo ý nghĩa câu hỏi.`
+              ? `Không tìm thấy tiêu đề nào chứa "${activeQuery}". Hãy thử chuyển sang Tìm kiếm thông minh để mở rộng theo ý nghĩa câu hỏi.`
               : `Không tìm thấy tiêu đề nào chứa "${activeQuery}". Hãy thử lại với từ khóa ngắn gọn hơn.`
           }
-          actionLabel={isAuthenticated ? 'Thử Tìm kiếm AI (Ngữ nghĩa)' : undefined}
+          actionLabel={isAuthenticated ? 'Thử Tìm kiếm thông minh' : undefined}
           onAction={isAuthenticated ? () => navigateSearch({ mode: 'ai', page: 1 }) : undefined}
         />
       ) : (
@@ -315,11 +303,7 @@ export function SearchPage() {
             )}
           >
             {(keywordSearch.data?.data ?? []).map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                companyName={article.companyId ? companyNameById.get(article.companyId) : undefined}
-              />
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
 

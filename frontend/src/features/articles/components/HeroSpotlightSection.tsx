@@ -9,7 +9,6 @@ import { formatRelativeTime, formatViewCount } from '@/utils/date'
 
 interface HeroSpotlightSectionProps {
   articles: ArticleSummaryDto[]
-  companyNameById?: Map<string, string>
   isLoading: boolean
   isError: boolean
   onRetry: () => void
@@ -48,7 +47,6 @@ function HeroSpotlightSkeleton() {
 
 export function HeroSpotlightSection({
   articles,
-  companyNameById,
   isLoading,
   isError,
   onRetry,
@@ -80,9 +78,7 @@ export function HeroSpotlightSection({
   const leadArticle = articles[0]
   const secondaryArticles = articles.slice(1, 4)
   const leadCategory = leadArticle.categories[0]
-  const leadCompanyName = leadArticle.companyId
-    ? companyNameById?.get(leadArticle.companyId)
-    : undefined
+  const leadCompanyName = leadArticle.companyName
 
   return (
     <section

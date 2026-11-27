@@ -10,13 +10,9 @@ import { ArticleCard } from './ArticleCard'
 
 interface CategoryStreamSectionProps {
   categories: CategoryResponseDto[]
-  companyNameById?: Map<string, string>
 }
 
-export function CategoryStreamSection({
-  categories,
-  companyNameById,
-}: CategoryStreamSectionProps) {
+export function CategoryStreamSection({ categories }: CategoryStreamSectionProps) {
   const [selectedSlug, setSelectedSlug] = useState<string>('')
 
   const { data, isLoading, isFetching, isError, refetch } = usePublishedArticles({
@@ -124,11 +120,7 @@ export function CategoryStreamSection({
           )}
         >
           {articles.map((article) => (
-            <ArticleCard
-              key={article.id}
-              article={article}
-              companyName={article.companyId ? companyNameById?.get(article.companyId) : undefined}
-            />
+            <ArticleCard key={article.id} article={article} />
           ))}
         </div>
       )}
