@@ -231,3 +231,32 @@
     animation: none;
   }
 }
+
+
+/* Breaking News Ticker Marquee (Pure 2D, pauses on hover) */
+@keyframes nhTickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.nh-ticker-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.25rem;
+  white-space: nowrap;
+  animation: nhTickerScroll 30s linear infinite;
+}
+
+.nh-ticker-bar:hover .nh-ticker-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nh-ticker-track {
+    animation: none;
+  }
+}
