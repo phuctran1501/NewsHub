@@ -12,5 +12,6 @@ public enum AppErrorKind
     NotFound = 404,
     Conflict = 409,
     Gone = 410,
-    Validation = 422
+    Validation = 422,
+    ServiceUnavailable = 503
 }

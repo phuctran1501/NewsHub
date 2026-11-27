@@ -244,7 +244,7 @@ public class GeminiAiServiceTests
     }
 
     [Fact]
-    public async Task GenerateEmbeddingAsync_WhenGeminiReturnsInvalidDimensions_ShouldThrowBadRequestException()
+    public async Task GenerateEmbeddingAsync_WhenGeminiReturnsInvalidDimensions_ShouldThrowServiceUnavailableException()
     {
         // Arrange (giả lập trường hợp model trả về 3072 chiều thay vì 768)
         var values = new float[3072];
@@ -272,7 +272,7 @@ public class GeminiAiServiceTests
         var service = CreateService(handlerMock.Object);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<BadRequestException>(() => service.GenerateEmbeddingAsync("Văn bản thử nghiệm", CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<ServiceUnavailableException>(() => service.GenerateEmbeddingAsync("Văn bản thử nghiệm", CancellationToken.None));
         Assert.Equal(ErrorCodes.InvalidAiResponse, ex.ErrorCode);
     }
 

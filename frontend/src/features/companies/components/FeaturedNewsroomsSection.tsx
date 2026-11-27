@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Skeleton } from '@/components/common/Skeleton'
-import { LoginModal } from '@/features/auth'
 import { useAuth } from '@/hooks/useAuth'
+import { ROUTES } from '@/routes/paths'
 import {
   useFollowedCompanyIds,
   usePublicCompanies,
@@ -22,7 +22,8 @@ function getCompanyMonogram(name: string): string {
 
 export function FeaturedNewsroomsSection() {
   const { isAuthenticated } = useAuth()
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const { data, isLoading, isError, refetch } = usePublicCompanies({
     pageNumber: 1,
@@ -35,7 +36,8 @@ export function FeaturedNewsroomsSection() {
 
   function handleFollowClick(companyId: string, companyName: string, isFollowing: boolean) {
     if (!isAuthenticated) {
-      setIsLoginModalOpen(true)
+      const redirect = encodeURIComponent(`${location.pathname}${location.search}`)
+      navigate(`${ROUTES.AUTH.LOGIN}?redirect=${redirect}`)
       return
     }
     toggleFollow.mutate({
@@ -162,8 +164,6 @@ export function FeaturedNewsroomsSection() {
           })}
         </div>
       )}
-
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </section>
   )
 }

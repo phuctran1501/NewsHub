@@ -252,7 +252,7 @@ export function SearchPage() {
         ) : aiSearch.isError ? (
           <EmptyState
             title="Không thể thực hiện tìm kiếm thông minh"
-            description="Dịch vụ tìm kiếm vector tạm thời gián đoạn. Bạn có thể thử lại hoặc tìm bằng từ khóa tiêu đề."
+            description="Dịch vụ tìm kiếm thông minh tạm thời gián đoạn. Bạn có thể thử lại hoặc tìm bằng từ khóa tiêu đề."
             actionLabel="Chuyển sang tìm theo từ khóa"
             onAction={() => navigateSearch({ mode: 'keyword', page: 1 })}
           />
