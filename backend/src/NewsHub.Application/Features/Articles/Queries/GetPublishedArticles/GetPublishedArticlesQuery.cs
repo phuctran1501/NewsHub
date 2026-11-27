@@ -95,6 +95,7 @@ public sealed class GetPublishedArticlesQueryHandler(
             .Skip((int)offset)
             .Take(request.PageSize)
             .Include(a => a.Author)
+            .Include(a => a.Company)
             .Include(a => a.CoverImage)
             .Include(a => a.ArticleCategories)
                 .ThenInclude(ac => ac.Category)
@@ -119,7 +120,8 @@ public sealed class GetPublishedArticlesQueryHandler(
                 a.ViewCount,
                 categories.Select(c => new CategorySummaryDto(c.Id, c.Name, c.Slug)).ToList(),
                 a.PublishedAt,
-                a.CreatedAt);
+                a.CreatedAt,
+                a.Company?.Name);
         }).ToList();
 
         return new PagedList<ArticleSummaryDto>(items, request.PageNumber, request.PageSize, totalCount);

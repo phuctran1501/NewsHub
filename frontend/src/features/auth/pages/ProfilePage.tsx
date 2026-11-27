@@ -1,3 +1,4 @@
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Badge } from '@/components/common/Badge'
@@ -6,6 +7,7 @@ import { Input } from '@/components/common/Input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/toastManager'
 import { useAuth } from '@/hooks/useAuth'
+import { queryKeys } from '@/lib/queryKeys'
 import { accountService } from '@/services/accountService'
 import { toAppClientError } from '@/services/apiClient'
 import { resolveUserRoleName, type UserProfile, type UserRoleName } from '@/types/auth'
@@ -73,7 +75,28 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
   const [pressCardNumber, setPressCardNumber] = useState(user.pressCardNumber ?? '')
   const [bio, setBio] = useState(user.bio ?? '')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-  const [isSaving, setIsSaving] = useState(false)
+
+  const updateProfileMutation = useMutation({
+    mutationFn: accountService.updateProfile,
+    onSuccess: (updated) => {
+      onProfileUpdated(updated)
+      setFullName(updated.fullName)
+      setPhoneNumber(updated.phoneNumber ?? '')
+      setPressCardNumber(updated.pressCardNumber ?? '')
+      setBio(updated.bio ?? '')
+      toast.success('Đã lưu thông tin hồ sơ', 'Các thay đổi của bạn đã được cập nhật.')
+    },
+    onError: (err: unknown) => {
+      const clientErr = toAppClientError(err)
+      if (clientErr.status === 422 && clientErr.details.length > 0) {
+        setFieldErrors(extractFieldErrors(clientErr))
+        return
+      }
+      toast.error('Không thể lưu hồ sơ', clientErr.message)
+    },
+  })
+
+  const isSaving = updateProfileMutation.isPending
 
   const normalizedPhonePreview = normalizeVietnamPhone(phoneNumber)
   const effectiveTypedPhone = phoneNumber.trim()
@@ -115,31 +138,12 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
     }
 
     setFieldErrors({})
-    setIsSaving(true)
-
-    try {
-      const updated = await accountService.updateProfile({
-        fullName: fullName.trim(),
-        phoneNumber: phoneNumber.trim(),
-        bio: bio.trim(),
-        ...(isJournalist ? { pressCardNumber: pressCardNumber.trim() } : {}),
-      })
-      onProfileUpdated(updated)
-      setFullName(updated.fullName)
-      setPhoneNumber(updated.phoneNumber ?? '')
-      setPressCardNumber(updated.pressCardNumber ?? '')
-      setBio(updated.bio ?? '')
-      toast.success('Đã lưu thông tin hồ sơ', 'Các thay đổi của bạn đã được cập nhật.')
-    } catch (err: unknown) {
-      const clientErr = toAppClientError(err)
-      if (clientErr.status === 422 && clientErr.details.length > 0) {
-        setFieldErrors(extractFieldErrors(clientErr))
-        return
-      }
-      toast.error('Không thể lưu hồ sơ', clientErr.message)
-    } finally {
-      setIsSaving(false)
-    }
+    updateProfileMutation.mutate({
+      fullName: fullName.trim(),
+      phoneNumber: phoneNumber.trim(),
+      bio: bio.trim(),
+      ...(isJournalist ? { pressCardNumber: pressCardNumber.trim() } : {}),
+    })
   }
 
   return (
@@ -263,23 +267,18 @@ export function ProfilePage() {
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeTab, setActiveTab] = useState<ProfileTabKey>('info')
 
+  const { data: latestProfile } = useQuery({
+    queryKey: queryKeys.account.me(),
+    queryFn: () => accountService.getMyProfile(),
+    enabled: Boolean(user),
+    staleTime: 60 * 1000,
+  })
+
   useEffect(() => {
-    let cancelled = false
-    async function syncLatestProfile() {
-      try {
-        const latest = await accountService.getMyProfile()
-        if (!cancelled) {
-          updateCurrentUser(latest)
-        }
-      } catch {
-        // Giữ nguyên state hiện tại nếu mạng chập chờn; apiClient đã tự xử lý 401 refresh.
-      }
+    if (latestProfile) {
+      updateCurrentUser(latestProfile)
     }
-    void syncLatestProfile()
-    return () => {
-      cancelled = true
-    }
-  }, [updateCurrentUser])
+  }, [latestProfile, updateCurrentUser])
 
   if (!user) {
     return null

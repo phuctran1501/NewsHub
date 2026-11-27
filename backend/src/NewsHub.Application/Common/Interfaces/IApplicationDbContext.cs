@@ -27,7 +27,7 @@ public interface IApplicationDbContext
     Task<IReadOnlyList<SemanticSearchResultDto>> SearchArticlesByEmbeddingAsync(
         Vector embedding,
         int limit,
-        double minSimilarity = 0.65,
+        double minSimilarity = 0.5,
         CancellationToken cancellationToken = default);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

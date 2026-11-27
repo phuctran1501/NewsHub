@@ -1,5 +1,10 @@
+import type { SearchMode } from '@/types/search'
+
 export const ROUTES = {
   HOME: '/',
+  CATEGORY: '/categories/:slug',
+  SEARCH: '/search',
+  ARTICLE_DETAIL: '/articles/:slug',
   PROFILE: '/me/profile',
   NOTIFICATIONS: '/me/notifications',
   AUTH: {
@@ -15,3 +20,24 @@ export const ROUTES = {
     ADMIN: '/cms/admin',
   },
 } as const
+
+export function buildCategoryPath(slug: string): string {
+  return `/categories/${encodeURIComponent(slug)}`
+}
+
+export function buildArticleDetailPath(slug: string): string {
+  return `/articles/${encodeURIComponent(slug)}`
+}
+
+export function buildSearchPath(query?: string, mode: SearchMode = 'ai'): string {
+  const params = new URLSearchParams()
+  const clean = query?.trim()
+  if (clean) {
+    params.set('q', clean)
+  }
+  if (mode !== 'ai') {
+    params.set('mode', mode)
+  }
+  const qs = params.toString()
+  return qs ? `${ROUTES.SEARCH}?${qs}` : ROUTES.SEARCH
+}

@@ -1,5 +1,6 @@
 namespace NewsHub.Infrastructure.Services;
 
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Options;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Ai.DTOs;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
 /// <summary>
@@ -129,7 +131,7 @@ Nội dung trích đoạn:
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
         {
-            throw new BadRequestException("Gemini API Key chưa được cấu hình.", ErrorCodes.AiServiceUnavailable);
+            throw new ServiceUnavailableException("Gemini API Key chưa được cấu hình.", ErrorCodes.AiServiceUnavailable);
         }
 
         var cleanContent = content.Length > 10000 ? content[..10000] : content;
@@ -191,13 +193,20 @@ Nội dung bài viết:
             _options.ModelName);
     }
 
+    public Task<float[]> GenerateEmbeddingAsync(
+        string text,
+        CancellationToken cancellationToken = default) =>
+        GenerateEmbeddingAsync(text, EmbeddingTaskType.RetrievalQuery, null, cancellationToken);
+
     public async Task<float[]> GenerateEmbeddingAsync(
         string text,
+        EmbeddingTaskType taskType,
+        string? title = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
         {
-            throw new BadRequestException("Gemini API Key chưa được cấu hình.", ErrorCodes.AiServiceUnavailable);
+            throw new ServiceUnavailableException("Gemini API Key chưa được cấu hình.", ErrorCodes.AiServiceUnavailable);
         }
 
         if (string.IsNullOrWhiteSpace(text))
@@ -206,50 +215,90 @@ Nội dung bài viết:
         }
 
         var cleanText = text.Length > 2000 ? text[..2000] : text;
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_options.EmbeddingModel}:embedContent?key={_options.ApiKey}";
+        var actionPath = $"models/{_options.EmbeddingModel}:embedContent";
+        var taskTypeValue = taskType == EmbeddingTaskType.RetrievalDocument
+            ? "RETRIEVAL_DOCUMENT"
+            : "RETRIEVAL_QUERY";
 
-        var requestBody = new
+        // Trường title của Gemini embedContent chỉ hợp lệ khi taskType là RETRIEVAL_DOCUMENT
+        var documentTitle = taskType == EmbeddingTaskType.RetrievalDocument && !string.IsNullOrWhiteSpace(title)
+            ? (title.Length > 200 ? title[..200] : title.Trim())
+            : null;
+
+        var requestBody = new Dictionary<string, object>
         {
-            model = $"models/{_options.EmbeddingModel}",
-            content = new
+            ["model"] = $"models/{_options.EmbeddingModel}",
+            ["taskType"] = taskTypeValue,
+            ["content"] = new
             {
                 parts = new[]
                 {
                     new { text = cleanText }
                 }
             },
-            outputDimensionality = 768
+            ["outputDimensionality"] = 768
         };
+
+        if (documentTitle is not null)
+        {
+            requestBody["title"] = documentTitle;
+        }
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(_options.TimeoutSeconds));
 
-        var response = await httpClient.PostAsJsonAsync(url, requestBody, cts.Token);
+        using var response = await PostGeminiWithVersionFallbackAsync(actionPath, requestBody, cts.Token);
         if (!response.IsSuccessStatusCode)
         {
             var errContent = await response.Content.ReadAsStringAsync(cts.Token);
             logger.LogError("Gemini Embedding API trả về mã lỗi {StatusCode}: {Error}", response.StatusCode, errContent);
-            throw new BadRequestException($"Không thể tạo vector nhúng: {response.StatusCode}", ErrorCodes.AiServiceUnavailable);
+            throw new ServiceUnavailableException($"Không thể tạo vector nhúng: {response.StatusCode}", ErrorCodes.AiServiceUnavailable);
         }
 
         var result = await response.Content.ReadFromJsonAsync<GeminiEmbeddingResponse>(JsonOptions, cts.Token);
         if (result?.Embedding?.Values == null || result.Embedding.Values.Length == 0)
         {
-            throw new BadRequestException("Dữ liệu vector nhúng rỗng.", ErrorCodes.InvalidAiResponse);
+            throw new ServiceUnavailableException("Dữ liệu vector nhúng rỗng.", ErrorCodes.InvalidAiResponse);
         }
 
         if (result.Embedding.Values.Length != 768)
         {
             logger.LogError("Kích thước vector nhúng trả về không khớp: nhận {ActualLength} chiều thay vì 768 chiều.", result.Embedding.Values.Length);
-            throw new BadRequestException($"Kích thước vector nhúng không hợp lệ: nhận {result.Embedding.Values.Length} chiều thay vì 768 chiều.", ErrorCodes.InvalidAiResponse);
+            throw new ServiceUnavailableException($"Kích thước vector nhúng không hợp lệ: nhận {result.Embedding.Values.Length} chiều thay vì 768 chiều.", ErrorCodes.InvalidAiResponse);
         }
 
-        return result.Embedding.Values;
+        return NormalizeL2(result.Embedding.Values);
+    }
+
+    /// <summary>
+    /// Chuẩn hóa L2 (độ dài đơn vị ||v|| = 1) cho vector Matryoshka 768 chiều theo khuyến nghị của Google Gemini.
+    /// </summary>
+    private static float[] NormalizeL2(float[] vector)
+    {
+        double sumSquares = 0;
+        for (var i = 0; i < vector.Length; i++)
+        {
+            sumSquares += (double)vector[i] * vector[i];
+        }
+
+        var norm = Math.Sqrt(sumSquares);
+        if (norm <= 1e-12)
+        {
+            return vector;
+        }
+
+        var normalized = new float[vector.Length];
+        for (var i = 0; i < vector.Length; i++)
+        {
+            normalized[i] = (float)(vector[i] / norm);
+        }
+
+        return normalized;
     }
 
     private async Task<string> CallGeminiGenerateContentAsync(string model, string prompt, CancellationToken cancellationToken)
     {
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={_options.ApiKey}";
+        var actionPath = $"models/{model}:generateContent";
 
         var requestBody = new
         {
@@ -273,18 +322,67 @@ Nội dung bài viết:
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(_options.TimeoutSeconds));
 
-        var response = await httpClient.PostAsJsonAsync(url, requestBody, cts.Token);
+        using var response = await PostGeminiWithVersionFallbackAsync(actionPath, requestBody, cts.Token);
         if (!response.IsSuccessStatusCode)
         {
             var errContent = await response.Content.ReadAsStringAsync(cts.Token);
             logger.LogError("Gemini GenerateContent API lỗi {StatusCode}: {Error}", response.StatusCode, errContent);
-            throw new BadRequestException($"Dịch vụ AI phản hồi lỗi: {response.StatusCode}", ErrorCodes.AiServiceUnavailable);
+            throw new ServiceUnavailableException($"Dịch vụ AI phản hồi lỗi: {response.StatusCode}", ErrorCodes.AiServiceUnavailable);
         }
 
         var result = await response.Content.ReadFromJsonAsync<GeminiGenerateContentResponse>(JsonOptions, cts.Token);
         var text = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
         return CleanJsonMarkdown(text ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Gửi POST tới Google Gemini REST API qua header x-goog-api-key (không lộ key trên URL)
+    /// và tự động thử phiên bản API thay thế (v1beta <-> v1) nếu gặp 404 NotFound.
+    /// </summary>
+    private async Task<HttpResponseMessage> PostGeminiWithVersionFallbackAsync(
+        string actionPath,
+        object requestBody,
+        CancellationToken cancellationToken)
+    {
+        var primaryVersion = string.IsNullOrWhiteSpace(_options.ApiVersion)
+            ? "v1beta"
+            : _options.ApiVersion.Trim().Trim('/');
+
+        var response = await SendGeminiPostAsync(primaryVersion, actionPath, requestBody, cancellationToken);
+        if (response.StatusCode != HttpStatusCode.NotFound)
+        {
+            return response;
+        }
+
+        var fallbackVersion = string.Equals(primaryVersion, "v1beta", StringComparison.OrdinalIgnoreCase)
+            ? "v1"
+            : "v1beta";
+
+        logger.LogWarning(
+            "Gemini API {PrimaryVersion}/{ActionPath} trả về 404 NotFound. Thử fallback sang {FallbackVersion}.",
+            primaryVersion,
+            actionPath,
+            fallbackVersion);
+
+        response.Dispose();
+        return await SendGeminiPostAsync(fallbackVersion, actionPath, requestBody, cancellationToken);
+    }
+
+    private Task<HttpResponseMessage> SendGeminiPostAsync(
+        string apiVersion,
+        string actionPath,
+        object requestBody,
+        CancellationToken cancellationToken)
+    {
+        var url = $"https://generativelanguage.googleapis.com/{apiVersion}/{actionPath}";
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(requestBody)
+        };
+        request.Headers.Add("x-goog-api-key", _options.ApiKey);
+
+        return httpClient.SendAsync(request, cancellationToken);
     }
 
     private static string CleanJsonMarkdown(string text)

@@ -30,21 +30,23 @@ public class NewsHubDbContext(DbContextOptions<NewsHubDbContext> options) : DbCo
     public async Task<IReadOnlyList<SemanticSearchResultDto>> SearchArticlesByEmbeddingAsync(
         Vector embedding,
         int limit,
-        double minSimilarity = 0.65,
+        double minSimilarity = 0.5,
         CancellationToken cancellationToken = default)
     {
+        var maxDistance = Math.Clamp(1.0 - minSimilarity, 0.0, 2.0);
+
         return await ArticleEmbeddings
             .AsNoTracking()
             .Where(e => e.Article != null &&
                         e.Article.Status == ArticleStatus.Published &&
-                        (1 - e.Embedding.CosineDistance(embedding)) >= minSimilarity)
+                        e.Embedding.CosineDistance(embedding) <= maxDistance)
             .OrderBy(e => e.Embedding.CosineDistance(embedding))
             .Take(limit)
             .Select(e => new SemanticSearchResultDto(
                 e.ArticleId,
                 e.Article!.Title,
                 e.Article.Slug,
-                (float)(1 - e.Embedding.CosineDistance(embedding)),
+                (float)(1.0 - e.Embedding.CosineDistance(embedding)),
                 e.Article.PublishedAt))
             .ToListAsync(cancellationToken);
     }
