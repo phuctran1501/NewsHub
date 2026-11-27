@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router-dom'
 import { CommandSearchModal } from '@/components/common/CommandSearchModal'
 import { PageTransition } from '@/components/common/PageTransition'
+import { ScrollToTopButton } from '@/components/common/ScrollToTopButton'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { MobileBottomNav } from './MobileBottomNav'
@@ -31,6 +32,7 @@ export function RootLayout() {
         </PageTransition>
       </main>
       <Footer />
+      <ScrollToTopButton />
       <MobileBottomNav
         isSearchOpen={isSearchOpen}
         onOpenSearch={() => setIsSearchOpen(true)}

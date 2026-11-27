@@ -2,6 +2,9 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { CategoryStreamSection } from '@/features/articles/components/CategoryStreamSection'
 import { HeroSpotlightSection } from '@/features/articles/components/HeroSpotlightSection'
+import { HomeCtaSection } from '@/features/articles/components/HomeCtaSection'
+import { MostReadSection } from '@/features/articles/components/MostReadSection'
+import { TrendingTopicsBar } from '@/features/articles/components/TrendingTopicsBar'
 import { usePublishedArticles } from '@/features/articles/hooks/usePublishedArticles'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { FeaturedNewsroomsSection } from '@/features/companies/components/FeaturedNewsroomsSection'
@@ -40,7 +43,7 @@ export function HomePage() {
     isLoading: isLoadingSpotlight,
     isError: isSpotlightError,
     refetch: refetchSpotlight,
-  } = usePublishedArticles({ pageNumber: 1, pageSize: 5, sortBy: 'latest' })
+  } = usePublishedArticles({ pageNumber: 1, pageSize: 12, sortBy: 'latest' })
 
   const { data: categories = [] } = useCategories()
 
@@ -104,6 +107,8 @@ export function HomePage() {
         </div>
       </div>
 
+      <TrendingTopicsBar categories={categories} />
+
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12 lg:py-10 space-y-12">
         {isAuthenticated && <HeroSearchSection />}
 
@@ -116,9 +121,13 @@ export function HomePage() {
 
         <CategoryStreamSection categories={categories} />
 
+        <MostReadSection />
+
         <PressEcosystemMarquee />
 
         <FeaturedNewsroomsSection />
+
+        <HomeCtaSection />
       </div>
     </div>
   )
