@@ -1,7 +1,8 @@
 import { Bookmark, Home, LayoutGrid, Search, User } from 'lucide-react'
 import { NavLink, useLocation, useSearchParams } from 'react-router-dom'
+import { useCategories } from '@/features/categories/hooks/useCategories'
 import { useAuth } from '@/hooks/useAuth'
-import { ROUTES } from '@/routes/paths'
+import { buildCategoryPath, ROUTES } from '@/routes/paths'
 import { cn } from '@/utils/cn'
 
 interface MobileBottomNavProps {
@@ -11,9 +12,14 @@ interface MobileBottomNavProps {
 
 export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavProps) {
   const { isAuthenticated } = useAuth()
+  const { data: categories } = useCategories()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const section = searchParams.get('section')
+
+  const firstCategoryPath = categories?.[0]
+    ? buildCategoryPath(categories[0].slug)
+    : buildCategoryPath('thoi-su')
 
   const isHomeActive =
     !isSearchOpen &&
@@ -22,7 +28,10 @@ export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavP
     !searchParams.get('category')
 
   const isCategoriesActive =
-    !isSearchOpen && (section === 'categories' || Boolean(searchParams.get('category')))
+    !isSearchOpen &&
+    (location.pathname.startsWith('/categories/') || section === 'categories')
+
+  const isSearchRouteActive = isSearchOpen || location.pathname === ROUTES.SEARCH
 
   const isBookmarksActive = !isSearchOpen && section === 'bookmarks'
 
@@ -51,7 +60,7 @@ export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavP
       </NavLink>
 
       <NavLink
-        to="/?section=categories"
+        to={firstCategoryPath}
         className={cn(
           'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors',
           isCategoriesActive
@@ -68,7 +77,7 @@ export function MobileBottomNav({ isSearchOpen, onOpenSearch }: MobileBottomNavP
         onClick={onOpenSearch}
         className={cn(
           'flex flex-col items-center justify-center gap-1 text-[11px] transition-colors cursor-pointer',
-          isSearchOpen
+          isSearchRouteActive
             ? 'font-semibold text-primary dark:text-secondary'
             : 'font-medium text-neutral-text-muted dark:text-dark-text-muted',
         )}

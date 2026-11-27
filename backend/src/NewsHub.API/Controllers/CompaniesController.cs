@@ -25,6 +25,7 @@ using NewsHub.Application.Features.Companies.Queries.GetFollowedCompanies;
 using NewsHub.Application.Features.Companies.Queries.GetMyCompanies;
 using NewsHub.Application.Features.Companies.Queries.GetMyInvitations;
 using NewsHub.Application.Features.Companies.Queries.GetPendingEditorialArticles;
+using NewsHub.Application.Features.Companies.Queries.GetPublicCompanies;
 using NewsHub.Application.Features.Companies.Queries.SearchCompanies;
 using NewsHub.Application.Features.Companies.Queries.SearchJournalistByEmail;
 
@@ -75,6 +76,24 @@ public class CompaniesController(
         var result = await mediator.Send(command, cancellationToken);
 
         return StatusCode(StatusCodes.Status201Created, ApiResponseFactory.Success(result, correlationId));
+    }
+
+    /// <summary>
+    /// Danh bạ công khai các tòa soạn đã được phê duyệt dành cho độc giả (Cache Redis 10 phút, ẩn Mã số thuế).
+    /// </summary>
+    [HttpGet("public")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPublicCompanies(
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 6,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        var query = new GetPublicCompaniesQuery(searchTerm, pageNumber, pageSize);
+        var result = await mediator.Send(query, cancellationToken);
+
+        return Ok(ApiResponseFactory.Paged(result, correlationId));
     }
 
     /// <summary>

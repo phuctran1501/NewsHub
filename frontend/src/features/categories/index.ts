@@ -1,2 +1,2 @@
-// Module danh mục báo chí (NH-UI-03)
-export {}
+export { useCategories, useCategoryBySlug } from './hooks/useCategories'
+export { CategoryPage } from './pages/CategoryPage'

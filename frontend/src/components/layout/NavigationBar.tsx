@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { NavLink, useLocation, useSearchParams } from 'react-router-dom'
-import { ROUTES } from '@/routes/paths'
+import { NavLink, useLocation } from 'react-router-dom'
+import { useCategories } from '@/features/categories/hooks/useCategories'
+import { buildCategoryPath, ROUTES } from '@/routes/paths'
 import { cn } from '@/utils/cn'
 
 export interface NavCategoryItem {
@@ -9,13 +10,12 @@ export interface NavCategoryItem {
   categorySlug?: string
 }
 
-const DEFAULT_NAV_ITEMS: NavCategoryItem[] = [
+const FALLBACK_NAV_ITEMS: NavCategoryItem[] = [
   { label: 'Trang chủ', to: ROUTES.HOME },
-  { label: 'Thời sự', to: '/?category=thoi-su', categorySlug: 'thoi-su' },
-  { label: 'Kinh tế', to: '/?category=kinh-te', categorySlug: 'kinh-te' },
-  { label: 'Công nghệ', to: '/?category=cong-nghe', categorySlug: 'cong-nghe' },
-  { label: 'Thế giới', to: '/?category=the-gioi', categorySlug: 'the-gioi' },
-  { label: 'Tòa soạn', to: '/?section=companies', categorySlug: 'companies' },
+  { label: 'Thời sự', to: buildCategoryPath('thoi-su'), categorySlug: 'thoi-su' },
+  { label: 'Kinh tế', to: buildCategoryPath('kinh-te'), categorySlug: 'kinh-te' },
+  { label: 'Công nghệ', to: buildCategoryPath('cong-nghe'), categorySlug: 'cong-nghe' },
+  { label: 'Thế giới', to: buildCategoryPath('the-gioi'), categorySlug: 'the-gioi' },
 ]
 
 interface NavigationBarProps {
@@ -23,22 +23,33 @@ interface NavigationBarProps {
   className?: string
 }
 
-export function NavigationBar({ items = DEFAULT_NAV_ITEMS, className }: NavigationBarProps) {
+export function NavigationBar({ items, className }: NavigationBarProps) {
   const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const currentCategory = searchParams.get('category') ?? searchParams.get('section')
-  const isOnHomeRoute = location.pathname === ROUTES.HOME
+  const { data: categories } = useCategories()
+
+  const navItems: NavCategoryItem[] =
+    items ??
+    (categories && categories.length > 0
+      ? [
+          { label: 'Trang chủ', to: ROUTES.HOME },
+          ...categories.slice(0, 5).map((cat) => ({
+            label: cat.name,
+            to: buildCategoryPath(cat.slug),
+            categorySlug: cat.slug,
+          })),
+        ]
+      : FALLBACK_NAV_ITEMS)
 
   return (
     <nav aria-label="Danh mục báo chí" className={cn('hidden lg:flex items-center gap-7', className)}>
-      {items.map((item) => {
+      {navItems.map((item) => {
         const isItemActive = item.categorySlug
-          ? isOnHomeRoute && currentCategory === item.categorySlug
-          : isOnHomeRoute && !currentCategory
+          ? location.pathname === buildCategoryPath(item.categorySlug)
+          : location.pathname === ROUTES.HOME
 
         return (
           <NavLink
-            key={item.label}
+            key={item.to}
             to={item.to}
             className={() =>
               cn(

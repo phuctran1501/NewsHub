@@ -1,2 +1,3 @@
-// Module tìm kiếm ngữ nghĩa NLP & gợi ý từ khóa AI (NH-UI-04)
-export {}
+export { SemanticResultCard } from './components/SemanticResultCard'
+export { useAiSemanticSearch, useKeywordSearch } from './hooks/useArticleSearch'
+export { SearchPage } from './pages/SearchPage'

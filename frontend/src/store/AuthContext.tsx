@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { toast } from '@/components/ui/toastManager'
+import { queryClient } from '@/lib/queryClient'
+import { queryKeys } from '@/lib/queryKeys'
 import { accountService } from '@/services/accountService'
 import { authService } from '@/services/authService'
 import {
@@ -37,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
     setActiveWorkspaceRole(null)
     safeRemoveStorageItem(SESSION_FLAG_KEY)
+    queryClient.removeQueries({ queryKey: queryKeys.account.me() })
+    queryClient.removeQueries({ queryKey: ['companies', 'following'] })
   }, [])
 
   useEffect(() => {
@@ -88,12 +92,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [clearSessionState])
 
+  const updateCurrentUser = useCallback((nextUser: UserProfile | null) => {
+    setUser(nextUser)
+    if (nextUser) {
+      queryClient.setQueryData(queryKeys.account.me(), nextUser)
+    } else {
+      queryClient.removeQueries({ queryKey: queryKeys.account.me() })
+    }
+  }, [])
+
   const login = useCallback(async (credentials: LoginRequest): Promise<UserProfile> => {
     const result = await authService.login(credentials)
     safeSetStorageItem(SESSION_FLAG_KEY, '1')
     setTokenState(result.accessToken)
     setUser(result.user)
     setActiveWorkspaceRole(resolveUserRoleName(result.user.role))
+    queryClient.setQueryData(queryKeys.account.me(), result.user)
+    void queryClient.invalidateQueries({ queryKey: ['companies', 'following'] })
     return result.user
   }, [])
 
@@ -119,9 +134,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       setActiveWorkspaceRole,
-      updateCurrentUser: setUser,
+      updateCurrentUser,
     }),
-    [user, accessToken, roleName, activeWorkspaceRole, isInitializing, login, logout],
+    [user, accessToken, roleName, activeWorkspaceRole, isInitializing, login, logout, updateCurrentUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
