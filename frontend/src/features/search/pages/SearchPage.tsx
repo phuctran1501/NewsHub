@@ -172,7 +172,7 @@ export function SearchPage() {
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-text-muted dark:text-dark-text-muted">
             <div className="flex flex-wrap items-center gap-2">
               {mode === 'ai' ? (
-                <Badge variant="ai">Tìm kiếm thông minh</Badge>
+                <Badge variant="category">Tìm kiếm thông minh</Badge>
               ) : (
                 <Badge variant="category">Tìm kiếm từ khóa</Badge>
               )}
