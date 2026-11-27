@@ -123,6 +123,8 @@ public class AiBackgroundJobs(
         logger.LogInformation("Bắt đầu tác vụ nền sinh vector nhúng NLP cho ArticleId: {ArticleId}", articleId);
 
         var article = await dbContext.Articles
+            .Include(a => a.ArticleCategories)
+                .ThenInclude(ac => ac.Category)
             .FirstOrDefaultAsync(a => a.Id == articleId, cancellationToken);
 
         if (article == null || article.Status != ArticleStatus.Published)
@@ -134,10 +136,24 @@ public class AiBackgroundJobs(
         try
         {
             var plainTextContent = StripHtmlTags(article.ContentHtml);
-            var snippet = plainTextContent.Length > 1000 ? plainTextContent[..1000] : plainTextContent;
-            var textToEmbed = $"{article.Title} {snippet}".Trim();
+            var snippet = plainTextContent.Length > 1200 ? plainTextContent[..1200] : plainTextContent;
+            var categoryNames = article.ArticleCategories
+                .Where(ac => ac.Category != null)
+                .Select(ac => ac.Category!.Name)
+                .Distinct()
+                .ToList();
 
-            var embeddingArray = await aiService.GenerateEmbeddingAsync(textToEmbed, cancellationToken);
+            var categoryPrefix = categoryNames.Count > 0
+                ? $"Chuyên mục: {string.Join(", ", categoryNames)}. "
+                : string.Empty;
+
+            var textToEmbed = $"{categoryPrefix}{article.Title}. {snippet}".Trim();
+
+            var embeddingArray = await aiService.GenerateEmbeddingAsync(
+                textToEmbed,
+                EmbeddingTaskType.RetrievalDocument,
+                article.Title,
+                cancellationToken);
 
             var vector = new Vector(embeddingArray);
 

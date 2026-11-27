@@ -237,10 +237,10 @@ public class GeminiAiServiceTests
         // Act
         var result = await service.GenerateEmbeddingAsync("Văn bản thử nghiệm", CancellationToken.None);
 
-        // Assert
+        // Assert (vector được chuẩn hóa L2 nên [0.42, 0, ...] -> [1.0, 0, ...])
         Assert.NotNull(result);
         Assert.Equal(768, result.Length);
-        Assert.Equal(0.42f, result[0]);
+        Assert.InRange(result[0], 0.999f, 1.001f);
     }
 
     [Fact]

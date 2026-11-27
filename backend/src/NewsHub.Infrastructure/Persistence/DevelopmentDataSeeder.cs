@@ -7,17 +7,23 @@ using NewsHub.Application.Common.Interfaces;
 using NewsHub.Domain.Entities;
 using NewsHub.Domain.Enums;
 using NewsHub.Domain.ValueObjects;
+using Pgvector;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Seeder dữ liệu mẫu chuẩn báo chí tiếng Việt cho môi trường Development (100% Idempotent).
 /// </summary>
 public static class DevelopmentDataSeeder
 {
-    public static async Task SeedAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+    public static async Task SeedAsync(
+        IServiceProvider services,
+        bool regenerateEmbeddings = false,
+        CancellationToken cancellationToken = default)
     {
         using var scope = services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<NewsHubDbContext>();
         var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var aiService = scope.ServiceProvider.GetService<IAiService>();
         var cacheService = scope.ServiceProvider.GetService<ICacheService>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DevelopmentDataSeeder");
 
@@ -346,18 +352,119 @@ public static class DevelopmentDataSeeder
             insertedCount++;
         }
 
-        // 5. Xóa cache Redis để Frontend nhận dữ liệu mới ngay lập tức
+        // 5. Sinh vector nhúng thật (pgvector 768 chiều, RETRIEVAL_DOCUMENT + L2-normalized) cho các bài đã xuất bản
+        var embeddedCount = 0;
+        if (aiService is not null)
+        {
+            var publishedArticles = await dbContext.Articles
+                .Include(a => a.ArticleCategories)
+                    .ThenInclude(ac => ac.Category)
+                .Include(a => a.ArticleEmbedding)
+                .Where(a => a.Status == ArticleStatus.Published)
+                .ToListAsync(cancellationToken);
+
+            foreach (var article in publishedArticles)
+            {
+                if (!regenerateEmbeddings && article.ArticleEmbedding is not null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    var plainText = Regex.Replace(article.ContentHtml ?? string.Empty, "<.*?>", " ");
+                    plainText = Regex.Replace(plainText, @"\s+", " ").Trim();
+                    var snippet = plainText.Length > 1200 ? plainText[..1200] : plainText;
+                    var categoryNames = article.ArticleCategories
+                        .Where(ac => ac.Category != null)
+                        .Select(ac => ac.Category!.Name)
+                        .Distinct()
+                        .ToList();
+                    var categoryPrefix = categoryNames.Count > 0
+                        ? $"Chuyên mục: {string.Join(", ", categoryNames)}. "
+                        : string.Empty;
+
+                    var textToEmbed = $"{categoryPrefix}{article.Title}. {snippet}".Trim();
+                    var values = await aiService.GenerateEmbeddingAsync(
+                        textToEmbed,
+                        EmbeddingTaskType.RetrievalDocument,
+                        article.Title,
+                        cancellationToken);
+
+                    var vector = new Vector(values);
+                    if (article.ArticleEmbedding is not null)
+                    {
+                        article.ArticleEmbedding.Embedding = vector;
+                        article.ArticleEmbedding.UpdatedAt = DateTimeOffset.UtcNow;
+                    }
+                    else
+                    {
+                        dbContext.ArticleEmbeddings.Add(new ArticleEmbedding
+                        {
+                            Id = Guid.CreateVersion7(),
+                            ArticleId = article.Id,
+                            Embedding = vector,
+                            UpdatedAt = DateTimeOffset.UtcNow,
+                        });
+                    }
+
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                    embeddedCount++;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Không thể tạo embedding cho bài viết {Slug}. Tiếp tục các bài khác.", article.Slug);
+                }
+            }
+        }
+
+        // 6. Xóa cache Redis để Frontend nhận dữ liệu mới ngay lập tức
         if (cacheService is not null)
         {
             await cacheService.RemoveAsync("categories:all", cancellationToken);
             await cacheService.RemoveByPrefixAsync("companies:public:", cancellationToken);
+            await cacheService.RemoveByPrefixAsync("ai:search:emb:", cancellationToken);
         }
 
         logger.LogInformation(
-            "Seed hoàn tất: {Journalists} nhà báo, {Categories} chuyên mục, {Companies} tòa soạn, +{Articles} bài viết mới.",
+            "Seed hoàn tất: {Journalists} nhà báo, {Categories} chuyên mục, {Companies} tòa soạn, +{Articles} bài viết mới, +{Embeddings} vector embeddings.",
             journalists.Count,
             categoryBySlug.Count,
             companies.Count,
-            insertedCount);
+            insertedCount,
+            embeddedCount);
+    }
+
+    /// <summary>
+    /// Chạy kiểm thử nhanh Hybrid Search (pgvector + lexical) trực tiếp trên dữ liệu thật trong môi trường Development.
+    /// </summary>
+    public static async Task VerifyHybridSearchAsync(
+        IServiceProvider services,
+        CancellationToken cancellationToken = default)
+    {
+        using var scope = services.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<MediatR.ISender>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("HybridSearchVerify");
+
+        var testQueries = new[]
+        {
+            "hệ thống tóm tắt tin tức",
+            "làm sao tránh lộ token khi bị tấn công XSS?",
+            "chính sách giảm khí thải carbon nhà máy khu công nghiệp",
+            "xe buýt điện đường sắt đô thị giờ cao điểm",
+        };
+
+        foreach (var q in testQueries)
+        {
+            var results = await mediator.Send(
+                new NewsHub.Application.Features.Ai.Queries.SearchArticlesByNlp.SearchArticlesByNlpQuery(q, 5),
+                cancellationToken);
+
+            logger.LogInformation("=== QUERY: \"{Query}\" -> {Count} kết quả ===", q, results.Count);
+            foreach (var r in results)
+            {
+                logger.LogInformation("  [{Score:P1}] {Title} (/articles/{Slug})", r.SimilarityScore, r.Title, r.Slug);
+            }
+        }
     }
 }

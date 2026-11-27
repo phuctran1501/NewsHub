@@ -56,14 +56,25 @@ public class GeminiAiServiceTests
             options,
             NullLogger<GeminiAiService>.Instance);
 
-        var result = await service.GenerateEmbeddingAsync("tin tức công nghệ", CancellationToken.None);
+        var result = await service.GenerateEmbeddingAsync(
+            "tin tức công nghệ",
+            NewsHub.Domain.Enums.EmbeddingTaskType.RetrievalDocument,
+            "Tiêu đề bài báo",
+            CancellationToken.None);
 
         Assert.Equal(768, result.Length);
+        // Xác minh vector đã được chuẩn hóa L2 (||v|| ≈ 1)
+        var norm = Math.Sqrt(result.Sum(v => (double)v * v));
+        Assert.InRange(norm, 0.999, 1.001);
         Assert.Equal(2, stubHandler.Requests.Count);
         Assert.Contains("/v1beta/models/gemini-embedding-001:embedContent", stubHandler.Requests[0].RequestUri!.AbsoluteUri);
         Assert.Contains("/v1/models/gemini-embedding-001:embedContent", stubHandler.Requests[1].RequestUri!.AbsoluteUri);
         Assert.DoesNotContain("key=", stubHandler.Requests[0].RequestUri!.AbsoluteUri);
         Assert.Equal("test-api-key", stubHandler.Requests[0].Headers.GetValues("x-goog-api-key").Single());
+        var sentPayload = await stubHandler.Requests[0].Content!.ReadAsStringAsync();
+        using var jsonDoc = System.Text.Json.JsonDocument.Parse(sentPayload);
+        Assert.Equal("RETRIEVAL_DOCUMENT", jsonDoc.RootElement.GetProperty("taskType").GetString());
+        Assert.Equal("Tiêu đề bài báo", jsonDoc.RootElement.GetProperty("title").GetString());
     }
 
     [Fact]

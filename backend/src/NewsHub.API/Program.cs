@@ -49,7 +49,12 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment() && args.Contains("--seed-only", StringComparer.OrdinalIgnoreCase))
 {
-    await DevelopmentDataSeeder.SeedAsync(app.Services);
+    var regenerateEmbeddings = args.Contains("--reseed-embeddings", StringComparer.OrdinalIgnoreCase);
+    await DevelopmentDataSeeder.SeedAsync(app.Services, regenerateEmbeddings);
+    if (args.Contains("--verify-search", StringComparer.OrdinalIgnoreCase))
+    {
+        await DevelopmentDataSeeder.VerifyHybridSearchAsync(app.Services);
+    }
     return;
 }
 

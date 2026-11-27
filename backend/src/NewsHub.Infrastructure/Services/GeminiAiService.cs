@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Features.Ai.DTOs;
 using NewsHub.Domain.Constants;
+using NewsHub.Domain.Enums;
 using NewsHub.Domain.Exceptions;
 
 /// <summary>
@@ -192,8 +193,15 @@ Nội dung bài viết:
             _options.ModelName);
     }
 
+    public Task<float[]> GenerateEmbeddingAsync(
+        string text,
+        CancellationToken cancellationToken = default) =>
+        GenerateEmbeddingAsync(text, EmbeddingTaskType.RetrievalQuery, null, cancellationToken);
+
     public async Task<float[]> GenerateEmbeddingAsync(
         string text,
+        EmbeddingTaskType taskType,
+        string? title = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
@@ -208,19 +216,33 @@ Nội dung bài viết:
 
         var cleanText = text.Length > 2000 ? text[..2000] : text;
         var actionPath = $"models/{_options.EmbeddingModel}:embedContent";
+        var taskTypeValue = taskType == EmbeddingTaskType.RetrievalDocument
+            ? "RETRIEVAL_DOCUMENT"
+            : "RETRIEVAL_QUERY";
 
-        var requestBody = new
+        // Trường title của Gemini embedContent chỉ hợp lệ khi taskType là RETRIEVAL_DOCUMENT
+        var documentTitle = taskType == EmbeddingTaskType.RetrievalDocument && !string.IsNullOrWhiteSpace(title)
+            ? (title.Length > 200 ? title[..200] : title.Trim())
+            : null;
+
+        var requestBody = new Dictionary<string, object>
         {
-            model = $"models/{_options.EmbeddingModel}",
-            content = new
+            ["model"] = $"models/{_options.EmbeddingModel}",
+            ["taskType"] = taskTypeValue,
+            ["content"] = new
             {
                 parts = new[]
                 {
                     new { text = cleanText }
                 }
             },
-            outputDimensionality = 768
+            ["outputDimensionality"] = 768
         };
+
+        if (documentTitle is not null)
+        {
+            requestBody["title"] = documentTitle;
+        }
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(_options.TimeoutSeconds));
@@ -245,7 +267,33 @@ Nội dung bài viết:
             throw new ServiceUnavailableException($"Kích thước vector nhúng không hợp lệ: nhận {result.Embedding.Values.Length} chiều thay vì 768 chiều.", ErrorCodes.InvalidAiResponse);
         }
 
-        return result.Embedding.Values;
+        return NormalizeL2(result.Embedding.Values);
+    }
+
+    /// <summary>
+    /// Chuẩn hóa L2 (độ dài đơn vị ||v|| = 1) cho vector Matryoshka 768 chiều theo khuyến nghị của Google Gemini.
+    /// </summary>
+    private static float[] NormalizeL2(float[] vector)
+    {
+        double sumSquares = 0;
+        for (var i = 0; i < vector.Length; i++)
+        {
+            sumSquares += (double)vector[i] * vector[i];
+        }
+
+        var norm = Math.Sqrt(sumSquares);
+        if (norm <= 1e-12)
+        {
+            return vector;
+        }
+
+        var normalized = new float[vector.Length];
+        for (var i = 0; i < vector.Length; i++)
+        {
+            normalized[i] = (float)(vector[i] / norm);
+        }
+
+        return normalized;
     }
 
     private async Task<string> CallGeminiGenerateContentAsync(string model, string prompt, CancellationToken cancellationToken)
