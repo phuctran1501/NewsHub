@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { toast } from '@/components/ui/toastManager'
 import { useAuth } from '@/hooks/useAuth'
 import { toAppClientError } from '@/services/apiClient'
 import type { UserProfile } from '@/types/auth'
@@ -71,6 +72,7 @@ export function LoginForm({
         email: email.trim(),
         password,
       })
+      toast.success('Đăng nhập thành công', `Chào mừng ${authenticatedUser.fullName} quay lại NewsHub.`)
       onSuccess?.(authenticatedUser)
     } catch (err: unknown) {
       const clientErr = toAppClientError(err)
@@ -78,6 +80,7 @@ export function LoginForm({
       if (clientErr.status === 429 || clientErr.code === 'TOO_MANY_REQUESTS') {
         setRateLimitSeconds(RATE_LIMIT_COOLDOWN_SECONDS)
         setFormError(null)
+        toast.warning('Thao tác quá nhanh', 'Vui lòng đợi 60 giây trước khi thử đăng nhập lại.')
         return
       }
 
@@ -91,11 +94,14 @@ export function LoginForm({
         clientErr.code === 'INVALID_CREDENTIALS' ||
         clientErr.code === 'AUTH_INVALID_CREDENTIALS'
       ) {
-        setFormError('Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.')
+        const msg = 'Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.'
+        setFormError(msg)
+        toast.error('Đăng nhập thất bại', msg)
         return
       }
 
       setFormError(clientErr.message)
+      toast.error('Không thể đăng nhập', clientErr.message)
     } finally {
       setIsSubmitting(false)
     }

@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export function Header({ onOpenSearch }: HeaderProps) {
   const navigate = useNavigate()
-  const { user, roleName, isAuthenticated, logout } = useAuth()
+  const { user, roleName, isAuthenticated, isInitializing, logout } = useAuth()
 
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md">
@@ -59,7 +59,12 @@ export function Header({ onOpenSearch }: HeaderProps) {
 
           <ThemeToggle />
 
-          {isAuthenticated && user ? (
+          {isInitializing ? (
+            <div className="flex items-center gap-2.5" aria-hidden="true">
+              <div className="w-9 h-9 rounded-[10px] bg-neutral-border/60 dark:bg-dark-border/60 animate-pulse" />
+              <div className="w-9 h-9 rounded-full bg-neutral-border/60 dark:bg-dark-border/60 animate-pulse" />
+            </div>
+          ) : isAuthenticated && user ? (
             <div className="flex items-center gap-2.5">
               <Tooltip>
                 <TooltipTrigger asChild>

@@ -1,7 +1,6 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/common/Button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { toast } from '@/components/ui/toastManager'
 import { accountService } from '@/services/accountService'
 import { toAppClientError } from '@/services/apiClient'
 import { extractFieldErrors, validatePassword } from '@/utils/validation'
@@ -12,8 +11,6 @@ export function ChangePasswordForm() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-  const [formError, setFormError] = useState<string | null>(null)
-  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -40,14 +37,10 @@ export function ChangePasswordForm() {
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors)
-      setFormError(null)
-      setSuccessMsg(null)
       return
     }
 
     setFieldErrors({})
-    setFormError(null)
-    setSuccessMsg(null)
     setIsSubmitting(true)
 
     try {
@@ -59,8 +52,9 @@ export function ChangePasswordForm() {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      setSuccessMsg(
-        'Đổi mật khẩu thành công. Các phiên đăng nhập hiện có trên thiết bị khác vẫn được giữ nguyên.',
+      toast.success(
+        'Đổi mật khẩu thành công',
+        'Phiên đăng nhập trên các thiết bị khác vẫn được giữ nguyên.',
       )
     } catch (err: unknown) {
       const clientErr = toAppClientError(err)
@@ -69,6 +63,7 @@ export function ChangePasswordForm() {
         setFieldErrors({
           currentPassword: 'Mật khẩu hiện tại không chính xác.',
         })
+        toast.error('Mật khẩu hiện tại không đúng', 'Vui lòng kiểm tra và thử lại.')
         return
       }
 
@@ -77,53 +72,23 @@ export function ChangePasswordForm() {
         return
       }
 
-      setFormError(clientErr.message)
+      toast.error('Không thể đổi mật khẩu', clientErr.message)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-4">
+    <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-5">
       <div>
-        <h2 className="text-base font-bold text-neutral-text-main dark:text-dark-text-main">
+        <h2 className="text-lg font-bold text-neutral-text-main dark:text-dark-text-main">
           Đổi mật khẩu
         </h2>
-        <p className="mt-1 text-xs text-neutral-text-muted dark:text-dark-text-muted">
+        <p className="mt-1 text-xs sm:text-sm text-neutral-text-muted dark:text-dark-text-muted">
           Cập nhật mật khẩu định kỳ để bảo vệ tài khoản. Thao tác này không làm gián đoạn phiên đăng
           nhập trên các thiết bị khác của bạn.
         </p>
       </div>
-
-      <AnimatePresence mode="wait">
-        {formError && (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-          >
-            <Alert variant="destructive">
-              <AlertDescription className="mt-0">{formError}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-
-        {successMsg && (
-          <motion.div
-            key="success"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-          >
-            <Alert variant="success" role="status">
-              <AlertDescription className="mt-0">{successMsg}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <PasswordInput
         name="currentPassword"
@@ -141,7 +106,7 @@ export function ChangePasswordForm() {
         disabled={isSubmitting}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
         <PasswordInput
           name="newPassword"
           label="Mật khẩu mới *"
@@ -175,7 +140,7 @@ export function ChangePasswordForm() {
         />
       </div>
 
-      <div className="flex justify-end pt-1">
+      <div className="flex justify-end border-t border-neutral-border dark:border-dark-border pt-5">
         <Button type="submit" variant="primary" size="md" isLoading={isSubmitting}>
           Cập nhật mật khẩu
         </Button>

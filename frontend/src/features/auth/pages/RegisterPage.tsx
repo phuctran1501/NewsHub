@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { toast } from '@/components/ui/toastManager'
 import { ROUTES } from '@/routes/paths'
 import { getSafeRedirectPath } from '@/utils/validation'
 import { RegisterForm, type RegisterRoleOption } from '../components/RegisterForm'
@@ -38,10 +39,13 @@ export function RegisterPage() {
   }
 
   function handleRegistrationSuccess(registeredEmail: string) {
+    toast.success(
+      'Đăng ký tài khoản thành công',
+      'Vui lòng nhập mật khẩu để đăng nhập vào hệ thống NewsHub.',
+    )
     navigate(loginHref, {
       replace: true,
       state: {
-        registered: true,
         prefilledEmail: registeredEmail,
       },
     })
@@ -89,7 +93,7 @@ export function RegisterPage() {
                         : { type: 'spring', stiffness: 430, damping: 34 }
                     }
                     aria-hidden="true"
-                    className="absolute inset-0 rounded-[8px] bg-primary dark:bg-secondary"
+                    className="absolute inset-0 rounded-lg bg-primary dark:bg-secondary"
                   />
                 )}
                 <span className="relative z-10">{tab.label}</span>

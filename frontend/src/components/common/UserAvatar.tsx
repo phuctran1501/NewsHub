@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cn } from '@/utils/cn'
 
 interface UserAvatarProps {
@@ -8,17 +9,34 @@ interface UserAvatarProps {
 }
 
 const AVATAR_SIZE_CLASSES = {
-  sm: 'h-8 w-8 text-xs',
-  md: 'h-9 w-9 text-xs',
-  xl: 'h-24 w-24 text-2xl',
+  sm: 'h-8 w-8',
+  md: 'h-9 w-9',
+  xl: 'h-24 w-24',
 } as const
 
-function getUserInitials(fullName?: string | null): string {
-  if (!fullName) return 'NH'
-  const parts = fullName.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return 'NH'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+const FALLBACK_LOGO_SIZES = {
+  sm: 18,
+  md: 20,
+  xl: 46,
+} as const
+
+function NewsHubAvatarMark({ size }: { size: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0 text-primary dark:text-secondary"
+    >
+      <path d="M16.5 5L27 5L35 13V14H16.5V5Z" fill="currentColor" />
+      <path d="M35 16.5V27L27 35H26V16.5H35Z" fill="currentColor" />
+      <path d="M23.5 35H13L5 27V26H23.5V35Z" fill="currentColor" />
+      <path d="M5 23.5V13L13 5H14V23.5H5Z" fill="currentColor" />
+      <path d="M20 16.2L23.8 20L20 23.8L16.2 20L20 16.2Z" fill="currentColor" />
+    </svg>
+  )
 }
 
 export function UserAvatar({
@@ -27,6 +45,10 @@ export function UserAvatar({
   size = 'md',
   className,
 }: UserAvatarProps) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  const trimmedUrl = avatarUrl?.trim() || null
+  const canRenderImage = Boolean(trimmedUrl && failedUrl !== trimmedUrl)
+
   return (
     <span
       className={cn(
@@ -35,16 +57,15 @@ export function UserAvatar({
         className,
       )}
     >
-      {avatarUrl ? (
+      {canRenderImage && trimmedUrl ? (
         <img
-          src={avatarUrl}
+          src={trimmedUrl}
           alt={fullName ? `Ảnh đại diện của ${fullName}` : 'Ảnh đại diện'}
+          onError={() => setFailedUrl(trimmedUrl)}
           className="h-full w-full object-cover"
         />
       ) : (
-        <span className="font-bold text-primary dark:text-secondary">
-          {getUserInitials(fullName)}
-        </span>
+        <NewsHubAvatarMark size={FALLBACK_LOGO_SIZES[size]} />
       )}
     </span>
   )

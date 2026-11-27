@@ -18,7 +18,7 @@ export default defineConfig({
           if (id.includes('framer-motion') || id.includes('motion-dom')) {
             return 'vendor-motion'
           }
-          if (id.includes('@radix-ui')) {
+          if (id.includes('@radix-ui') || id.includes('@base-ui')) {
             return 'vendor-radix'
           }
           if (

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { toast } from '@/components/ui/toastManager'
 import { accountService } from '@/services/accountService'
 import { authService } from '@/services/authService'
 import {
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function bootstrapSession() {
       try {
         const refreshed = await authService.refreshToken()
+        if (cancelled) return
         const profile = await accountService.getMyProfile()
         if (!cancelled) {
           setTokenState(refreshed.accessToken)
@@ -100,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authService.logout()
     } finally {
       clearSessionState()
+      toast.info('Đã đăng xuất', 'Hẹn gặp lại bạn trên NewsHub.')
     }
   }, [clearSessionState])
 
