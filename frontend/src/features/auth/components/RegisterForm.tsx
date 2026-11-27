@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { toast } from '@/components/ui/toastManager'
 import { toAppClientError } from '@/services/apiClient'
 import { authService } from '@/services/authService'
 import {
@@ -100,6 +101,7 @@ export function RegisterForm({ role, onRegistered }: RegisterFormProps) {
       }
 
       setFormError(clientErr.message)
+      toast.error('Đăng ký không thành công', clientErr.message)
     } finally {
       setIsSubmitting(false)
     }

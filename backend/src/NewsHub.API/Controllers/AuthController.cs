@@ -11,6 +11,7 @@ using NewsHub.Application.Features.Auth.Commands.Logout;
 using NewsHub.Application.Features.Auth.Commands.RefreshToken;
 using NewsHub.Application.Features.Auth.Commands.Register;
 using NewsHub.Application.Features.Auth.Commands.RegisterJournalist;
+using NewsHub.Domain.Exceptions;
 
 [ApiController]
 [Route("api/v1/auth")]
@@ -20,7 +21,7 @@ public class AuthController(
     IJwtTokenGenerator jwtTokenGenerator,
     IWebHostEnvironment environment) : ControllerBase
 {
-    private const string RefreshTokenCookieName = "refreshToken";
+    private const string RefreshTokenCookieName = "newshub_refresh_token";
     private const string AuthCookiePath = "/api/v1/auth";
 
     [HttpPost("register")]
@@ -73,18 +74,27 @@ public class AuthController(
         var correlationId = correlationIdProvider.GetCorrelationId();
         var rawRefreshToken = Request.Cookies[RefreshTokenCookieName];
 
-        var result = await mediator.Send(new RefreshTokenCommand(rawRefreshToken), cancellationToken);
-
-        SetRefreshTokenCookie(result.RawRefreshToken);
-
-        var responseData = new
+        try
         {
-            accessToken = result.AccessToken,
-            tokenType = result.TokenType,
-            expiresIn = result.ExpiresIn
-        };
+            var result = await mediator.Send(new RefreshTokenCommand(rawRefreshToken), cancellationToken);
 
-        return Ok(ApiResponseFactory.Success(responseData, correlationId));
+            SetRefreshTokenCookie(result.RawRefreshToken);
+
+            var responseData = new
+            {
+                accessToken = result.AccessToken,
+                tokenType = result.TokenType,
+                expiresIn = result.ExpiresIn
+            };
+
+            return Ok(ApiResponseFactory.Success(responseData, correlationId));
+        }
+        catch (UnauthorizedException)
+        {
+            // Xóa ngay HttpOnly cookie đã hết hạn / bị thu hồi / không còn trong DB để trình duyệt không gửi lặp lại.
+            DeleteRefreshTokenCookie();
+            throw;
+        }
     }
 
     [HttpPost("logout")]

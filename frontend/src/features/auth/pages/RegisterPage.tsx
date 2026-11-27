@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { toast } from '@/components/ui/toastManager'
 import { ROUTES } from '@/routes/paths'
 import { getSafeRedirectPath } from '@/utils/validation'
 import { RegisterForm, type RegisterRoleOption } from '../components/RegisterForm'
@@ -38,10 +39,13 @@ export function RegisterPage() {
   }
 
   function handleRegistrationSuccess(registeredEmail: string) {
+    toast.success(
+      'Đăng ký tài khoản thành công',
+      'Vui lòng nhập mật khẩu để đăng nhập vào hệ thống NewsHub.',
+    )
     navigate(loginHref, {
       replace: true,
       state: {
-        registered: true,
         prefilledEmail: registeredEmail,
       },
     })

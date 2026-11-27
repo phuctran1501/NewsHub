@@ -1,6 +1,7 @@
 import { Upload } from 'lucide-react'
 import { useEffect, useRef, useState, type ChangeEvent, type RefObject } from 'react'
 import { UserAvatar } from '@/components/common/UserAvatar'
+import { toast } from '@/components/ui/toastManager'
 import type { UserProfile } from '@/types/auth'
 import { validateAvatarFile } from '@/utils/validation'
 import { AvatarCropModal } from './AvatarCropModal'
@@ -9,15 +10,9 @@ interface AvatarUploaderProps {
   user: UserProfile
   fileInputRef: RefObject<HTMLInputElement | null>
   onAvatarUpdated: (updatedUser: UserProfile) => void
-  onFeedback?: (feedback: { type: 'success' | 'error'; message: string } | null) => void
 }
 
-export function AvatarUploader({
-  user,
-  fileInputRef,
-  onAvatarUpdated,
-  onFeedback,
-}: AvatarUploaderProps) {
+export function AvatarUploader({ user, fileInputRef, onAvatarUpdated }: AvatarUploaderProps) {
   const objectUrlRef = useRef<string | null>(null)
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null)
 
@@ -43,11 +38,10 @@ export function AvatarUploader({
 
     const validationErr = validateAvatarFile(file)
     if (validationErr) {
-      onFeedback?.({ type: 'error', message: validationErr })
+      toast.error('Ảnh đại diện không hợp lệ', validationErr)
       return
     }
 
-    onFeedback?.(null)
     revokeObjectUrl()
     const nextUrl = URL.createObjectURL(file)
     objectUrlRef.current = nextUrl
@@ -63,7 +57,7 @@ export function AvatarUploader({
     onAvatarUpdated(updatedUser)
     setSelectedImageUrl(null)
     revokeObjectUrl()
-    onFeedback?.({ type: 'success', message: 'Đã cập nhật ảnh đại diện mới thành công.' })
+    toast.success('Đã cập nhật ảnh đại diện', 'Ảnh mới đã được đồng bộ trên toàn hệ thống.')
   }
 
   return (

@@ -117,3 +117,75 @@
     background: #94a3b8;
   }
 }
+
+
+/* Base UI Stacked Toast Deck (bottom-right, Pure 2D flat) */
+.nh-toast-root {
+  --gap: 0.75rem;
+  --peek: 0.75rem;
+  --scale: calc(max(0, 1 - (var(--toast-index) * 0.06)));
+  --shrink: calc(1 - var(--scale));
+  --height: var(--toast-frontmost-height, var(--toast-height));
+  --offset-y: calc(
+    var(--toast-offset-y) * -1 + (var(--toast-index) * var(--gap) * -1) + var(--toast-swipe-movement-y)
+  );
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 100%;
+  height: var(--height);
+  z-index: calc(1000 - var(--toast-index));
+  transform-origin: bottom center;
+  transform: translateX(var(--toast-swipe-movement-x))
+    translateY(
+      calc(
+        var(--toast-swipe-movement-y) - (var(--toast-index) * var(--peek)) -
+          (var(--shrink) * var(--height))
+      )
+    )
+    scale(var(--scale));
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 260ms ease,
+    height 220ms ease;
+  user-select: none;
+}
+
+.nh-toast-root::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: calc(var(--gap) + 2px);
+}
+
+.nh-toast-root[data-expanded] {
+  height: var(--toast-height);
+  transform: translateX(var(--toast-swipe-movement-x)) translateY(var(--offset-y));
+}
+
+.nh-toast-root[data-limited] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nh-toast-root[data-starting-style],
+.nh-toast-root[data-ending-style] {
+  opacity: 0;
+  transform: translateY(120%);
+}
+
+.nh-toast-root[data-ending-style][data-swipe-direction='right'] {
+  transform: translateX(calc(var(--toast-swipe-movement-x) + 120%)) translateY(var(--offset-y));
+}
+
+.nh-toast-root[data-behind] .nh-toast-content {
+  opacity: 0.35;
+  transition: opacity 200ms ease;
+}
+
+.nh-toast-root[data-expanded] .nh-toast-content {
+  opacity: 1;
+}

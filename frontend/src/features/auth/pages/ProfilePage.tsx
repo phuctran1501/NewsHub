@@ -3,8 +3,8 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/components/ui/toastManager'
 import { useAuth } from '@/hooks/useAuth'
 import { accountService } from '@/services/accountService'
 import { toAppClientError } from '@/services/apiClient'
@@ -29,7 +29,10 @@ const PROFILE_TABS: ReadonlyArray<{ key: ProfileTabKey; label: string }> = [
   { key: 'security', label: 'Bảo mật & Mật khẩu' },
 ]
 
-function getRoleSummary(role: UserRoleName, pressCardNumber: string | null): {
+function getRoleSummary(
+  role: UserRoleName,
+  pressCardNumber: string | null,
+): {
   label: string
   variant: 'neutral' | 'category'
 } {
@@ -70,8 +73,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
   const [pressCardNumber, setPressCardNumber] = useState(user.pressCardNumber ?? '')
   const [bio, setBio] = useState(user.bio ?? '')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-  const [formError, setFormError] = useState<string | null>(null)
-  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   const normalizedPhonePreview = normalizeVietnamPhone(phoneNumber)
@@ -91,8 +92,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
     setPressCardNumber(user.pressCardNumber ?? '')
     setBio(user.bio ?? '')
     setFieldErrors({})
-    setFormError(null)
-    setSuccessMsg(null)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -112,14 +111,10 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors)
-      setFormError(null)
-      setSuccessMsg(null)
       return
     }
 
     setFieldErrors({})
-    setFormError(null)
-    setSuccessMsg(null)
     setIsSaving(true)
 
     try {
@@ -134,14 +129,14 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
       setPhoneNumber(updated.phoneNumber ?? '')
       setPressCardNumber(updated.pressCardNumber ?? '')
       setBio(updated.bio ?? '')
-      setSuccessMsg('Đã lưu thay đổi thông tin hồ sơ cá nhân.')
+      toast.success('Đã lưu thông tin hồ sơ', 'Các thay đổi của bạn đã được cập nhật.')
     } catch (err: unknown) {
       const clientErr = toAppClientError(err)
       if (clientErr.status === 422 && clientErr.details.length > 0) {
         setFieldErrors(extractFieldErrors(clientErr))
         return
       }
-      setFormError(clientErr.message)
+      toast.error('Không thể lưu hồ sơ', clientErr.message)
     } finally {
       setIsSaving(false)
     }
@@ -158,36 +153,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
         </p>
       </div>
 
-      <AnimatePresence mode="wait">
-        {formError && (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-          >
-            <Alert variant="destructive">
-              <AlertDescription className="mt-0">{formError}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-
-        {successMsg && (
-          <motion.div
-            key="success"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-          >
-            <Alert variant="success" role="status">
-              <AlertDescription className="mt-0">{successMsg}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Input
           name="fullName"
@@ -195,7 +160,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
           value={fullName}
           onChange={(e) => {
             setFullName(e.target.value)
-            setSuccessMsg(null)
             if (fieldErrors.fullName) setFieldErrors((prev) => ({ ...prev, fullName: '' }))
           }}
           error={fieldErrors.fullName}
@@ -221,7 +185,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
           value={phoneNumber}
           onChange={(e) => {
             setPhoneNumber(e.target.value)
-            setSuccessMsg(null)
             if (fieldErrors.phoneNumber) setFieldErrors((prev) => ({ ...prev, phoneNumber: '' }))
           }}
           error={fieldErrors.phoneNumber}
@@ -241,7 +204,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
             value={pressCardNumber}
             onChange={(e) => {
               setPressCardNumber(e.target.value)
-              setSuccessMsg(null)
               if (fieldErrors.pressCardNumber) {
                 setFieldErrors((prev) => ({ ...prev, pressCardNumber: '' }))
               }
@@ -268,7 +230,6 @@ function ProfileDetailsForm({ user, roleName, onProfileUpdated }: ProfileDetails
           value={bio}
           onChange={(e) => {
             setBio(e.target.value)
-            setSuccessMsg(null)
             if (fieldErrors.bio) setFieldErrors((prev) => ({ ...prev, bio: '' }))
           }}
           disabled={isSaving}
@@ -301,10 +262,6 @@ export function ProfilePage() {
   const prefersReducedMotion = useReducedMotion()
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null)
   const [activeTab, setActiveTab] = useState<ProfileTabKey>('info')
-  const [avatarFeedback, setAvatarFeedback] = useState<{
-    type: 'success' | 'error'
-    message: string
-  } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -358,7 +315,6 @@ export function ProfilePage() {
                   user={user}
                   fileInputRef={avatarFileInputRef}
                   onAvatarUpdated={updateCurrentUser}
-                  onFeedback={setAvatarFeedback}
                 />
               </div>
 
@@ -385,26 +341,6 @@ export function ProfilePage() {
               </Button>
             </div>
           </div>
-
-          <AnimatePresence mode="wait">
-            {avatarFeedback && (
-              <motion.div
-                key={avatarFeedback.message}
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.16 }}
-                className="mt-4"
-              >
-                <Alert
-                  variant={avatarFeedback.type === 'success' ? 'success' : 'destructive'}
-                  role={avatarFeedback.type === 'success' ? 'status' : 'alert'}
-                >
-                  <AlertDescription className="mt-0">{avatarFeedback.message}</AlertDescription>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </section>
 
