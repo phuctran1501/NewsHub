@@ -64,7 +64,7 @@ export function PressEcosystemMarquee() {
                 src={outlet.logoSrc}
                 alt={index < PRESS_OUTLETS.length ? outlet.name : ''}
                 loading="lazy"
-                className={`${outlet.heightClass} w-auto max-w-[136px] object-contain select-none`}
+                className={`${outlet.heightClass} w-auto max-w-34 object-contain select-none`}
               />
             </div>
           ))}

@@ -40,7 +40,7 @@ export function NotFoundPage() {
             aria-hidden="true"
             viewBox="0 0 40 40"
             fill="none"
-            className="h-14 w-14 sm:h-[70px] sm:w-[70px] motion-safe:animate-[spin_16s_linear_infinite]"
+            className="h-14 w-14 sm:h-17.5 sm:w-17.5 motion-safe:animate-[spin_16s_linear_infinite]"
           >
             <path d="M16.5 5L27 5L35 13V14H16.5V5Z" fill="currentColor" />
             <path d="M35 16.5V27L27 35H26V16.5H35Z" fill="currentColor" />
