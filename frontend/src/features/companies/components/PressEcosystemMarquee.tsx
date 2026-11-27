@@ -38,19 +38,15 @@ export function PressEcosystemMarquee() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-6 sm:p-8 space-y-6"
+      className="space-y-5"
     >
-      <div className="space-y-1.5">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-neutral-border dark:border-dark-border pb-3">
         <h2
           id="press-ecosystem-heading"
           className="text-xl font-bold tracking-[-0.015em] text-neutral-text-main dark:text-dark-text-main"
         >
           Hệ sinh thái đa tòa soạn
         </h2>
-        <p className="text-sm text-neutral-text-muted dark:text-dark-text-muted max-w-2xl">
-          Phóng viên độc lập &amp; cơ quan báo chí hội tụ trên một nền tảng. Mỗi tòa soạn sở hữu
-          không gian duyệt bài, mã định danh pháp lý và luồng độc giả theo dõi riêng biệt.
-        </p>
       </div>
 
       <div
@@ -62,7 +58,7 @@ export function PressEcosystemMarquee() {
             <div
               key={`${outlet.id}-${index}`}
               aria-hidden={index >= PRESS_OUTLETS.length ? true : undefined}
-              className="flex h-14 min-w-40 shrink-0 items-center justify-center rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-white/95 px-6 hover:border-primary dark:hover:border-secondary-dark transition-colors duration-150"
+              className="flex h-16 min-w-44 shrink-0 items-center justify-center rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-white/95 px-6 hover:border-primary dark:hover:border-secondary-dark transition-colors duration-150"
             >
               <img
                 src={outlet.logoSrc}
