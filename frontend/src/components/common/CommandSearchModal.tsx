@@ -8,26 +8,43 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { useDebounce } from '@/hooks/useDebounce'
-import { ROUTES } from '@/routes/paths'
+import { useCategories } from '@/features/categories/hooks/useCategories'
+import { useAuth } from '@/hooks/useAuth'
+import { buildCategoryPath, buildSearchPath, ROUTES } from '@/routes/paths'
 
 interface CommandSearchModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
-const QUICK_DESTINATIONS = [
-  { label: 'Trang chủ Thời Báo Số', to: ROUTES.HOME },
-  { label: 'Chuyên mục Thời sự', to: '/?category=thoi-su' },
-  { label: 'Chuyên mục Kinh tế & Tài chính', to: '/?category=kinh-te' },
-  { label: 'Chuyên mục Công nghệ & Dữ liệu', to: '/?category=cong-nghe' },
-  { label: 'Danh bạ Tòa soạn số', to: '/?section=companies' },
+const FALLBACK_CATEGORY_DESTINATIONS = [
+  { label: 'Chuyên mục Thời sự', to: buildCategoryPath('thoi-su') },
+  { label: 'Chuyên mục Kinh tế', to: buildCategoryPath('kinh-te') },
+  { label: 'Chuyên mục Công nghệ', to: buildCategoryPath('cong-nghe') },
 ]
 
 export function CommandSearchModal({ isOpen, onClose }: CommandSearchModalProps) {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const [query, setQuery] = useState('')
-  const debouncedQuery = useDebounce(query, 250)
+  const { data: categories } = useCategories()
+
+  const searchLabel = isAuthenticated ? 'Tìm kiếm thông minh' : 'Tìm kiếm bài viết'
+  const searchRoute = isAuthenticated ? ROUTES.SEARCH : buildSearchPath(undefined, 'keyword')
+
+  const categoryDestinations =
+    categories && categories.length > 0
+      ? categories.slice(0, 4).map((cat) => ({
+          label: `Chuyên mục ${cat.name}`,
+          to: buildCategoryPath(cat.slug),
+        }))
+      : FALLBACK_CATEGORY_DESTINATIONS
+
+  const quickDestinations = [
+    { label: 'Trang chủ Thời Báo Số', to: ROUTES.HOME },
+    { label: searchLabel, to: searchRoute },
+    ...categoryDestinations,
+  ]
 
   const handleClose = () => {
     setQuery('')
@@ -36,10 +53,10 @@ export function CommandSearchModal({ isOpen, onClose }: CommandSearchModalProps)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const clean = (debouncedQuery || query).trim()
+    const clean = query.trim()
     if (!clean) return
     handleClose()
-    navigate(`/?q=${encodeURIComponent(clean)}`)
+    navigate(buildSearchPath(clean, isAuthenticated ? 'ai' : 'keyword'))
   }
 
   return (
@@ -47,7 +64,7 @@ export function CommandSearchModal({ isOpen, onClose }: CommandSearchModalProps)
       <DialogContent hideCloseButton className="max-w-lg p-0 overflow-hidden">
         <DialogTitle className="sr-only">Tìm kiếm nhanh trên NewsHub</DialogTitle>
         <DialogDescription className="sr-only">
-          Nhập từ khóa bài báo hoặc chọn nhanh chuyên mục bên dưới.
+          Nhập câu hỏi ngữ nghĩa AI hoặc từ khóa bài báo, hoặc chọn nhanh chuyên mục bên dưới.
         </DialogDescription>
 
         <form onSubmit={handleSubmit} className="flex items-center gap-3 px-4 h-12">
@@ -61,7 +78,11 @@ export function CommandSearchModal({ isOpen, onClose }: CommandSearchModalProps)
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Nhập từ khóa bài báo hoặc câu hỏi ngữ nghĩa..."
+            placeholder={
+              isAuthenticated
+                ? 'Nhập câu hỏi ngữ nghĩa AI hoặc từ khóa bài báo...'
+                : 'Nhập từ khóa bài báo cần tìm...'
+            }
             className="w-full bg-transparent text-sm text-neutral-text-main dark:text-dark-text-main placeholder:text-neutral-text-muted dark:placeholder:text-dark-text-muted outline-none"
           />
           <kbd className="rounded border border-neutral-border dark:border-dark-border px-1.5 py-0.5 font-mono text-[10px] text-neutral-text-muted dark:text-dark-text-muted">
@@ -75,7 +96,7 @@ export function CommandSearchModal({ isOpen, onClose }: CommandSearchModalProps)
           <p className="px-2.5 py-1 text-[11px] font-semibold text-neutral-text-muted dark:text-dark-text-muted">
             Điều hướng nhanh
           </p>
-          {QUICK_DESTINATIONS.map((item) => (
+          {quickDestinations.map((item) => (
             <button
               key={item.to}
               type="button"

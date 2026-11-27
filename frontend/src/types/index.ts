@@ -1,3 +1,7 @@
 export * from './api'
+export * from './article'
 export * from './auth'
+export * from './category'
+export * from './company'
+export * from './search'
 export * from './theme'

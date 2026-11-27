@@ -6,6 +6,7 @@ using NewsHub.API.Services;
 using NewsHub.Application;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Infrastructure;
+using NewsHub.Infrastructure.Persistence;
 
 // Tự động load file .env nếu có ở thư mục gốc hoặc backend (Local Dev)
 var aspnetEnv = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -45,6 +46,17 @@ builder.Services.AddAppRateLimiter();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment() && args.Contains("--seed-only", StringComparer.OrdinalIgnoreCase))
+{
+    var regenerateEmbeddings = args.Contains("--reseed-embeddings", StringComparer.OrdinalIgnoreCase);
+    await DevelopmentDataSeeder.SeedAsync(app.Services, regenerateEmbeddings);
+    if (args.Contains("--verify-search", StringComparer.OrdinalIgnoreCase))
+    {
+        await DevelopmentDataSeeder.VerifyHybridSearchAsync(app.Services);
+    }
+    return;
+}
 
 // Forwarded Headers cho môi trường Reverse Proxy Cloud (Render / Cloudflare)
 app.UseForwardedHeaders(new ForwardedHeadersOptions

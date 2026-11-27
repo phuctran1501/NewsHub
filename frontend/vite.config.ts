@@ -21,6 +21,9 @@ export default defineConfig({
           if (id.includes('@radix-ui') || id.includes('@base-ui')) {
             return 'vendor-radix'
           }
+          if (id.includes('@tanstack')) {
+            return 'vendor-query'
+          }
           if (
             id.includes('/react/') ||
             id.includes('/react-dom/') ||

@@ -1,28 +1,52 @@
-import type { PagedApiResponse } from '@/types/api'
-import { apiClient, unwrapPaged } from './apiClient'
-
-export interface CompanyDirectoryItem {
-  id: string
-  code: string
-  name: string
-  logoUrl: string | null
-  description: string | null
-}
+import type { ApiResponse, PagedApiResponse } from '@/types/api'
+import type { FollowedCompanyDto, PublicCompanyDto } from '@/types/company'
+import { apiClient, unwrapData, unwrapPaged } from './apiClient'
 
 export const companyService = {
-  async getPublicCompanies(params?: {
-    pageNumber?: number
-    pageSize?: number
-    search?: string
-  }): Promise<PagedApiResponse<CompanyDirectoryItem>> {
+  async getPublicCompanies(
+    params?: {
+      pageNumber?: number
+      pageSize?: number
+      searchTerm?: string
+    },
+    signal?: AbortSignal,
+  ): Promise<PagedApiResponse<PublicCompanyDto>> {
     return unwrapPaged(
-      apiClient.get<PagedApiResponse<CompanyDirectoryItem>>('/api/v1/companies', {
+      apiClient.get<PagedApiResponse<PublicCompanyDto>>('/api/v1/companies/public', {
+        signal,
         params: {
           pageNumber: params?.pageNumber ?? 1,
-          pageSize: params?.pageSize ?? 10,
-          search: params?.search,
+          pageSize: params?.pageSize ?? 6,
+          searchTerm: params?.searchTerm || undefined,
         },
       }),
+    )
+  },
+
+  async getFollowedCompanies(
+    params?: { pageNumber?: number; pageSize?: number },
+    signal?: AbortSignal,
+  ): Promise<PagedApiResponse<FollowedCompanyDto>> {
+    return unwrapPaged(
+      apiClient.get<PagedApiResponse<FollowedCompanyDto>>('/api/v1/companies/following', {
+        signal,
+        params: {
+          pageNumber: params?.pageNumber ?? 1,
+          pageSize: params?.pageSize ?? 50,
+        },
+      }),
+    )
+  },
+
+  async followCompany(companyId: string): Promise<string> {
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>(`/api/v1/companies/${companyId}/follow`),
+    )
+  },
+
+  async unfollowCompany(companyId: string): Promise<string> {
+    return unwrapData(
+      apiClient.delete<ApiResponse<string>>(`/api/v1/companies/${companyId}/follow`),
     )
   },
 }

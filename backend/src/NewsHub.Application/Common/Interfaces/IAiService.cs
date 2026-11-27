@@ -1,9 +1,10 @@
 namespace NewsHub.Application.Common.Interfaces;
 
 using NewsHub.Application.Features.Ai.DTOs;
+using NewsHub.Domain.Enums;
 
 /// <summary>
-/// Abstraction kết nối với dịch vụ Trí tuệ Nhân tạo Google Gemini (Flash Lite & Text Embedding).
+/// Abstraction kết nối với dịch vụ Trí tuệ Nhân tạo Google Gemini (Flash & Text Embedding).
 /// </summary>
 public interface IAiService
 {
@@ -25,9 +26,18 @@ public interface IAiService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sinh vector nhúng 768 chiều từ chuỗi văn bản sử dụng text-embedding-004.
+    /// Sinh vector nhúng 768 chiều (mặc định tối ưu cho truy vấn tìm kiếm RETRIEVAL_QUERY).
     /// </summary>
     Task<float[]> GenerateEmbeddingAsync(
         string text,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sinh vector nhúng 768 chiều chuẩn hóa L2 kèm taskType bất đối xứng (RETRIEVAL_DOCUMENT / RETRIEVAL_QUERY).
+    /// </summary>
+    Task<float[]> GenerateEmbeddingAsync(
+        string text,
+        EmbeddingTaskType taskType,
+        string? title = null,
         CancellationToken cancellationToken = default);
 }

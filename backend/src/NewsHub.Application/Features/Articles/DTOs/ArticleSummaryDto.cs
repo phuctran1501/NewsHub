@@ -16,4 +16,5 @@ public sealed record ArticleSummaryDto(
     long ViewCount,
     IReadOnlyList<CategorySummaryDto> Categories,
     DateTimeOffset? PublishedAt,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? CompanyName = null);
