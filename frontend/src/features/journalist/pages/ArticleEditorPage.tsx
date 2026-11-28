@@ -382,7 +382,7 @@ function ArticleEditorForm({
           </div>
           <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
             {lastAutosavedAt
-              ? `Bản nháp tự động đã lưu cục bộ lúc ${formatClockTime(lastAutosavedAt)} — an toàn khi tải lại trang.`
+              ? `Bản nháp tự động đã lưu cục bộ lúc ${formatClockTime(lastAutosavedAt)} - an toàn khi tải lại trang.`
               : 'Nội dung sẽ tự động sao lưu cục bộ trong lúc bạn soạn thảo.'}
           </p>
         </div>

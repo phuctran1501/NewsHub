@@ -1,10 +1,15 @@
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
+import TextAlign from '@tiptap/extension-text-align'
 import { Color, FontFamily, FontSize, TextStyle } from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
   Bold,
   ChevronDown,
   Heading2,
@@ -13,9 +18,13 @@ import {
   Italic,
   Link2,
   List,
+  ListMinus,
   ListOrdered,
+  Minus,
   Quote,
   Redo2,
+  RemoveFormatting,
+  Strikethrough,
   Underline as UnderlineIcon,
   Undo2,
 } from 'lucide-react'
@@ -106,10 +115,15 @@ export function TipTapRichEditor({
   const [linkError, setLinkError] = useState<string | null>(null)
 
   const editor = useEditor({
+    // Đảm bảo thanh công cụ cập nhật trạng thái active ngay lập tức khi click hoặc di chuyển con trỏ
+    shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
         underline: false,
+        bulletList: {
+          HTMLAttributes: {},
+        },
         link: {
           openOnClick: false,
           HTMLAttributes: {
@@ -123,9 +137,13 @@ export function TipTapRichEditor({
       Color,
       FontFamily,
       FontSize,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
       NaturalSizeImage.configure({
         HTMLAttributes: {
-          class: 'nh-inline-reportage-img rounded-[10px] border border-neutral-border dark:border-dark-border my-4',
+          class:
+            'nh-inline-reportage-img rounded-[10px] border border-neutral-border dark:border-dark-border my-4',
         },
       }),
       Placeholder.configure({
@@ -215,6 +233,11 @@ export function TipTapRichEditor({
     setLinkDialogOpen(false)
   }
 
+  const handleInsertDashItem = () => {
+    if (!editor || editor.isDestroyed) return
+    editor.chain().focus().insertContent('<p>— </p>').run()
+  }
+
   const handleInlineImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     event.target.value = ''
@@ -285,7 +308,7 @@ export function TipTapRichEditor({
         disabled={disabled || isUploadingImage}
       />
 
-      {/* Word-inspired Pure 2D Toolbar — flush at top of editor card */}
+      {/* Word-inspired Pure 2D Toolbar — updates instantly on every click & selection */}
       <div
         role="toolbar"
         aria-label="Thanh công cụ định dạng văn bản"
@@ -304,7 +327,7 @@ export function TipTapRichEditor({
               editor.chain().focus().setFontFamily(font).run()
             }
           }}
-          className="h-8 max-w-[148px] rounded-[8px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-2 text-xs font-medium text-neutral-text-main dark:text-dark-text-main outline-none focus:border-primary dark:focus:border-secondary cursor-pointer"
+          className="h-8 max-w-[144px] rounded-[8px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-2 text-xs font-medium text-neutral-text-main dark:text-dark-text-main outline-none focus:border-primary dark:focus:border-secondary cursor-pointer"
         >
           {FONT_FAMILIES.map((font) => (
             <option key={font.label} value={font.value}>
@@ -316,7 +339,11 @@ export function TipTapRichEditor({
         <select
           aria-label="Cỡ chữ (px)"
           title="Cỡ chữ theo pixel"
-          value={FONT_SIZES_PX.includes(activeFontSize as (typeof FONT_SIZES_PX)[number]) ? activeFontSize : '16px'}
+          value={
+            FONT_SIZES_PX.includes(activeFontSize as (typeof FONT_SIZES_PX)[number])
+              ? activeFontSize
+              : '16px'
+          }
           onChange={(event) => {
             const size = event.target.value
             if (size === '16px') {
@@ -388,6 +415,16 @@ export function TipTapRichEditor({
           <UnderlineIcon size={15} strokeWidth={1.75} />
         </button>
 
+        <button
+          type="button"
+          title="Gạch ngang chữ"
+          aria-label="Gạch ngang chữ"
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={toolBtnClass(editor.isActive('strike'))}
+        >
+          <Strikethrough size={15} strokeWidth={1.75} />
+        </button>
+
         {/* Color Picker Popover using react-colorful */}
         <div ref={colorPopoverRef} className="relative">
           <button
@@ -454,7 +491,91 @@ export function TipTapRichEditor({
           )}
         </div>
 
+        <button
+          type="button"
+          title="Xóa toàn bộ định dạng vùng chọn"
+          aria-label="Xóa định dạng"
+          onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+          className={toolBtnClass(false)}
+        >
+          <RemoveFormatting size={15} strokeWidth={1.75} />
+        </button>
+
         <span className="h-5 w-px bg-neutral-border dark:bg-dark-border mx-0.5" aria-hidden="true" />
+
+        {/* Alignment controls */}
+        <button
+          type="button"
+          title="Căn trái"
+          aria-label="Căn trái"
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          className={toolBtnClass(editor.isActive({ textAlign: 'left' }))}
+        >
+          <AlignLeft size={15} strokeWidth={1.75} />
+        </button>
+
+        <button
+          type="button"
+          title="Căn giữa"
+          aria-label="Căn giữa"
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          className={toolBtnClass(editor.isActive({ textAlign: 'center' }))}
+        >
+          <AlignCenter size={15} strokeWidth={1.75} />
+        </button>
+
+        <button
+          type="button"
+          title="Căn phải"
+          aria-label="Căn phải"
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          className={toolBtnClass(editor.isActive({ textAlign: 'right' }))}
+        >
+          <AlignRight size={15} strokeWidth={1.75} />
+        </button>
+
+        <button
+          type="button"
+          title="Căn đều hai bên"
+          aria-label="Căn đều hai bên"
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          className={toolBtnClass(editor.isActive({ textAlign: 'justify' }))}
+        >
+          <AlignJustify size={15} strokeWidth={1.75} />
+        </button>
+
+        <span className="h-5 w-px bg-neutral-border dark:bg-dark-border mx-0.5" aria-hidden="true" />
+
+        {/* Lists, Quote, Divider */}
+        <button
+          type="button"
+          title="Danh sách chấm đầu dòng"
+          aria-label="Danh sách chấm đầu dòng"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={toolBtnClass(editor.isActive('bulletList'))}
+        >
+          <List size={15} strokeWidth={1.75} />
+        </button>
+
+        <button
+          type="button"
+          title="Chèn dòng gạch đầu dòng (—)"
+          aria-label="Danh sách gạch đầu dòng"
+          onClick={handleInsertDashItem}
+          className={toolBtnClass(false)}
+        >
+          <ListMinus size={15} strokeWidth={1.75} />
+        </button>
+
+        <button
+          type="button"
+          title="Danh sách đánh số"
+          aria-label="Danh sách đánh số"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={toolBtnClass(editor.isActive('orderedList'))}
+        >
+          <ListOrdered size={15} strokeWidth={1.75} />
+        </button>
 
         <button
           type="button"
@@ -468,22 +589,12 @@ export function TipTapRichEditor({
 
         <button
           type="button"
-          title="Danh sách chấm đầu dòng"
-          aria-label="Danh sách chấm đầu dòng"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={toolBtnClass(editor.isActive('bulletList'))}
+          title="Chèn đường kẻ ngang phân đoạn"
+          aria-label="Đường kẻ ngang"
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          className={toolBtnClass(false)}
         >
-          <List size={15} strokeWidth={1.75} />
-        </button>
-
-        <button
-          type="button"
-          title="Danh sách đánh số"
-          aria-label="Danh sách đánh số"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={toolBtnClass(editor.isActive('orderedList'))}
-        >
-          <ListOrdered size={15} strokeWidth={1.75} />
+          <Minus size={15} strokeWidth={1.75} />
         </button>
 
         <button
@@ -532,12 +643,15 @@ export function TipTapRichEditor({
         </div>
       </div>
 
-      <EditorContent
-        editor={editor}
-        className="nh-tiptap-editor nh-article-prose px-5 py-4 min-h-[380px] focus-within:outline-none"
-      />
+      {/* Scrollable Editor Content Area (fixed max-height with vertical scrollbar for long articles) */}
+      <div className="max-h-[540px] overflow-y-auto overscroll-contain">
+        <EditorContent
+          editor={editor}
+          className="nh-tiptap-editor nh-article-prose px-5 py-4 min-h-[380px] focus-within:outline-none"
+        />
+      </div>
 
-      {/* Professional Link Insert/Edit Dialog (replaces window.prompt) */}
+      {/* Professional Link Insert/Edit Dialog */}
       <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

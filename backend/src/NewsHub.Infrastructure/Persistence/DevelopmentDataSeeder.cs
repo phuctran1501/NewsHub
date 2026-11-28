@@ -375,17 +375,156 @@ public static class DevelopmentDataSeeder
                 CoverUrl: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1280&q=80",
                 Body: "<p>Trước những biến động địa chính trị trên các tuyến hàng hải trọng yếu và chiến lược đa dạng hóa nguồn cung của các tập đoàn đa quốc gia, khu vực Đông Nam Á đang nổi lên như mắt xích trung chuyển chiến lược trong mạng lưới thương mại biển toàn cầu.</p><h2>Tự động hóa cảng biển và tiêu chuẩn tàu xanh</h2><p>Các cụm cảng nước sâu tại khu vực châu Á – Thái Bình Dương đang chạy đua nâng cấp cần cẩu tự động, hệ thống quản lý bãi container bằng AI và hạ tầng cấp điện bờ nhằm giảm phát thải khí nhà kính khi tàu neo đậu. Việc tiếp nhận trực tiếp các siêu tàu container trọng tải trên 200.000 tấn giúp hàng hóa xuất khẩu đi thẳng tới bờ Đông, bờ Tây nước Mỹ và châu Âu mà không cần trung chuyển qua cảng nước thứ ba, tiết kiệm từ 3 đến 5 ngày vận chuyển.</p><blockquote>“Cạnh tranh cảng biển trong thập kỷ mới không chỉ đo bằng chiều sâu luồng tàu, mà còn bằng tốc độ thông quan số hóa và khả năng kết nối mượt mà với đường bộ cao tốc, đường thủy nội địa và đường sắt.” — Báo cáo logistics hàng hải khu vực nhận định.</blockquote><h2>Liên kết vùng để tối ưu chi phí logistics</h2><p>Tại Việt Nam, việc đồng bộ hóa cụm cảng Cái Mép – Thị Vải, Lạch Huyện cùng dự án cảng trung chuyển quốc tế mới kết hợp mạng lưới cao tốc liên vùng đang mở ra dư địa tăng trưởng mạnh mẽ cho xuất nhập khẩu. Các chuyên gia nhấn mạnh rằng đầu tư song hành cho trung tâm dịch vụ hậu cần sau cảng và hải quan thông minh sẽ giúp hạ chi phí logistics quốc gia xuống mức cạnh tranh hàng đầu khu vực ASEAN.</p>"
             ),
+            (
+                Slug: "siet-chat-xu-ly-lua-dao-cong-nghe-cao-va-bao-ve-du-lieu-ca-nhan",
+                Title: "Siết chặt xử lý lừa đảo công nghệ cao: Cơ chế khóa nhanh tài khoản nghi vấn và bảo vệ dữ liệu cá nhân",
+                CategorySlug: "phap-luat",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 5,
+                Views: 3120L,
+                HoursAgo: 3,
+                CoverUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Trước tình trạng các đường dây lừa đảo trực tuyến sử dụng giả mạo giọng nói (deepfake), ứng dụng chứa mã độc và tài khoản ngân hàng thuê mượn ngày càng tinh vi, cơ quan lập pháp và ngành ngân hàng đang triển khai cơ chế phối hợp phong tỏa dòng tiền theo thời gian thực.</p><h2>Truy vết dòng tiền trong khung giờ vàng</h2><p>Quy trình liên thông mới giữa cơ quan điều tra, hệ thống thanh toán quốc gia và các ngân hàng thương mại cho phép gắn cờ cảnh báo tức thì đối với những tài khoản có dấu hiệu nhận tiền bất thường từ nhiều nạn nhân. Nhờ xác thực sinh trắc học bắt buộc đối với giao dịch giá trị lớn, số vụ chiếm đoạt tài khoản qua tài khoản không chính chủ đã giảm rõ rệt trong các quý gần đây.</p><blockquote>“Bảo vệ công dân trên không gian mạng đòi hỏi cả hành lang pháp lý đủ sức răn đe đối với hành vi mua bán dữ liệu cá nhân lẫn cơ chế ứng cứu tài chính nhanh chỉ tính bằng phút.” — Luật sư Trần Đình Khoa nhận định.</blockquote><h2>Khuyến nghị phòng tránh rủi ro cho người dân</h2><ul><li>Tuyệt đối không cài đặt tệp tin ngoài kho ứng dụng chính thức hoặc cung cấp mã OTP cho bất kỳ ai tự xưng cơ quan chức năng.</li><li>Kích hoạt xác thực hai lớp và giới hạn hạn mức chuyển khoản phù hợp nhu cầu sử dụng hằng ngày.</li><li>Trình báo ngay đường dây nóng công an và ngân hàng trong vòng 30 phút đầu nếu phát hiện dấu hiệu bị lừa đảo.</li></ul>"
+            ),
+            (
+                Slug: "doanh-nghiep-xuat-khau-viet-nam-chuyen-xanh-de-vuot-rao-can-cbam",
+                Title: "Doanh nghiệp xuất khẩu Việt Nam tăng tốc chuyển đổi xanh để vượt hàng rào thuế carbon châu Âu",
+                CategorySlug: "kinh-doanh",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)1,
+                ReadMin: 6,
+                Views: 2640L,
+                HoursAgo: 5,
+                CoverUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Khi cơ chế điều chỉnh biên giới carbon (CBAM) của Liên minh châu Âu bước vào giai đoạn áp dụng đầy đủ, các ngành thép, xi măng, nhôm, dệt may và da giày Việt Nam đang đẩy mạnh đầu tư điện mặt trời áp mái, kiểm kê khí nhà kính và chứng chỉ chuỗi cung ứng bền vững.</p><h2>Minh bạch dữ liệu phát thải trên từng lô hàng</h2><p>Nhiều doanh nghiệp sản xuất lớn tại Bình Dương, Đồng Nai và Hải Phòng đã triển khai hệ thống phần mềm đo đếm phát thải trực tiếp tại dây chuyền, kết nối dữ liệu năng lượng vào báo cáo ESG định kỳ. Điều này không chỉ giúp giảm nguy cơ bị áp thuế bổ sung tại cửa khẩu EU mà còn tạo lợi thế đàm phán đơn hàng dài hạn với các nhãn hàng toàn cầu.</p><blockquote>“Chuyển đổi xanh không còn là chi phí tuân thủ ngắn hạn mà đã trở thành giấy thông hành bắt buộc để doanh nghiệp Việt giữ vững thị phần tại các thị trường khó tính.” — Đại diện Hiệp hội Doanh nghiệp Xuất khẩu chia sẻ.</blockquote><h2>Tiếp cận dòng vốn tín dụng xanh</h2><p>Các ngân hàng thương mại hiện dành nhiều gói tín dụng ưu đãi lãi suất cho dự án thay thế lò hơi sinh khối, hệ thống xử lý nước thải tuần hoàn và nhà xưởng đạt chuẩn LEED. Doanh nghiệp nhỏ và vừa được khuyến nghị liên kết theo cụm ngành để chia sẻ chi phí kiểm toán carbon quốc tế.</p>"
+            ),
+            (
+                Slug: "pin-the-ran-va-nang-luong-sach-buoc-ngoat-luu-tru-dien-nam-2026",
+                Title: "Đột phá công nghệ pin thể rắn và hệ thống lưu trữ năng lượng quy mô lớn năm 2026",
+                CategorySlug: "khoa-hoc",
+                AuthorIdx: 0,
+                CompanyIdx: (int?)2,
+                ReadMin: 5,
+                Views: 2180L,
+                HoursAgo: 7,
+                CoverUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Các phòng thí nghiệm vật liệu hàng đầu thế giới vừa công bố thế hệ pin thể rắn có mật độ năng lượng vượt mốc 450 Wh/kg, cho phép sạc 80% dung lượng chỉ trong vòng 10 phút và giảm thiểu nguy cơ cháy nổ nhờ chất điện phân rắn ổn định nhiệt.</p><h2>Giải bài toán lưu trữ cho điện gió và điện mặt trời</h2><p>Bên cạnh ứng dụng trên phương tiện giao thông, công nghệ pin natri-ion và pin dòng chảy đang được triển khai tại các trạm lưu trữ điện lưới (BESS) nhằm cân bằng công suất vào giờ cao điểm. Điều này giúp giảm đáng kể tình trạng cắt giảm công suất năng lượng tái tạo vào buổi trưa nắng gắt.</p><blockquote>“Khi chi phí lưu trữ năng lượng giảm xuống dưới 100 USD/kWh, điện mặt trời kết hợp pin lưu trữ sẽ cạnh tranh trực tiếp với nhiệt điện truyền thống về cả giá thành lẫn độ ổn định.” — PGS.TS Nguyễn Văn Hùng đánh giá.</blockquote>"
+            ),
+            (
+                Slug: "xe-dien-do-thi-va-ha-tang-tram-sac-nhanh-phu-song-cao-toc-bac-nam",
+                Title: "Xe điện đô thị bùng nổ: Hạ tầng trạm sạc nhanh phủ kín các trạm dừng nghỉ cao tốc Bắc – Nam",
+                CategorySlug: "xe",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)1,
+                ReadMin: 5,
+                Views: 3450L,
+                HoursAgo: 4,
+                CoverUrl: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Thị trường ô tô Việt Nam chứng kiến sự chuyển dịch mạnh mẽ sang xe thuần điện và hybrid khi chi phí vận hành tiết kiệm hơn 50% so với xe xăng truyền thống, đi kèm mạng lưới trạm sạc nhanh công suất 150–250 kW được lắp đặt đồng bộ dọc tuyến cao tốc Bắc – Nam.</p><h2>Xóa bỏ nỗi lo quãng đường khi đi liên tỉnh</h2><p>Nhờ tiêu chuẩn cổng sạc thống nhất và ứng dụng bản đồ hiển thị trạng thái trụ sạc trống theo thời gian thực, người dùng xe điện nay có thể thực hiện các hành trình xuyên Việt một cách chủ động. Các hãng xe cũng đẩy mạnh gói bảo hành pin 10 năm và dịch vụ cứu hộ lưu động 24/7.</p><ul><li>Tích hợp thanh toán tự động (Plug & Charge) rút ngắn thời gian thao tác tại trạm.</li><li>Mở rộng trạm sạc tại chung cư, trung tâm thương mại và bãi đỗ xe công cộng theo quy chuẩn phòng cháy mới.</li></ul>"
+            ),
+            (
+                Slug: "tuyen-sinh-dai-hoc-2026-tang-cuong-danh-gia-nang-luc-va-nganh-ban-dan",
+                Title: "Tuyển sinh đại học 2026: Mở rộng chỉ tiêu các ngành bán dẫn, AI và chuẩn hóa kỳ thi đánh giá năng lực",
+                CategorySlug: "giao-duc",
+                AuthorIdx: 0,
+                CompanyIdx: (int?)0,
+                ReadMin: 5,
+                Views: 3890L,
+                HoursAgo: 2,
+                CoverUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Mùa tuyển sinh đại học năm nay ghi nhận sức hút vượt trội ở nhóm ngành thiết kế vi mạch, trí tuệ nhân tạo, khoa học dữ liệu và năng lượng tái tạo, trong khi các trường đại học lớn tiến tới liên thông kết quả kỳ thi đánh giá năng lực để giảm áp lực thi cử cho thí sinh.</p><h2>Liên kết đào tạo thực chiến cùng doanh nghiệp</h2><p>Nhiều chương trình kỹ sư chất lượng cao đã đưa sinh viên năm 3 và năm 4 vào làm việc trực tiếp tại phòng lab doanh nghiệp từ 6 đến 12 tháng. Cách làm này giúp sinh viên tốt nghiệp rút ngắn thời gian đào tạo lại và nhanh chóng đáp ứng tiêu chuẩn dự án quốc tế.</p><blockquote>“Chọn ngành học cần xuất phát từ năng lực cốt lõi và khả năng tự học suốt đời, thay vì chỉ chạy theo xu hướng điểm chuẩn nhất thời.” — Ban tư vấn tuyển sinh khuyến nghị.</blockquote>"
+            ),
+            (
+                Slug: "y-te-du-phong-va-ung-dung-ai-chan-doan-som-benh-ly-tim-mach",
+                Title: "Ứng dụng AI trong chẩn đoán hình ảnh giúp phát hiện sớm nguy cơ đột quỵ và bệnh lý tim mạch",
+                CategorySlug: "suc-khoe",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 5,
+                Views: 2910L,
+                HoursAgo: 6,
+                CoverUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Nhiều bệnh viện tuyến trung ương và tuyến tỉnh tại Việt Nam đã đưa phần mềm trí tuệ nhân tạo hỗ trợ đọc phim CT, MRI và điện tâm đồ vào quy trình tầm soát, giúp bác sĩ rút ngắn thời gian phát hiện dấu hiệu tổn thương mạch máu não từ hàng chục phút xuống còn vài chục giây.</p><h2>Chủ động phòng bệnh từ thay đổi lối sống</h2><p>Các chuyên gia tim mạch nhấn mạnh công nghệ chẩn đoán chỉ phát huy tối đa hiệu quả khi người dân duy trì khám sức khỏe định kỳ 6–12 tháng một lần, kiểm soát huyết áp, mỡ máu, ngủ đủ giấc và duy trì vận động thể chất tối thiểu 150 phút mỗi tuần.</p>"
+            ),
+            (
+                Slug: "du-lich-xanh-va-trai-nghiem-di-san-mien-trung-hut-khach-quoc-te",
+                Title: "Du lịch xanh và tuyến tàu hỏa di sản miền Trung hút mạnh dòng khách quốc tế quay trở lại",
+                CategorySlug: "du-lich",
+                AuthorIdx: 2,
+                CompanyIdx: null,
+                ReadMin: 4,
+                Views: 2470L,
+                HoursAgo: 8,
+                CoverUrl: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Hành trình kết nối Huế – Đà Nẵng – Hội An bằng tuyến tàu hỏa du lịch ngắm đèo Hải Vân cùng các tour trải nghiệm làng nghề không rác thải nhựa đang trở thành điểm sáng của du lịch Việt Nam, kéo dài thời gian lưu trú trung bình của du khách quốc tế.</p><h2>Nâng tầm dịch vụ từ bản sắc địa phương</h2><p>Thay vì chỉ khai thác du lịch nghỉ dưỡng đại trà, các địa phương đang đầu tư bài bản vào du lịch ẩm thực, bảo tồn kiến trúc cổ và không gian nghệ thuật buổi tối, mang lại nguồn thu bền vững cho cộng đồng dân cư bản địa.</p>"
+            ),
+            (
+                Slug: "so-hoa-di-san-va-khong-gian-doc-sach-cong-dong-giua-long-do-thi",
+                Title: "Số hóa di sản văn hóa và sức sống mới của các không gian đọc sách cộng đồng giữa lòng đô thị",
+                CategorySlug: "van-hoa",
+                AuthorIdx: 0,
+                CompanyIdx: null,
+                ReadMin: 4,
+                Views: 1960L,
+                HoursAgo: 10,
+                CoverUrl: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Những bảo tàng ứng dụng công nghệ quét 3D, thực tế tăng cường (AR) kết hợp chuỗi đường sách và thư viện mở cuối tuần đang kéo thế hệ trẻ đến gần hơn với lịch sử, văn học và nghệ thuật truyền thống dân tộc.</p><h2>Đưa di sản bước ra khỏi tủ kính</h2><p>Thông qua các triển lãm tương tác và dự án tái hiện cổ phục, âm nhạc dân gian trên nền tảng số, nhiều giá trị văn hóa lâu đời được kể lại bằng ngôn ngữ đương đại sinh động, tạo sức lan tỏa tích cực trong cộng đồng.</p>"
+            ),
+            (
+                Slug: "dien-anh-viet-nam-vuon-ra-lien-hoan-phim-quoc-te-va-suc-bat-phong-ve",
+                Title: "Điện ảnh Việt Nam khởi sắc: Sức bật phòng vé nội địa và dấu ấn mới tại các liên hoan phim quốc tế",
+                CategorySlug: "giai-tri",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)2,
+                ReadMin: 4,
+                Views: 2730L,
+                HoursAgo: 5,
+                CoverUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Làn sóng đạo diễn trẻ đầu tư nghiêm túc vào kịch bản gốc, kỹ xảo hậu kỳ và chất liệu văn hóa bản địa đã giúp nhiều tác phẩm điện ảnh Việt vừa chinh phục doanh thu phòng vé trong nước vừa liên tiếp góp mặt tại các liên hoan phim uy tín châu Á và châu Âu.</p><h2>Khán giả ngày càng khắt khe về chất lượng kịch bản</h2><p>Sự thành công của các bộ phim đa thể loại từ tâm lý xã hội, lịch sử đến hoạt hình 3D cho thấy khán giả sẵn sàng ủng hộ phim Việt khi tác phẩm được chăm chút chỉn chu và mang lại cảm xúc chân thật.</p>"
+            ),
+            (
+                Slug: "bong-da-viet-nam-dau-tu-dao-tao-tre-va-chuan-hoa-cong-nghe-var",
+                Title: "Bóng đá Việt Nam đẩy mạnh học viện đào tạo trẻ và phủ sóng công nghệ VAR toàn giải V-League",
+                CategorySlug: "the-thao",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)0,
+                ReadMin: 5,
+                Views: 4120L,
+                HoursAgo: 3,
+                CoverUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Việc áp dụng đồng bộ công nghệ VAR ở toàn bộ các vòng đấu kết hợp ứng dụng phân tích dữ liệu thể lực bằng cảm biến GPS tại các trung tâm đào tạo trẻ đang nâng cao rõ rệt chất lượng chuyên môn và tính công bằng của bóng đá chuyên nghiệp Việt Nam.</p><h2>Hướng tới mục tiêu bền vững ở đấu trường châu lục</h2><p>Các câu lạc bộ chú trọng hơn tới mặt sân đạt chuẩn, dinh dưỡng thể thao và tạo cơ hội thi đấu thường xuyên cho cầu thủ lứa U21 nhằm xây dựng lực lượng kế cận dày dặn cho đội tuyển quốc gia.</p>"
+            ),
+            (
+                Slug: "ban-doc-hien-ke-giam-un-tac-gio-cao-diem-va-cai-tao-via-he-thong-thoang",
+                Title: "Bạn đọc hiến kế giảm ùn tắc giờ cao điểm: Phân luồng linh hoạt và trả lại vỉa hè cho người đi bộ",
+                CategorySlug: "ban-doc",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 4,
+                Views: 2290L,
+                HoursAgo: 7,
+                CoverUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Chuyên mục Đường dây nóng và Diễn đàn Bạn đọc tuần qua ghi nhận hàng trăm ý kiến đóng góp tâm huyết từ người dân Hà Nội và TP.HCM xoay quanh việc tối ưu chu kỳ đèn tín hiệu thông minh, lệch giờ học – giờ làm và quản lý trật tự vỉa hè minh bạch.</p><h2>Những đề xuất thiết thực từ thực tế đời sống</h2><ul><li>Tăng cường camera phạt nguội kết hợp biển báo điện tử cập nhật mật độ giao thông trước các nút giao lớn.</li><li>Quy hoạch bãi gửi xe kết nối trực tiếp nhà ga metro và trạm xe buýt để khuyến khích người dân bỏ xe cá nhân.</li><li>Công khai bản đồ các tuyến vỉa hè đủ điều kiện sử dụng tạm một phần và xử lý nghiêm tình trạng lấn chiếm lối đi bộ.</li></ul><p>Tòa soạn tiếp tục tổng hợp các góp ý xác đáng để chuyển tới cơ quan quản lý đô thị xem xét và phản hồi trực tiếp tới bạn đọc trong các bản tin tiếp theo.</p>"
+            ),
         };
 
         var insertedCount = 0;
         foreach (var spec in articleSpecs)
         {
+            var mediaPublicId = $"seed/covers/{spec.Slug}";
+            var existingMedia = await dbContext.MediaFiles.FirstOrDefaultAsync(m => m.PublicId == mediaPublicId, cancellationToken);
+            if (existingMedia is not null && existingMedia.Url != spec.CoverUrl)
+            {
+                existingMedia.Url = spec.CoverUrl;
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
             var exists = await dbContext.Articles.AnyAsync(a => a.Slug == spec.Slug, cancellationToken);
             if (exists) continue;
 
             var author = journalists[spec.AuthorIdx];
-            var mediaPublicId = $"seed/covers/{spec.Slug}";
-            var media = await dbContext.MediaFiles.FirstOrDefaultAsync(m => m.PublicId == mediaPublicId, cancellationToken);
+            var media = existingMedia;
             if (media is null)
             {
                 media = new MediaFile

@@ -29,6 +29,7 @@ public class HtmlSanitizerService : NewsHub.Application.Common.Interfaces.IHtmlS
         _sanitizer.AllowedAttributes.Add("title");
         _sanitizer.AllowedAttributes.Add("width");
         _sanitizer.AllowedAttributes.Add("height");
+        _sanitizer.AllowedAttributes.Add("data-list-style");
         _sanitizer.AllowedAttributes.Add("srcset");
         _sanitizer.AllowedAttributes.Add("sizes");
 
