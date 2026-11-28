@@ -7,9 +7,11 @@ export const buttonVariants = cva(
       variant: {
         primary:
           'bg-primary text-white hover:bg-primary-hover dark:bg-secondary dark:text-dark-bg dark:hover:bg-secondary-dark',
+        secondary:
+          'bg-secondary-light text-primary hover:bg-secondary/70 dark:bg-secondary/15 dark:text-secondary dark:hover:bg-secondary/25',
         action: 'bg-accent-action text-white hover:bg-accent-action-hover',
         outline:
-          'border border-neutral-border dark:border-dark-border bg-transparent text-neutral-text-main dark:text-dark-text-main hover:border-primary dark:hover:border-secondary',
+          'border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface text-neutral-text-main dark:text-dark-text-main hover:border-primary dark:hover:border-secondary',
         ghost:
           'bg-transparent text-neutral-text-muted dark:text-dark-text-muted hover:text-neutral-text-main dark:hover:text-dark-text-main hover:bg-neutral-bg dark:hover:bg-dark-border/50',
         danger:

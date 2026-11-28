@@ -70,14 +70,25 @@ public static class DevelopmentDataSeeder
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // 2. Seed 5 Chuyên mục chuẩn
+        // 2. Seed 16 Chuyên mục báo chí chuẩn (tham khảo cơ cấu Tuổi Trẻ)
         var categorySpecs = new[]
         {
             (Name: "Thời sự", Slug: "thoi-su", Desc: "Tin tức thời sự trong nước, chính sách công, hạ tầng và chuyển đổi đô thị."),
+            (Name: "Thế giới", Slug: "the-gioi", Desc: "Diễn biến địa chính trị, kinh tế toàn cầu và chính sách công nghệ quốc tế."),
+            (Name: "Pháp luật", Slug: "phap-luat", Desc: "Pháp đình, an ninh trật tự, chính sách pháp lý và tư vấn quyền công dân."),
+            (Name: "Kinh doanh", Slug: "kinh-doanh", Desc: "Doanh nghiệp, khởi nghiệp, tài chính ngân hàng, bất động sản và thị trường."),
             (Name: "Kinh tế", Slug: "kinh-te", Desc: "Phân tích kinh tế vĩ mô, thị trường vốn, đầu tư FDI và chuyển đổi kinh tế số."),
             (Name: "Công nghệ", Slug: "cong-nghe", Desc: "Trí tuệ nhân tạo, kiến trúc phần mềm, hạ tầng đám mây và an ninh dữ liệu."),
-            (Name: "Thế giới", Slug: "the-gioi", Desc: "Diễn biến địa chính trị, kinh tế toàn cầu và chính sách công nghệ quốc tế."),
-            (Name: "Đời sống", Slug: "doi-song", Desc: "Văn hóa đọc, giáo dục số, năng lượng xanh và chất lượng sống hiện đại."),
+            (Name: "Khoa học", Slug: "khoa-hoc", Desc: "Phát minh mới, nghiên cứu học thuật, vũ trụ, năng lượng và môi trường."),
+            (Name: "Xe", Slug: "xe", Desc: "Thị trường ô tô, xe điện, giao thông thông minh và đánh giá phương tiện."),
+            (Name: "Giáo dục", Slug: "giao-duc", Desc: "Tuyển sinh, đại học, đổi mới phương pháp học tập và du học quốc tế."),
+            (Name: "Sức khỏe", Slug: "suc-khoe", Desc: "Y tế dự phòng, dinh dưỡng, tiến bộ y khoa và chăm sóc sức khỏe cộng đồng."),
+            (Name: "Đời sống", Slug: "doi-song", Desc: "Văn hóa đọc, gia đình, năng lượng xanh và chất lượng sống hiện đại."),
+            (Name: "Du lịch", Slug: "du-lich", Desc: "Điểm đến trong nước và quốc tế, ẩm thực vùng miền và xu hướng dịch chuyển."),
+            (Name: "Văn hóa", Slug: "van-hoa", Desc: "Di sản, nghệ thuật, xuất bản sách và đời sống văn hóa đương đại."),
+            (Name: "Giải trí", Slug: "giai-tri", Desc: "Điện ảnh, âm nhạc, sân khấu và sự kiện giải trí nổi bật."),
+            (Name: "Thể thao", Slug: "the-thao", Desc: "Bóng đá trong nước và quốc tế, điền kinh và các giải đấu đỉnh cao."),
+            (Name: "Bạn đọc", Slug: "ban-doc", Desc: "Phản ánh dân sinh, đường dây nóng tòa soạn và đối thoại cùng bạn đọc."),
         };
 
         var categoryBySlug = new Dictionary<string, Category>(StringComparer.OrdinalIgnoreCase);
