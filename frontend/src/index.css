@@ -318,6 +318,104 @@
   animation-play-state: paused;
 }
 
+/* Editorial Article Rich-Text Typography (line-height >= 1.7, Pure 2D) */
+.nh-article-prose {
+  font-size: 1.0625rem;
+  line-height: 1.78;
+  word-break: break-word;
+}
+
+.nh-article-prose p {
+  margin-bottom: 1.35rem;
+}
+
+.nh-article-prose h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.85rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.nh-article-prose h3 {
+  margin-top: 1.6rem;
+  margin-bottom: 0.65rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.nh-article-prose ul,
+.nh-article-prose ol {
+  margin-bottom: 1.35rem;
+  padding-left: 1.5rem;
+}
+
+.nh-article-prose ul {
+  list-style-type: disc;
+}
+
+.nh-article-prose ol {
+  list-style-type: decimal;
+}
+
+.nh-article-prose li {
+  margin-bottom: 0.5rem;
+}
+
+.nh-article-prose blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-neutral-border);
+  background-color: var(--color-neutral-bg);
+  border-radius: 12px;
+  font-style: italic;
+}
+
+.dark .nh-article-prose blockquote {
+  border-color: var(--color-dark-border);
+  background-color: var(--color-dark-bg);
+}
+
+.nh-article-prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.dark .nh-article-prose a {
+  color: var(--color-secondary);
+}
+
+.nh-article-prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border-radius: 12px;
+  border: 1px solid var(--color-neutral-border);
+  cursor: zoom-in;
+}
+
+.dark .nh-article-prose img {
+  border-color: var(--color-dark-border);
+}
+
+.nh-article-prose figure {
+  margin: 1.75rem 0;
+}
+
+.nh-article-prose figcaption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--color-neutral-text-muted);
+}
+
+.dark .nh-article-prose figcaption {
+  color: var(--color-dark-text-muted);
+}
+
 /* Hide scrollbar on horizontal category/topic strips */
 .nh-no-scrollbar::-webkit-scrollbar {
   display: none;

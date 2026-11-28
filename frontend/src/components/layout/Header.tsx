@@ -35,7 +35,7 @@ export function Header({ onOpenSearch }: HeaderProps) {
         </div>
 
         <div className="hidden md:block flex-1 max-w-xl">
-          <div className="nh-search-beam rounded-[12px]">
+          <div className="nh-search-beam rounded-xl">
             <button
               type="button"
               onClick={onOpenSearch}

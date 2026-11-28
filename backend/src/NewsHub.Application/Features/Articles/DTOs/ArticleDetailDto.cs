@@ -19,4 +19,5 @@ public sealed record ArticleDetailDto(
     IReadOnlyList<CategorySummaryDto> Categories,
     DateTimeOffset? PublishedAt,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? UpdatedAt);
+    DateTimeOffset? UpdatedAt,
+    string? CompanyName = null);

@@ -130,7 +130,7 @@ export function TopUtilityBar() {
             onMouseLeave={() => setIsWeatherPaused(false)}
             title="Dữ liệu thời tiết Open-Meteo • Nhấn để chuyển tỉnh thành"
             aria-label={`Thời tiết ${currentWeather.city}: ${currentWeather.temp}, ${currentWeather.condition}`}
-            className="hidden lg:inline-flex h-5 w-[188px] items-center overflow-hidden text-left hover:text-neutral-text-main dark:hover:text-dark-text-main transition-colors cursor-pointer"
+            className="hidden lg:inline-flex h-5 w-47 items-center overflow-hidden text-left hover:text-neutral-text-main dark:hover:text-dark-text-main transition-colors cursor-pointer"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
@@ -168,7 +168,7 @@ export function TopUtilityBar() {
             onMouseLeave={() => setIsMarketPaused(false)}
             title="Chỉ số thị trường • Nhấn để chuyển chỉ số tiếp theo"
             aria-label={`Chỉ số ${currentMarket.symbol}: ${currentMarket.value} (${currentMarket.change})`}
-            className="hidden xl:inline-flex h-5 w-[225px] items-center overflow-hidden text-left hover:text-neutral-text-main dark:hover:text-dark-text-main transition-colors cursor-pointer"
+            className="hidden xl:inline-flex h-5 w-56.25 items-center overflow-hidden text-left hover:text-neutral-text-main dark:hover:text-dark-text-main transition-colors cursor-pointer"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
