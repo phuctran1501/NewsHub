@@ -1,6 +1,6 @@
 import type { RouteObject } from 'react-router-dom'
 import { RootLayout } from '@/components/layout/RootLayout'
-import { ArticleDetailPlaceholderPage } from '@/features/articles'
+import { ArticleDetailPage, DraftPreviewPage } from '@/features/articles'
 import { ProfilePage } from '@/features/auth'
 import { CategoryPage } from '@/features/categories'
 import { SearchPage } from '@/features/search'
@@ -25,8 +25,12 @@ export const publicRoutes: RouteObject = {
       element: <SearchPage />,
     },
     {
+      path: ROUTES.ARTICLE_PREVIEW,
+      element: <DraftPreviewPage />,
+    },
+    {
       path: ROUTES.ARTICLE_DETAIL,
-      element: <ArticleDetailPlaceholderPage />,
+      element: <ArticleDetailPage />,
     },
     {
       path: ROUTES.PROFILE,

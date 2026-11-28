@@ -291,6 +291,79 @@ public static class DevelopmentDataSeeder
                 CoverUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1280&q=80",
                 Body: "<p>Nghệ thuật trình bày chữ viết thoáng đãng, loại bỏ các yếu tố gây xao nhãng và tóm tắt ý chính thông minh đang giúp độc giả quay lại với những bài phân tích dài chất lượng cao.</p>"
             ),
+            // ── 6 Bài phóng sự chuyên sâu dài (tham khảo phong cách & chủ đề thời sự Tuổi Trẻ) ──
+            (
+                Slug: "metro-so-1-tphcm-thay-doi-thoi-quen-di-lai-do-thi",
+                Title: "Tuyến Metro số 1 TP.HCM và cuộc chuyển dịch thói quen đi lại của hàng trăm nghìn người dân",
+                CategorySlug: "thoi-su",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 7,
+                Views: 4820L,
+                HoursAgo: 0,
+                CoverUrl: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Sau giai đoạn vận hành thương mại ổn định, tuyến đường sắt đô thị số 1 (Bến Thành – Suối Tiên) không chỉ giải tỏa áp lực kẹt xe dọc trục cửa ngõ phía Đông TP.HCM mà còn từng bước hình thành văn hóa sử dụng giao thông công cộng văn minh, đúng giờ cho cư dân đô thị.</p><h2>Kết nối đa phương thức: Chìa khóa giữ chân hành khách</h2><p>Ghi nhận tại các nhà ga trọng điểm như Thủ Đức, Thảo Điền và Bến Thành vào khung giờ cao điểm sáng từ 6h30 đến 8h30, lượng hành khách là nhân viên văn phòng và sinh viên tăng đều qua từng tuần. Điểm thay đổi rõ rệt nhất là sự hiện diện của mạng lưới 17 tuyến xe buýt điện gom khách miễn phí và có trợ giá kết nối trực tiếp vào các khu dân cư, trường đại học và khu công nghệ cao.</p><p>Bên cạnh đó, hệ thống bãi giữ xe cá nhân quanh các ga trên cao đã được mở rộng với cơ chế thanh toán không tiền mặt qua thẻ ngân hàng, ví điện tử và mã QR liên thông. Người dân chỉ mất chưa đầy 30 phút để di chuyển từ TP. Thủ Đức vào trung tâm quận 1, rút ngắn gần một nửa thời gian so với việc tự lái xe máy qua xa lộ Hà Nội trong điều kiện ùn tắc.</p><blockquote>“Trước đây mỗi sáng tôi phải rời nhà lúc 6h15 để tránh kẹt xe ở ngã tư Thủ Đức và cầu Sài Gòn. Nay tôi gửi xe gần ga, lên tàu đọc báo khoảng 25 phút là tới ngay gần cơ quan, vừa tiết kiệm sức lực vừa chủ động hoàn toàn lịch trình.” — Chị Minh Thư, nhân viên tài chính tại quận 1 chia sẻ.</blockquote><h2>Động lực tái cấu trúc không gian đô thị theo mô hình TOD</h2><p>Theo các chuyên gia quy hoạch giao thông, giá trị lớn nhất của Metro số 1 không dừng lại ở năng lực chuyên chở hành khách mà nằm ở mô hình phát triển đô thị gắn với giao thông công cộng (TOD). Dọc hành lang tuyến, nhiều tổ hợp thương mại, văn phòng, không gian đi bộ và công viên bờ sông đang được điều chỉnh quy hoạch nhằm khuyến khích người dân đi bộ trong bán kính 500 đến 800 mét quanh nhà ga.</p><ul><li>Tăng tỷ lệ phủ sóng xe buýt điện gom khách kết nối trực tiếp các khu đô thị mới và khu công nghệ cao.</li><li>Hoàn thiện hệ thống vé liên thông điện tử giữa đường sắt đô thị, xe buýt và xe đạp công cộng.</li><li>Đẩy nhanh chuẩn bị đầu tư tuyến Metro số 2 (Bến Thành – Tham Lương) để sớm hình thành mạng lưới khép kín.</li></ul><p>Giới chuyên môn nhấn mạnh rằng thành công bước đầu của tuyến số 1 là bài học thực tiễn quý giá về quản trị vận hành, bảo trì kỹ thuật và truyền thông hướng dẫn người dân, tạo tiền đề vững chắc cho mục tiêu hoàn thiện hàng trăm kilômét đường sắt đô thị tại TP.HCM và Hà Nội trong thập kỷ tới.</p>"
+            ),
+            (
+                Slug: "nong-san-viet-nam-vuot-rao-can-xanh-chinh-phuc-thi-truong-cao-cap",
+                Title: "Nông sản Việt vượt rào cản xanh: Từ mã số vùng trồng đến chuỗi lạnh xuất khẩu tỷ USD",
+                CategorySlug: "kinh-te",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)1,
+                ReadMin: 7,
+                Views: 3910L,
+                HoursAgo: 1,
+                CoverUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Kim ngạch xuất khẩu rau quả, cà phê đặc sản và gạo chất lượng cao của Việt Nam liên tiếp lập kỷ lục mới, nhưng đằng sau những con số tăng trưởng ấn tượng là cuộc chạy đua khốc liệt nhằm đáp ứng tiêu chuẩn truy xuất nguồn gốc, dư lượng thuốc bảo vệ thực vật và giảm phát thải carbon tại các thị trường khó tính.</p><h2>Minh bạch hóa bằng dữ liệu số tại từng vườn trồng</h2><p>Tại Đồng bằng sông Cửu Long và Tây Nguyên, hàng nghìn hợp tác xã đã chuyển từ ghi chép sổ tay sang nhật ký canh tác điện tử gắn với mã số vùng trồng và cơ sở đóng gói. Mỗi lô hàng trước khi rời kho đều có mã QR chứa đầy đủ thông tin về giống cây, lịch bón phân, thời điểm thu hoạch và kết quả kiểm nghiệm an toàn thực phẩm tại phòng thí nghiệm đạt chuẩn quốc tế.</p><p>Đại diện nhiều doanh nghiệp xuất khẩu cho biết việc đầu tư hệ thống kiểm soát chất lượng ngay từ đầu giúp tỷ lệ lô hàng bị cảnh báo tại cửa khẩu giảm xuống mức thấp nhất trong nhiều năm, đồng thời nâng giá bán trung bình thêm 15% đến 25% so với hàng xuất thô truyền thống.</p><blockquote>“Thị trường châu Âu, Nhật Bản và Hàn Quốc sẵn sàng trả giá rất cao cho trái cây nhiệt đới và cà phê Việt Nam, với điều kiện doanh nghiệp chứng minh được quy trình sản xuất bền vững và chất lượng đồng đều qua từng mùa vụ.” — Ông Nguyễn Văn Thành, Giám đốc một doanh nghiệp xuất khẩu nông sản tại Tiền Giang nhận định.</blockquote><h2>Nút thắt chuỗi cung ứng lạnh và chế biến sâu</h2><p>Dù sản lượng dồi dào, chi phí logistics vẫn chiếm tỷ trọng cao trong giá thành nông sản xuất khẩu. Để giải bài toán này, nhiều tập đoàn nông nghiệp đang mạnh tay đầu tư nhà máy cấp đông nhanh bằng nitơ lỏng, kho lạnh thông minh gần vùng nguyên liệu và dây chuyền chế biến sâu như trái cây sấy thăng hoa, nước ép cô đặc và cà phê hòa tan đặc sản.</p><ul><li>Mở rộng vùng nguyên liệu đạt chứng nhận VietGAP, GlobalGAP và hữu cơ gắn với hợp đồng bao tiêu dài hạn.</li><li>Phát triển trung tâm logistics nông sản chuyên biệt kết nối trực tiếp cảng nước sâu và đường sắt liên vận.</li><li>Đa dạng hóa thị trường xuất khẩu nhằm giảm rủi ro phụ thuộc vào một khu vực đơn lẻ.</li></ul><p>Khi nông dân, hợp tác xã và doanh nghiệp cùng chia sẻ dữ liệu trên một chuỗi giá trị minh bạch, nông sản Việt Nam hoàn toàn có cơ sở chuyển dịch từ lợi thế giá rẻ sang thương hiệu chất lượng cao có sức cạnh tranh bền vững trên bản đồ thương mại toàn cầu.</p>"
+            ),
+            (
+                Slug: "chuyen-doi-so-y-te-benh-an-dien-tu-lien-thong-toan-quoc",
+                Title: "Chuyển đổi số y tế: Khi bệnh án điện tử giúp người dân không còn mang theo xấp phim chụp dày cộm",
+                CategorySlug: "doi-song",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 6,
+                Views: 3450L,
+                HoursAgo: 2,
+                CoverUrl: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Cảnh người bệnh xếp hàng từ 4 giờ sáng với tập hồ sơ giấy, kết quả xét nghiệm và phim X-quang cồng kềnh đang dần lùi vào quá khứ tại nhiều bệnh viện tuyến trung ương và tuyến tỉnh nhờ tiến độ triển khai bệnh án điện tử và sổ sức khỏe tích hợp trên ứng dụng định danh số.</p><h2>Giảm thời gian chờ đợi, tăng độ chính xác chẩn đoán</h2><p>Tại nhiều bệnh viện đa khoa lớn ở TP.HCM, Hà Nội và Đà Nẵng, người dân có thể đặt lịch khám theo khung giờ ngay trên điện thoại, thanh toán viện phí không dùng tiền mặt và nhận kết quả xét nghiệm trực tuyến. Quan trọng hơn, bác sĩ chỉ mất vài giây để tra cứu toàn bộ lịch sử dùng thuốc, dị ứng và các đợt điều trị trước đó của bệnh nhân, hạn chế tối đa tình trạng phải chụp chiếu, xét nghiệm lặp lại gây tốn kém.</p><p>Hệ thống lưu trữ và truyền tải hình ảnh y khoa (PACS) kết hợp công cụ hỗ trợ đọc phim bằng trí tuệ nhân tạo còn giúp phát hiện sớm các tổn thương nhỏ trên ảnh chụp cắt lớp phổi và võng mạc, giảm tải áp lực đáng kể cho đội ngũ bác sĩ chẩn đoán hình ảnh ở tuyến cơ sở.</p><blockquote>“Mục tiêu cuối cùng của chuyển đổi số y tế không phải là mua thêm máy chủ hay phần mềm, mà là giúp mỗi bệnh nhân được chăm sóc nhanh hơn, an toàn hơn và minh bạch chi phí điều trị.” — PGS.TS Trần Minh Quân, chuyên gia quản trị bệnh viện chia sẻ.</blockquote><h2>Thách thức liên thông dữ liệu và bảo mật thông tin bệnh nhân</h2><p>Tuy đạt nhiều bước tiến tích cực, quá trình liên thông dữ liệu giữa các bệnh viện công lập, tư nhân và trạm y tế phường xã vẫn đối mặt với sự khác biệt về chuẩn phần mềm và hạ tầng bảo mật. Các chuyên gia công nghệ y tế kiến nghị cần thống nhất chuẩn trao đổi dữ liệu quốc tế HL7 FHIR, mã hóa đầu cuối hồ sơ sức khỏe và kiểm toán truy cập nghiêm ngặt để bảo vệ tuyệt đối quyền riêng tư của người bệnh.</p><p>Khi sổ sức khỏe điện tử thực sự đồng hành cùng mỗi công dân từ lúc mới sinh đến tuổi xế chiều, ngành y tế sẽ có bức tranh dữ liệu dịch tễ chính xác theo thời gian thực để chuyển trọng tâm từ chữa bệnh sang y tế dự phòng chủ động.</p>"
+            ),
+            (
+                Slug: "ai-trong-giang-duong-dai-hoc-viet-nam-day-cach-dat-cau-hoi",
+                Title: "Trí tuệ nhân tạo trong giảng đường đại học Việt Nam: Dạy sinh viên cách phản biện thay vì cấm đoán",
+                CategorySlug: "cong-nghe",
+                AuthorIdx: 0,
+                CompanyIdx: (int?)2,
+                ReadMin: 6,
+                Views: 3120L,
+                HoursAgo: 4,
+                CoverUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Sự phổ biến nhanh chóng của các mô hình ngôn ngữ lớn đã khiến nhiều trường đại học trên thế giới lẫn tại Việt Nam buộc phải xem xét lại phương thức kiểm tra, đánh giá truyền thống. Thay vì ban hành lệnh cấm tuyệt đối khó thực thi, xu hướng mới là đưa AI trở thành công cụ học tập có định hướng đi kèm quy tắc liêm chính học thuật rõ ràng.</p><h2>Đổi mới cách ra đề và đánh giá năng lực thực chất</h2><p>Nhiều khoa công nghệ thông tin, kinh tế và truyền thông tại các trường đại học lớn đã chuyển tỷ trọng đánh giá từ tiểu luận viết ở nhà sang vấn đáp trực tiếp, bảo vệ đồ án nhóm, giải quyết tình huống thực tế từ doanh nghiệp và kiểm tra tư duy phản biện. Sinh viên được phép sử dụng trợ lý AI để tìm tài liệu, cấu trúc dàn ý hoặc rà soát lỗi lập trình, nhưng bắt buộc phải công khai phần hỗ trợ của AI và tự chịu trách nhiệm hoàn toàn về tính chính xác của dữ liệu trích dẫn.</p><blockquote>“Một kỹ sư hay nhà báo tương lai không thể làm việc mà thiếu AI, nhưng họ cũng sẽ nhanh chóng bị đào thải nếu không đủ kiến thức nền tảng để nhận ra khi nào AI đang trả lời sai lệch.” — TS. Phạm Lan Anh, giảng viên đại học tại TP.HCM nhấn mạnh.</blockquote><h2>Xây dựng năng lực số và đạo đức dữ liệu cho thế hệ trẻ</h2><ul><li>Tích hợp học phần kỹ năng đặt câu hỏi (prompt engineering), kiểm chứng nguồn tin và bảo vệ dữ liệu cá nhân ngay từ năm nhất.</li><li>Đầu tư hạ tầng tính toán và phòng thí nghiệm AI mở hợp tác cùng các tập đoàn công nghệ để sinh viên thực hành trên bài toán thật.</li><li>Ban hành bộ khung hướng dẫn trích dẫn và liêm chính học thuật khi sử dụng công cụ AI tạo sinh trong nghiên cứu khoa học.</li></ul><p>Các chuyên gia giáo dục đánh giá đây là thời điểm bản lề giúp giáo dục đại học Việt Nam thu hẹp khoảng cách với khu vực, chuyển từ truyền thụ kiến thức ghi nhớ sang đào tạo năng lực giải quyết vấn đề phức tạp và sáng tạo liên ngành.</p>"
+            ),
+            (
+                Slug: "nha-o-xa-hoi-do-thi-go-nut-that-quy-dat-va-tin-dung-uu-dai",
+                Title: "Gỡ nút thắt nhà ở xã hội tại các đô thị lớn: Bài toán quỹ đất sạch và dòng vốn dài hạn",
+                CategorySlug: "kinh-te",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)1,
+                ReadMin: 6,
+                Views: 2780L,
+                HoursAgo: 6,
+                CoverUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Nhu cầu nhà ở vừa túi tiền của công nhân khu công nghiệp, người lao động trẻ và viên chức tại các đô thị lớn vẫn luôn ở mức rất cao, nhưng nguồn cung nhà ở xã hội trong những năm qua chưa theo kịp tốc độ đô thị hóa. Các chính sách sửa đổi mới đang tập trung tháo gỡ đồng bộ thủ tục đầu tư, quỹ đất và cơ chế tín dụng ưu đãi.</p><h2>Rút ngắn thời gian phê duyệt dự án và minh bạch đối tượng thụ hưởng</h2><p>Một trong những rào cản lớn nhất trước đây là quy trình chấp thuận chủ trương đầu tư, thẩm định giá bán và xác nhận điều kiện thu nhập của người mua kéo dài nhiều tháng. Với cơ chế mới liên thông dữ liệu dân cư và cơ quan thuế, việc xác minh điều kiện thu nhập và tình trạng nhà ở được rút gọn đáng kể, giảm thiểu tiêu cực và tình trạng đầu cơ suất mua.</p><p>Đồng thời, nhiều địa phương đã chủ động quy hoạch các khu nhà ở xã hội quy mô lớn gắn với hạ tầng trường học, trạm y tế và tuyến giao thông công cộng thay vì bố trí rời rạc ở những khu vực thiếu tiện ích cơ bản.</p><blockquote>“Người lao động trẻ cần những gói vay mua nhà có lãi suất ổn định trong 15 đến 20 năm để yên tâm lập nghiệp, thay vì chỉ ưu đãi trong 1–2 năm đầu rồi thả nổi theo thị trường.” — Chuyên gia kinh tế bất động sản Lê Hoàng Nam phân tích.</blockquote><h2>Phát triển mô hình nhà ở cho thuê dài hạn</h2><p>Bên cạnh phân khúc bán đứt, các nhà hoạch định chính sách đang đẩy mạnh cơ chế phát triển quỹ nhà ở xã hội cho thuê với giá hợp lý thông qua Quỹ nhà ở quốc gia và sự tham gia của doanh nghiệp bất động sản có năng lực. Cách tiếp cận linh hoạt này giúp người lao động mới ra trường dễ dàng tiếp cận chỗ ở an toàn mà không phải gánh áp lực nợ vay quá lớn ngay từ đầu.</p>"
+            ),
+            (
+                Slug: "chuoi-cung-ung-toan-cau-dich-chuyen-co-hoi-cho-cang-bien-nuoc-sau",
+                Title: "Chuỗi cung ứng toàn cầu tái định hình: Cơ hội bứt phá cho hệ thống cảng biển nước sâu châu Á",
+                CategorySlug: "the-gioi",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 6,
+                Views: 2390L,
+                HoursAgo: 9,
+                CoverUrl: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Trước những biến động địa chính trị trên các tuyến hàng hải trọng yếu và chiến lược đa dạng hóa nguồn cung của các tập đoàn đa quốc gia, khu vực Đông Nam Á đang nổi lên như mắt xích trung chuyển chiến lược trong mạng lưới thương mại biển toàn cầu.</p><h2>Tự động hóa cảng biển và tiêu chuẩn tàu xanh</h2><p>Các cụm cảng nước sâu tại khu vực châu Á – Thái Bình Dương đang chạy đua nâng cấp cần cẩu tự động, hệ thống quản lý bãi container bằng AI và hạ tầng cấp điện bờ nhằm giảm phát thải khí nhà kính khi tàu neo đậu. Việc tiếp nhận trực tiếp các siêu tàu container trọng tải trên 200.000 tấn giúp hàng hóa xuất khẩu đi thẳng tới bờ Đông, bờ Tây nước Mỹ và châu Âu mà không cần trung chuyển qua cảng nước thứ ba, tiết kiệm từ 3 đến 5 ngày vận chuyển.</p><blockquote>“Cạnh tranh cảng biển trong thập kỷ mới không chỉ đo bằng chiều sâu luồng tàu, mà còn bằng tốc độ thông quan số hóa và khả năng kết nối mượt mà với đường bộ cao tốc, đường thủy nội địa và đường sắt.” — Báo cáo logistics hàng hải khu vực nhận định.</blockquote><h2>Liên kết vùng để tối ưu chi phí logistics</h2><p>Tại Việt Nam, việc đồng bộ hóa cụm cảng Cái Mép – Thị Vải, Lạch Huyện cùng dự án cảng trung chuyển quốc tế mới kết hợp mạng lưới cao tốc liên vùng đang mở ra dư địa tăng trưởng mạnh mẽ cho xuất nhập khẩu. Các chuyên gia nhấn mạnh rằng đầu tư song hành cho trung tâm dịch vụ hậu cần sau cảng và hải quan thông minh sẽ giúp hạ chi phí logistics quốc gia xuống mức cạnh tranh hàng đầu khu vực ASEAN.</p>"
+            ),
         };
 
         var insertedCount = 0;
