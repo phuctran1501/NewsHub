@@ -102,3 +102,54 @@ export interface PublishedArticlesQueryParams {
   companyId?: string
   sortBy?: ArticleSortBy
 }
+
+export type ArticleStatusValue =
+  | 'Draft'
+  | 'PendingCompanyReview'
+  | 'Published'
+  | 'Archived'
+  | 'Rejected'
+
+export interface MyArticlesQueryParams {
+  pageNumber?: number
+  pageSize?: number
+  status?: ArticleStatusValue
+}
+
+export interface CreateArticlePayload {
+  title: string
+  contentHtml: string
+  coverImageId?: string | null
+  categoryIds?: string[]
+  companyId?: string | null
+  sourceName?: string | null
+  sourceUrl?: string | null
+}
+
+export interface UpdateArticlePayload {
+  title?: string
+  contentHtml?: string
+  coverImageId?: string | null
+  categoryIds?: string[]
+  sourceName?: string | null
+  sourceUrl?: string | null
+}
+
+export interface DraftPreviewTokenDto {
+  token: string
+  previewUrl: string
+  expiresAt: string
+}
+
+export interface CategorySuggestionDto {
+  categoryId: string
+  categoryName: string
+  slug: string
+  confidence: number
+  reason: string
+}
+
+export interface SuggestCategoriesResponseDto {
+  suggestions: CategorySuggestionDto[]
+}
+

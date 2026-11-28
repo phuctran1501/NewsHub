@@ -1,5 +1,7 @@
 import type { RouteObject } from 'react-router-dom'
 import { CmsLayout } from '@/components/layout/CmsLayout'
+import { CompanyHubPage, JournalistOverviewPage, MyArticlesPage } from '@/features/journalist'
+import { LazyArticleEditorPage } from '@/features/journalist/pages/LazyArticleEditorPage'
 import { CmsScaffoldPage } from '@/pages/CmsScaffoldPage'
 import { ROUTES } from './paths'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -14,7 +16,23 @@ export const cmsRoutes: RouteObject = {
   children: [
     {
       index: true,
-      element: <CmsScaffoldPage />,
+      element: <JournalistOverviewPage />,
+    },
+    {
+      path: 'articles',
+      element: <MyArticlesPage />,
+    },
+    {
+      path: 'editor',
+      element: <LazyArticleEditorPage />,
+    },
+    {
+      path: 'editor/:id',
+      element: <LazyArticleEditorPage />,
+    },
+    {
+      path: 'companies',
+      element: <CompanyHubPage />,
     },
     {
       path: 'admin',

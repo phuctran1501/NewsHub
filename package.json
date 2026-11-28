@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "supabase": "^2.119.0"
+  },
+  "dependencies": {
+    "@tiptap/starter-kit": "^3.35.1"
   }
 }

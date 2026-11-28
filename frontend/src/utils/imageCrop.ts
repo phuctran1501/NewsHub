@@ -105,3 +105,72 @@ export async function createCroppedAvatarFile(
 
   return new File([fallbackBlob], 'avatar.png', { type: 'image/png' })
 }
+
+export async function createCroppedCoverFile(
+  imageSrc: string,
+  pixelCrop: Area,
+  rotationDeg = 0,
+  outputWidth = 1600,
+  outputHeight = 900,
+): Promise<File> {
+  const image = await loadImage(imageSrc)
+  const rad = (rotationDeg * Math.PI) / 180
+  const { width: rotatedWidth, height: rotatedHeight } = getRotatedBoundingSize(
+    image.width,
+    image.height,
+    rotationDeg,
+  )
+
+  const tempCanvas = document.createElement('canvas')
+  tempCanvas.width = Math.round(rotatedWidth)
+  tempCanvas.height = Math.round(rotatedHeight)
+  const tempCtx = tempCanvas.getContext('2d')
+  if (!tempCtx) {
+    throw new Error('Trình duyệt không hỗ trợ xử lý ảnh Canvas.')
+  }
+
+  tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2)
+  tempCtx.rotate(rad)
+  tempCtx.translate(-image.width / 2, -image.height / 2)
+  tempCtx.drawImage(image, 0, 0)
+
+  const outCanvas = document.createElement('canvas')
+  outCanvas.width = outputWidth
+  outCanvas.height = outputHeight
+  const outCtx = outCanvas.getContext('2d')
+  if (!outCtx) {
+    throw new Error('Trình duyệt không hỗ trợ xuất ảnh bìa.')
+  }
+
+  outCtx.imageSmoothingEnabled = true
+  outCtx.imageSmoothingQuality = 'high'
+  outCtx.drawImage(
+    tempCanvas,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    outputWidth,
+    outputHeight,
+  )
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    outCanvas.toBlob((result) => resolve(result), 'image/webp', 0.9)
+  })
+
+  if (blob) {
+    return new File([blob], 'article-cover.webp', { type: 'image/webp' })
+  }
+
+  const fallbackBlob = await new Promise<Blob | null>((resolve) => {
+    outCanvas.toBlob((result) => resolve(result), 'image/jpeg', 0.92)
+  })
+
+  if (!fallbackBlob) {
+    throw new Error('Không thể tạo tệp ảnh bìa sau khi cắt.')
+  }
+
+  return new File([fallbackBlob], 'article-cover.jpg', { type: 'image/jpeg' })
+}

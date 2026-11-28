@@ -364,6 +364,37 @@
   margin-bottom: 0.5rem;
 }
 
+.nh-article-prose ul[data-list-style="dash"] {
+  list-style-type: none;
+  padding-left: 1.25rem;
+}
+
+.nh-article-prose ul[data-list-style="dash"] > li {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.nh-article-prose ul[data-list-style="dash"] > li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--color-neutral-text-muted);
+}
+
+.dark .nh-article-prose ul[data-list-style="dash"] > li::before {
+  color: var(--color-dark-text-muted);
+}
+
+.nh-article-prose hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--color-neutral-border);
+}
+
+.dark .nh-article-prose hr {
+  border-top-color: var(--color-dark-border);
+}
+
 .nh-article-prose blockquote {
   margin: 1.5rem 0;
   padding: 1rem 1.25rem;
@@ -414,6 +445,41 @@
 
 .dark .nh-article-prose figcaption {
   color: var(--color-dark-text-muted);
+}
+
+/* TipTap Rich-Text Editor (NH-UI-05) */
+.nh-tiptap-editor .ProseMirror {
+  min-height: 360px;
+  outline: none;
+}
+
+.nh-tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--color-neutral-text-muted);
+}
+
+.dark .nh-tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--color-dark-text-muted);
+}
+
+.nh-tiptap-editor .ProseMirror img {
+  cursor: default;
+}
+
+.nh-color-picker-wrap .react-colorful {
+  width: 100%;
+  height: 140px;
+}
+
+.nh-color-picker-wrap .react-colorful__saturation {
+  border-radius: 8px 8px 0 0;
+}
+
+.nh-color-picker-wrap .react-colorful__last-control {
+  border-radius: 0 0 8px 8px;
 }
 
 /* Hide scrollbar on horizontal category/topic strips */

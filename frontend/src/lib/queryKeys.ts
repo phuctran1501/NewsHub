@@ -1,4 +1,4 @@
-import type { PublishedArticlesQueryParams } from '@/types/article'
+import type { MyArticlesQueryParams, PublishedArticlesQueryParams } from '@/types/article'
 import type { SearchMode } from '@/types/search'
 
 export const queryKeys = {
@@ -13,7 +13,9 @@ export const queryKeys = {
     all: () => ['articles'] as const,
     published: (params: PublishedArticlesQueryParams) =>
       ['articles', 'published', params] as const,
+    myArticles: (params: MyArticlesQueryParams) => ['articles', 'my-articles', params] as const,
     detail: (slug: string) => ['articles', 'detail', slug] as const,
+    editDetail: (id: string) => ['articles', 'edit-detail', id] as const,
     aiSummary: (articleId: string) => ['articles', 'ai-summary', articleId] as const,
     related: (articleId: string, limit = 4) => ['articles', 'related', articleId, limit] as const,
     preview: (token: string) => ['articles', 'preview', token] as const,
@@ -39,6 +41,16 @@ export const queryKeys = {
       ['companies', 'public', params] as const,
     following: (pageNumber = 1, pageSize = 50) =>
       ['companies', 'following', { pageNumber, pageSize }] as const,
+    myCompanies: () => ['companies', 'my-companies'] as const,
+    search: (params: { searchTerm?: string; pageNumber?: number; pageSize?: number }) =>
+      ['companies', 'search', params] as const,
+    myInvitations: () => ['companies', 'my-invitations'] as const,
+    internalArticles: (companyId: string, params: { pageNumber?: number; pageSize?: number }) =>
+      ['companies', 'internal-articles', companyId, params] as const,
+  },
+  media: {
+    myMedia: (params?: { pageNumber?: number; pageSize?: number; folder?: string }) =>
+      ['media', 'my-media', params ?? {}] as const,
   },
   utility: {
     weather: () => ['utility', 'weather', 'vn-8-cities'] as const,

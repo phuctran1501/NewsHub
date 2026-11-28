@@ -17,10 +17,16 @@ export const ROUTES = {
     ROOT: '/cms',
     ARTICLES: '/cms/articles',
     EDITOR: '/cms/editor',
+    EDITOR_EDIT: '/cms/editor/:id',
+    COMPANIES: '/cms/companies',
     REVIEW: '/cms/review',
     ADMIN: '/cms/admin',
   },
 } as const
+
+export function buildCmsEditorPath(articleId?: string): string {
+  return articleId ? `/cms/editor/${encodeURIComponent(articleId)}` : ROUTES.CMS.EDITOR
+}
 
 export function buildCategoryPath(slug: string): string {
   return `/categories/${encodeURIComponent(slug)}`
