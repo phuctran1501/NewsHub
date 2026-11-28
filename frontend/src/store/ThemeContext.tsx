@@ -15,7 +15,7 @@ function readInitialTheme(): ThemeMode {
   if (saved === 'light' || saved === 'dark' || saved === 'system') {
     return saved
   }
-  return 'system'
+  return 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

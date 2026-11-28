@@ -108,12 +108,29 @@ public sealed class UpdateArticleCommandHandler(
         }
 
         var oldSlug = article.Slug;
+        var wasPublished = article.Status == ArticleStatus.Published;
 
         // Nếu bài viết đang chờ tòa soạn phê duyệt (PendingCompanyReview) mà tác giả chỉnh sửa lại:
         // Tự động thu hồi về Bản nháp (Draft) để đảm bảo Ban biên tập không duyệt nhầm nội dung chưa kiểm chứng
         if (article.Status == ArticleStatus.PendingCompanyReview)
         {
             article.Status = ArticleStatus.Draft;
+        }
+        // Quy tắc nghiệp vụ tòa soạn: Bài viết thuộc Tòa soạn đã xuất bản khi phóng viên (không phải Owner/Admin) chỉnh sửa
+        // sẽ tự động chuyển về trạng thái PendingCompanyReview để Chủ tòa soạn kiểm duyệt lại
+        else if (article.CompanyId.HasValue && article.Status == ArticleStatus.Published && !isAdmin)
+        {
+            var isCompanyOwner = currentUser.Id.HasValue && await dbContext.CompanyMembers
+                .AnyAsync(
+                    m => m.CompanyId == article.CompanyId.Value &&
+                         m.UserId == currentUser.Id.Value &&
+                         m.Role == CompanyMemberRole.Owner,
+                    cancellationToken);
+
+            if (!isCompanyOwner)
+            {
+                article.Status = ArticleStatus.PendingCompanyReview;
+            }
         }
 
         // 1. Cập nhật Tiêu đề & Tái tạo Slug nếu có thay đổi
@@ -123,7 +140,7 @@ public sealed class UpdateArticleCommandHandler(
             var newTitle = request.Title.Trim();
             article.Title = newTitle;
 
-            if (article.Status != ArticleStatus.Published)
+            if (!wasPublished)
             {
                 var baseSlug = SlugHelper.GenerateSlug(newTitle, 300);
                 if (string.IsNullOrWhiteSpace(baseSlug))

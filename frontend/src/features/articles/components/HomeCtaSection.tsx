@@ -45,7 +45,7 @@ export function HomeCtaSection() {
                 to={ROUTES.PROFILE}
                 className={cn(
                   buttonVariants({ variant: 'outline', size: 'lg' }),
-                  'border-white/30 text-white hover:border-white hover:bg-white/10 dark:border-dark-border dark:text-dark-text-main dark:hover:border-secondary',
+                  'bg-white text-primary hover:bg-secondary-light dark:bg-secondary dark:text-dark-bg dark:hover:bg-secondary-dark',
                 )}
               >
                 Trang cá nhân
@@ -66,7 +66,7 @@ export function HomeCtaSection() {
                 to={ROUTES.AUTH.LOGIN}
                 className={cn(
                   buttonVariants({ variant: 'outline', size: 'lg' }),
-                  'border-white/30 text-white hover:border-white hover:bg-white/10 dark:border-dark-border dark:text-dark-text-main dark:hover:border-secondary',
+                  'bg-white text-primary hover:bg-secondary-light dark:bg-secondary dark:text-dark-bg dark:hover:bg-secondary-dark',
                 )}
               >
                 Đăng nhập
