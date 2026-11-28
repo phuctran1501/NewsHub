@@ -13,6 +13,14 @@ export const queryKeys = {
     all: () => ['articles'] as const,
     published: (params: PublishedArticlesQueryParams) =>
       ['articles', 'published', params] as const,
+    detail: (slug: string) => ['articles', 'detail', slug] as const,
+    aiSummary: (articleId: string) => ['articles', 'ai-summary', articleId] as const,
+    related: (articleId: string, limit = 4) => ['articles', 'related', articleId, limit] as const,
+    preview: (token: string) => ['articles', 'preview', token] as const,
+  },
+  bookmarks: {
+    all: () => ['bookmarks'] as const,
+    list: (pageNumber = 1, pageSize = 50) => ['bookmarks', 'list', { pageNumber, pageSize }] as const,
   },
   search: {
     all: () => ['search'] as const,
@@ -31,5 +39,9 @@ export const queryKeys = {
       ['companies', 'public', params] as const,
     following: (pageNumber = 1, pageSize = 50) =>
       ['companies', 'following', { pageNumber, pageSize }] as const,
+  },
+  utility: {
+    weather: () => ['utility', 'weather', 'vn-8-cities'] as const,
+    marketTicker: () => ['utility', 'market-ticker'] as const,
   },
 } as const

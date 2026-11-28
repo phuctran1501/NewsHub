@@ -54,6 +54,7 @@ public sealed class GetArticleBySlugQueryHandler(
         var article = await dbContext.Articles
             .AsNoTracking()
             .Include(a => a.Author)
+            .Include(a => a.Company)
             .Include(a => a.CoverImage)
             .Include(a => a.ArticleCategories)
                 .ThenInclude(ac => ac.Category)
@@ -113,7 +114,8 @@ public sealed class GetArticleBySlugQueryHandler(
             categories.Select(c => new CategorySummaryDto(c.Id, c.Name, c.Slug)).ToList(),
             article.PublishedAt,
             article.CreatedAt,
-            article.UpdatedAt);
+            article.UpdatedAt,
+            article.Company?.Name);
 
         // 4. Lưu Cache và ghi nhận tương tác nếu bài viết đã Published
         if (article.Status == ArticleStatus.Published)

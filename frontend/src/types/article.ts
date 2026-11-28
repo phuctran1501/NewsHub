@@ -35,6 +35,62 @@ export interface ArticleSummaryDto {
   createdAt: string
 }
 
+export interface ArticleDetailDto {
+  id: string
+  title: string
+  slug: string
+  contentHtml: string
+  status: string
+  author: AuthorSummaryDto
+  companyId: string | null
+  companyName?: string | null
+  sourceName: string | null
+  sourceUrl: string | null
+  coverImage: CoverImageDto | null
+  readingTimeMinutes: number
+  viewCount: number
+  categories: CategorySummaryDto[]
+  publishedAt: string | null
+  createdAt: string
+  updatedAt: string | null
+}
+
+export type ArticleSentiment = 'Neutral' | 'Positive' | 'Negative' | 'Mixed'
+
+export interface ArticleAiSummaryDto {
+  status: 'Processing' | 'Completed' | string
+  bulletPoints: string[] | null
+  sentiment: ArticleSentiment | string | null
+  extractedTags: string[] | null
+  confidenceScore: number | null
+  processedAt: string | null
+}
+
+export const REPORT_REASON_VALUES = {
+  Spam: 1,
+  Misinformation: 2,
+  Harassment: 3,
+  CopyrightViolation: 4,
+  Other: 5,
+} as const
+
+export type ReportReasonValue = (typeof REPORT_REASON_VALUES)[keyof typeof REPORT_REASON_VALUES]
+
+export interface ReportArticlePayload {
+  reason: ReportReasonValue
+  details?: string
+}
+
+export interface BookmarkItemDto {
+  articleId: string
+  title: string
+  slug: string
+  coverImageUrl: string | null
+  savedAt: string
+  authorName: string | null
+  categoryName: string | null
+}
+
 export type ArticleSortBy = 'latest' | 'mostread' | 'oldest'
 
 export interface PublishedArticlesQueryParams {

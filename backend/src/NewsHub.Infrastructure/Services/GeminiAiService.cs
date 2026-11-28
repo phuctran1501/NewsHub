@@ -314,7 +314,7 @@ Nội dung bài viết:
             },
             generationConfig = new
             {
-                temperature = 0.2,
+                temperature = 0.1,
                 responseMimeType = "application/json"
             }
         };

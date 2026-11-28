@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -10,9 +11,13 @@ import { ArticleCard } from './ArticleCard'
 
 interface CategoryStreamSectionProps {
   categories: CategoryResponseDto[]
+  columns?: 2 | 3
 }
 
-export function CategoryStreamSection({ categories }: CategoryStreamSectionProps) {
+export function CategoryStreamSection({
+  categories,
+  columns = 2,
+}: CategoryStreamSectionProps) {
   const [selectedSlug, setSelectedSlug] = useState<string>('')
 
   const { data, isLoading, isFetching, isError, refetch } = usePublishedArticles({
@@ -24,6 +29,10 @@ export function CategoryStreamSection({ categories }: CategoryStreamSectionProps
 
   const articles = data?.data ?? []
   const activeCategory = categories.find((c) => c.slug === selectedSlug)
+  const gridColsClass =
+    columns === 2
+      ? 'grid-cols-1 md:grid-cols-2'
+      : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
 
   return (
     <section aria-labelledby="category-stream-heading" className="space-y-5">
@@ -36,20 +45,32 @@ export function CategoryStreamSection({ categories }: CategoryStreamSectionProps
             Luồng tin theo chuyên mục
           </h2>
 
-          <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Lọc theo chuyên mục">
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="tablist"
+            aria-label="Lọc theo chuyên mục"
+          >
             <button
               type="button"
               role="tab"
               aria-selected={selectedSlug === ''}
               onClick={() => setSelectedSlug('')}
               className={cn(
-                'rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer',
+                'relative rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer',
                 selectedSlug === ''
-                  ? 'border-primary bg-secondary-light text-primary font-semibold dark:border-secondary dark:bg-secondary/15 dark:text-secondary'
+                  ? 'border-primary text-primary font-semibold dark:border-secondary dark:text-secondary'
                   : 'border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface text-neutral-text-muted dark:text-dark-text-muted hover:border-primary dark:hover:border-secondary hover:text-neutral-text-main dark:hover:text-dark-text-main',
               )}
             >
-              Tất cả
+              {selectedSlug === '' && (
+                <motion.span
+                  layoutId="category-stream-pill"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full bg-secondary-light dark:bg-secondary/15"
+                />
+              )}
+              <span className="relative z-10">Tất cả</span>
             </button>
 
             {categories.slice(0, 7).map((cat) => {
@@ -62,13 +83,21 @@ export function CategoryStreamSection({ categories }: CategoryStreamSectionProps
                   aria-selected={isSelected}
                   onClick={() => setSelectedSlug(cat.slug)}
                   className={cn(
-                    'rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer',
+                    'relative rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer',
                     isSelected
-                      ? 'border-primary bg-secondary-light text-primary font-semibold dark:border-secondary dark:bg-secondary/15 dark:text-secondary'
+                      ? 'border-primary text-primary font-semibold dark:border-secondary dark:text-secondary'
                       : 'border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface text-neutral-text-muted dark:text-dark-text-muted hover:border-primary dark:hover:border-secondary hover:text-neutral-text-main dark:hover:text-dark-text-main',
                   )}
                 >
-                  {cat.name}
+                  {isSelected && (
+                    <motion.span
+                      layoutId="category-stream-pill"
+                      transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                      aria-hidden="true"
+                      className="absolute inset-0 rounded-full bg-secondary-light dark:bg-secondary/15"
+                    />
+                  )}
+                  <span className="relative z-10">{cat.name}</span>
                 </button>
               )
             })}
@@ -93,7 +122,7 @@ export function CategoryStreamSection({ categories }: CategoryStreamSectionProps
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={cn('grid gap-6', gridColsClass)}>
           {[0, 1, 2, 3, 4, 5].map((idx) => (
             <ArticleCardSkeleton key={idx} />
           ))}
@@ -115,7 +144,8 @@ export function CategoryStreamSection({ categories }: CategoryStreamSectionProps
       ) : (
         <div
           className={cn(
-            'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-150',
+            'grid gap-6 transition-opacity duration-150',
+            gridColsClass,
             isFetching && 'opacity-70',
           )}
         >

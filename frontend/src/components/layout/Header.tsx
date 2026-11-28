@@ -8,7 +8,7 @@ import { UserAvatar } from '@/components/common/UserAvatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/routes/paths'
-import { NavigationBar } from './NavigationBar'
+import { CategoryMegaMenuBar } from './CategoryMegaMenuBar'
 
 interface HeaderProps {
   onOpenSearch: () => void
@@ -19,9 +19,9 @@ export function Header({ onOpenSearch }: HeaderProps) {
   const { user, roleName, isAuthenticated, isInitializing, logout } = useAuth()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-6 lg:px-12">
-        <div className="flex items-center gap-8">
+    <header className="sticky top-0 z-40 w-full border-b border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md">
+      <div className="flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-10 xl:px-14">
+        <div className="flex items-center gap-4 shrink-0">
           <Link
             to={ROUTES.HOME}
             className="focus-visible:outline-2 focus-visible:outline-primary rounded"
@@ -29,25 +29,42 @@ export function Header({ onOpenSearch }: HeaderProps) {
             <Logo variant="horizontal" size="md" />
           </Link>
 
-          <NavigationBar />
+          <span className="hidden xl:inline-block border-l border-neutral-border dark:border-dark-border pl-4 text-xs text-neutral-text-muted dark:text-dark-text-muted">
+            Cổng Tin Tức & Hệ Sinh Thái Đa Tòa Soạn
+          </span>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onOpenSearch}
-            aria-label="Mở hộp thoại tìm kiếm nhanh"
-            className="hidden md:flex items-center justify-between gap-3 rounded-[10px] border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg px-3 h-9 w-52 xl:w-64 text-xs text-neutral-text-muted dark:text-dark-text-muted hover:border-primary dark:hover:border-secondary transition-colors duration-150 cursor-pointer"
-          >
-            <span className="inline-flex items-center gap-2">
-              <Search size={15} strokeWidth={1.75} className="shrink-0" />
-              <span>Tìm kiếm tin tức...</span>
-            </span>
-            <kbd className="hidden xl:inline-block rounded border border-neutral-border dark:border-dark-border px-1.5 py-0.5 font-mono text-[10px]">
-              ⌘K
-            </kbd>
-          </button>
+        <div className="hidden md:block flex-1 max-w-xl">
+          <div className="nh-search-beam rounded-xl">
+            <button
+              type="button"
+              onClick={onOpenSearch}
+              aria-label="Mở hộp thoại tìm kiếm nhanh"
+              className="relative z-10 flex h-10 w-full items-center justify-between gap-3 rounded-[10.5px] bg-neutral-surface dark:bg-dark-bg px-3.5 text-xs text-neutral-text-muted dark:text-dark-text-muted hover:text-neutral-text-main dark:hover:text-dark-text-main transition-colors duration-150 cursor-pointer"
+            >
+              <span className="inline-flex items-center gap-2 truncate">
+                <Search size={15} strokeWidth={1.75} className="shrink-0" />
+                <span className="truncate">
+                  {isAuthenticated
+                    ? 'Tìm kiếm ngữ nghĩa AI hoặc từ khóa tin tức...'
+                    : 'Tìm kiếm bài viết, chuyên mục, tòa soạn...'}
+                </span>
+              </span>
+              <span className="flex items-center gap-2 shrink-0">
+                {isAuthenticated && (
+                  <span className="rounded-full bg-secondary-light dark:bg-secondary/15 px-2 py-0.5 text-[10px] font-semibold text-primary dark:text-secondary">
+                    AI
+                  </span>
+                )}
+                <kbd className="hidden lg:inline-block rounded border border-neutral-border dark:border-dark-border px-1.5 py-0.5 font-mono text-[10px]">
+                  ⌘K
+                </kbd>
+              </span>
+            </button>
+          </div>
+        </div>
 
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
             onClick={onOpenSearch}
@@ -144,6 +161,8 @@ export function Header({ onOpenSearch }: HeaderProps) {
           )}
         </div>
       </div>
+
+      <CategoryMegaMenuBar />
     </header>
   )
 }

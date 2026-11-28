@@ -40,15 +40,6 @@ export function PressEcosystemMarquee() {
       transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
       className="space-y-5"
     >
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-neutral-border dark:border-dark-border pb-3">
-        <h2
-          id="press-ecosystem-heading"
-          className="text-xl font-bold tracking-[-0.015em] text-neutral-text-main dark:text-dark-text-main"
-        >
-          Hệ sinh thái đa tòa soạn
-        </h2>
-      </div>
-
       <div
         title="Rê chuột để tạm dừng dải logo"
         className="nh-press-marquee overflow-hidden mask-[linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]"

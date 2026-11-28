@@ -302,6 +302,7 @@ export function HeroSpotlightSection({
 
       {/* Right 4 cols: CNBC-style Tin LIVE mới nhất (Chronological Wire) */}
       <aside
+        id="live-wire"
         aria-labelledby="live-wire-heading"
         className="lg:col-span-4 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-5 sm:p-6 flex flex-col"
       >

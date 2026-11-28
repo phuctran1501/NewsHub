@@ -4,6 +4,7 @@ export const ROUTES = {
   HOME: '/',
   CATEGORY: '/categories/:slug',
   SEARCH: '/search',
+  ARTICLE_PREVIEW: '/articles/preview',
   ARTICLE_DETAIL: '/articles/:slug',
   PROFILE: '/me/profile',
   NOTIFICATIONS: '/me/notifications',
@@ -27,6 +28,10 @@ export function buildCategoryPath(slug: string): string {
 
 export function buildArticleDetailPath(slug: string): string {
   return `/articles/${encodeURIComponent(slug)}`
+}
+
+export function buildDraftPreviewPath(token: string): string {
+  return `${ROUTES.ARTICLE_PREVIEW}?token=${encodeURIComponent(token)}`
 }
 
 export function buildSearchPath(query?: string, mode: SearchMode = 'ai'): string {

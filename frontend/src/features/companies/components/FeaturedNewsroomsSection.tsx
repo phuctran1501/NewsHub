@@ -27,7 +27,7 @@ export function FeaturedNewsroomsSection() {
 
   const { data, isLoading, isError, refetch } = usePublicCompanies({
     pageNumber: 1,
-    pageSize: 6,
+    pageSize: 8,
   })
   const { followedIds } = useFollowedCompanyIds()
   const toggleFollow = useToggleFollowCompany()
@@ -62,8 +62,8 @@ export function FeaturedNewsroomsSection() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[0, 1, 2].map((idx) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          {[0, 1, 2, 3].map((idx) => (
             <div
               key={idx}
               className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-5 space-y-4"
@@ -95,7 +95,7 @@ export function FeaturedNewsroomsSection() {
           description="Các tòa soạn đối tác sau khi được phê duyệt hoạt động sẽ xuất hiện tại đây."
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           {companies.map((company) => {
             const isFollowing = followedIds.has(company.id)
             const isMutatingThis =
