@@ -318,6 +318,15 @@
   animation-play-state: paused;
 }
 
+/* Hide scrollbar on horizontal category/topic strips */
+.nh-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.nh-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nh-ticker-track,
   .nh-press-marquee-track {

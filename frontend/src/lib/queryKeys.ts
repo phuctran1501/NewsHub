@@ -32,4 +32,8 @@ export const queryKeys = {
     following: (pageNumber = 1, pageSize = 50) =>
       ['companies', 'following', { pageNumber, pageSize }] as const,
   },
+  utility: {
+    weather: () => ['utility', 'weather', 'vn-8-cities'] as const,
+    marketTicker: () => ['utility', 'market-ticker'] as const,
+  },
 } as const

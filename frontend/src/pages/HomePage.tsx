@@ -1,8 +1,12 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { CategoryStreamSection } from '@/features/articles/components/CategoryStreamSection'
+import { EventSpotlightSection } from '@/features/articles/components/EventSpotlightSection'
 import { HeroSpotlightSection } from '@/features/articles/components/HeroSpotlightSection'
 import { HomeCtaSection } from '@/features/articles/components/HomeCtaSection'
+import { MultimediaBandSection } from '@/features/articles/components/MultimediaBandSection'
+import { OpinionAndAiBriefColumn } from '@/features/articles/components/OpinionAndAiBriefColumn'
+import { SubHeroStrip } from '@/features/articles/components/SubHeroStrip'
 import { TrendingTopicsBar } from '@/features/articles/components/TrendingTopicsBar'
 import { usePublishedArticles } from '@/features/articles/hooks/usePublishedArticles'
 import { useCategories } from '@/features/categories/hooks/useCategories'
@@ -42,7 +46,7 @@ export function HomePage() {
     isLoading: isLoadingSpotlight,
     isError: isSpotlightError,
     refetch: refetchSpotlight,
-  } = usePublishedArticles({ pageNumber: 1, pageSize: 12, sortBy: 'latest' })
+  } = usePublishedArticles({ pageNumber: 1, pageSize: 16, sortBy: 'latest' })
 
   const { data: categories = [] } = useCategories()
 
@@ -64,13 +68,14 @@ export function HomePage() {
   }, [spotlightArticles])
 
   return (
-    <div>
+    <div className="w-full">
+      {/* Breaking News Ticker (Full-Width 100%) */}
       <div
         aria-label="Tin mới cập nhật"
         title="Rê chuột để tạm dừng dòng tin"
         className="nh-ticker-bar h-10 w-full overflow-hidden border-b border-[#275296] bg-primary text-neutral-bg flex items-center"
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center gap-3.5 px-6 lg:px-12 overflow-hidden">
+        <div className="flex w-full items-center gap-3.5 px-4 sm:px-6 lg:px-10 xl:px-14 overflow-hidden">
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent-crimson px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
             <span
               aria-hidden="true"
@@ -106,25 +111,55 @@ export function HomePage() {
         </div>
       </div>
 
+      {/* Trending Topics Strip (Full-Width 100%) */}
       <TrendingTopicsBar categories={categories} />
 
-      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12 lg:py-10 space-y-12">
-        {isAuthenticated && <HeroSearchSection />}
+      {/* Band 1: Hero Search + 8/4 Front Page & Live Wire + Sub-Hero 4 Cols */}
+      <div className="w-full border-b border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg py-7 lg:py-9">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 space-y-7">
+          {isAuthenticated && <HeroSearchSection />}
 
-        <HeroSpotlightSection
-          articles={spotlightArticles}
-          isLoading={isLoadingSpotlight}
-          isError={isSpotlightError}
-          onRetry={() => void refetchSpotlight()}
-        />
+          <HeroSpotlightSection
+            articles={spotlightArticles}
+            isLoading={isLoadingSpotlight}
+            isError={isSpotlightError}
+            onRetry={() => void refetchSpotlight()}
+          />
 
-        <CategoryStreamSection categories={categories} />
+          <SubHeroStrip articles={spotlightArticles} isLoading={isLoadingSpotlight} />
+        </div>
+      </div>
 
-        <PressEcosystemMarquee />
+      {/* Band 2: Event Spotlight Strip (Full-Width White Band) */}
+      <EventSpotlightSection articles={spotlightArticles} />
 
-        <FeaturedNewsroomsSection />
+      {/* Band 3: Multi-Category Stream (8 cols) + Sticky Opinion & AI Brief (4 cols) */}
+      <div className="w-full border-b border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg py-10">
+        <div className="grid w-full grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4 sm:px-6 lg:px-10 xl:px-14">
+          <div className="lg:col-span-8">
+            <CategoryStreamSection categories={categories} columns={2} />
+          </div>
 
-        <HomeCtaSection />
+          <OpinionAndAiBriefColumn articles={spotlightArticles} />
+        </div>
+      </div>
+
+      {/* Band 4: Full-Bleed Dark Navy Multimedia Band */}
+      <MultimediaBandSection articles={spotlightArticles} />
+
+      {/* Band 5: Press Ecosystem Marquee + Featured Newsrooms (4 Cols, Full-Width Surface) */}
+      <div className="w-full border-b border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface py-10">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 space-y-10">
+          <PressEcosystemMarquee />
+          <FeaturedNewsroomsSection />
+        </div>
+      </div>
+
+      {/* Band 6: Full-Width CTA Banner above Footer */}
+      <div className="w-full bg-neutral-bg dark:bg-dark-bg py-10">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
+          <HomeCtaSection />
+        </div>
       </div>
     </div>
   )

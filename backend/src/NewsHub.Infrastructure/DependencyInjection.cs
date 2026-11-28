@@ -119,6 +119,13 @@ public static class DependencyInjection
             opt.TimeoutSeconds = int.TryParse(geminiSection["TimeoutSeconds"], out var to) ? to : 30;
         });
 
+        services.AddMemoryCache();
+        services.AddHttpClient<IMarketTickerService, MarketTickerService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(5);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("NewsHub/1.0 (+https://newshub.vn)");
+        });
+
         services.AddHttpClient<IAiService, GeminiAiService>();
         services.AddScoped<IAiBackgroundJobs, AiBackgroundJobs>();
 

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router-dom'
 import { CommandSearchModal } from '@/components/common/CommandSearchModal'
 import { PageTransition } from '@/components/common/PageTransition'
+import { ReadingProgressBar } from '@/components/common/ReadingProgressBar'
 import { ScrollToTopButton } from '@/components/common/ScrollToTopButton'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { MobileBottomNav } from './MobileBottomNav'
+import { TopUtilityBar } from './TopUtilityBar'
 
 export function RootLayout() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -24,7 +26,9 @@ export function RootLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-neutral-bg dark:bg-dark-bg text-neutral-text-main dark:text-dark-text-main">
+      <ReadingProgressBar />
       <ScrollRestoration />
+      <TopUtilityBar />
       <Header onOpenSearch={() => setIsSearchOpen(true)} />
       <main className="flex-1">
         <PageTransition>
