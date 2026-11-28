@@ -89,7 +89,7 @@ export function ArticleAuthorBar({
             {displayNewsroom && (
               <a
                 href="/#companies"
-                className="rounded-full bg-secondary-light dark:bg-secondary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary dark:text-secondary hover:underline truncate max-w-[220px]"
+                className="rounded-full bg-secondary-light dark:bg-secondary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary dark:text-secondary hover:underline truncate max-w-55"
               >
                 {displayNewsroom}
               </a>

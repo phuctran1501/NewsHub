@@ -30,7 +30,7 @@ function ArticleDetailSkeleton() {
   return (
     <div className="w-full bg-neutral-surface dark:bg-dark-surface py-8 lg:py-12">
       <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
-        <div className="mx-auto max-w-[1160px] grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="mx-auto max-w-290 grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-6">
             <Skeleton className="h-4 w-56" />
             <div className="space-y-2.5">
@@ -65,6 +65,7 @@ export function ArticleDetailPage() {
 
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt?: string } | null>(null)
   const [isReportOpen, setIsReportOpen] = useState(false)
+  const [requestedSummaryArticleId, setRequestedSummaryArticleId] = useState<string | null>(null)
 
   const {
     data: article,
@@ -75,11 +76,15 @@ export function ArticleDetailPage() {
   } = useArticleBySlug(slug)
 
   const isPublished = article?.status === 'Published'
+  const hasRequestedSummary =
+    isAuthenticated && Boolean(article?.id) && requestedSummaryArticleId === article?.id
+
   const {
     data: aiSummary,
     isLoading: isLoadingSummary,
+    isFetching: isFetchingSummary,
     refetch: refetchSummary,
-  } = useArticleAiSummary(article?.id, Boolean(isPublished))
+  } = useArticleAiSummary(article?.id, Boolean(isPublished) && hasRequestedSummary)
 
   const { data: relatedArticles = [], isLoading: isLoadingRelated } = useRelatedArticles(
     article?.id,
@@ -150,7 +155,7 @@ export function ArticleDetailPage() {
     <div className="w-full">
       <div className="w-full border-b border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface py-8 lg:py-12">
         <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
-          <div className="mx-auto max-w-[1160px] grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <div className="mx-auto max-w-290 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             {/* Primary Reading Column (8/12) */}
             <article className="lg:col-span-8 space-y-6">
               <nav
@@ -181,7 +186,7 @@ export function ArticleDetailPage() {
                 </time>
               </nav>
 
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-[-0.025em] leading-[1.2] text-neutral-text-main dark:text-dark-text-main">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-[1.2] text-neutral-text-main dark:text-dark-text-main">
                 {article.title}
               </h1>
 
@@ -199,17 +204,6 @@ export function ArticleDetailPage() {
                 }
                 onOpenReport={() => setIsReportOpen(true)}
               />
-
-              {isPublished && (
-                <ArticleAiSummaryCard
-                  summary={aiSummary}
-                  isLoading={isLoadingSummary}
-                  canRegenerate={canRegenerateAi}
-                  isRegenerating={regenerateAi.isPending}
-                  onRegenerate={() => regenerateAi.mutate()}
-                  onRefresh={() => void refetchSummary()}
-                />
-              )}
 
               {article.coverImage?.url && (
                 <figure className="space-y-2">
@@ -322,6 +316,20 @@ export function ArticleDetailPage() {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {isPublished && (
+                <ArticleAiSummaryCard
+                  hasRequested={hasRequestedSummary}
+                  summary={aiSummary}
+                  isLoading={isLoadingSummary}
+                  isFetching={isFetchingSummary}
+                  canRegenerate={canRegenerateAi}
+                  isRegenerating={regenerateAi.isPending}
+                  onRequestSummary={() => setRequestedSummaryArticleId(article.id)}
+                  onRegenerate={() => regenerateAi.mutate()}
+                  onRefresh={() => void refetchSummary()}
+                />
               )}
             </aside>
           </div>

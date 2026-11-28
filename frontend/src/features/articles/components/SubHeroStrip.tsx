@@ -67,7 +67,7 @@ export function SubHeroStrip({ articles, isLoading }: SubHeroStripProps) {
             >
               <Link
                 to={buildArticleDetailPath(article.slug)}
-                className="relative block aspect-[16/10] w-full overflow-hidden bg-primary"
+                className="relative block aspect-16/10 w-full overflow-hidden bg-primary"
               >
                 {article.coverImage?.url ? (
                   <img
@@ -77,7 +77,7 @@ export function SubHeroStrip({ articles, isLoading }: SubHeroStripProps) {
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0f274a] via-primary to-[#1e3a5f]">
+                  <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-[#0f274a] via-primary to-[#1e3a5f]">
                     <span className="font-serif text-xl font-bold text-white/20 select-none">
                       NewsHub
                     </span>
