@@ -281,7 +281,7 @@ export function TipTapRichEditor({
 
   if (!editor || editor.isDestroyed) {
     return (
-      <div className="min-h-[360px] rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg animate-pulse" />
+      <div className="min-h-90 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg animate-pulse" />
     )
   }
 
@@ -298,7 +298,7 @@ export function TipTapRichEditor({
     )
 
   return (
-    <div className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface">
+    <div className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface">
       <input
         ref={imageInputRef}
         type="file"
@@ -312,7 +312,7 @@ export function TipTapRichEditor({
       <div
         role="toolbar"
         aria-label="Thanh công cụ định dạng văn bản"
-        className="flex flex-wrap items-center gap-1.5 px-3 py-2.5 border-b border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg rounded-t-[12px]"
+        className="flex flex-wrap items-center gap-1.5 px-3 py-2.5 border-b border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg rounded-t-xl"
       >
         {/* Font Family & Font Size (px) */}
         <select
@@ -327,7 +327,7 @@ export function TipTapRichEditor({
               editor.chain().focus().setFontFamily(font).run()
             }
           }}
-          className="h-8 max-w-[144px] rounded-[8px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-2 text-xs font-medium text-neutral-text-main dark:text-dark-text-main outline-none focus:border-primary dark:focus:border-secondary cursor-pointer"
+          className="h-8 max-w-36 rounded-lg border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-2 text-xs font-medium text-neutral-text-main dark:text-dark-text-main outline-none focus:border-primary dark:focus:border-secondary cursor-pointer"
         >
           {FONT_FAMILIES.map((font) => (
             <option key={font.label} value={font.value}>
@@ -352,7 +352,7 @@ export function TipTapRichEditor({
               editor.chain().focus().setFontSize(size).run()
             }
           }}
-          className="h-8 rounded-[8px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-2 text-xs font-medium text-neutral-text-main dark:text-dark-text-main outline-none focus:border-primary dark:focus:border-secondary cursor-pointer"
+          className="h-8 rounded-lg border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-2 text-xs font-medium text-neutral-text-main dark:text-dark-text-main outline-none focus:border-primary dark:focus:border-secondary cursor-pointer"
         >
           {FONT_SIZES_PX.map((size) => (
             <option key={size} value={size}>
@@ -445,7 +445,7 @@ export function TipTapRichEditor({
           </button>
 
           {isColorOpen && (
-            <div className="absolute left-0 top-full mt-1.5 z-40 w-60 rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)] space-y-3">
+            <div className="absolute left-0 top-full mt-1.5 z-40 w-60 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)] space-y-3">
               <div className="space-y-1.5">
                 <p className="text-[11px] font-semibold text-neutral-text-muted dark:text-dark-text-muted">
                   Bảng màu chữ
@@ -469,7 +469,7 @@ export function TipTapRichEditor({
                       editor.chain().focus().setColor(swatch).run()
                       setIsColorOpen(false)
                     }}
-                    className="h-6 w-full rounded-[6px] border border-neutral-border dark:border-dark-border cursor-pointer"
+                    className="h-6 w-full rounded-md border border-neutral-border dark:border-dark-border cursor-pointer"
                     style={{ backgroundColor: swatch }}
                   />
                 ))}
@@ -613,7 +613,7 @@ export function TipTapRichEditor({
           type="button"
           disabled={disabled || isUploadingImage}
           onClick={() => imageInputRef.current?.click()}
-          className="inline-flex items-center justify-center gap-1.5 h-8 px-2.5 rounded-[8px] text-xs font-semibold bg-secondary-light text-primary hover:bg-secondary/70 dark:bg-secondary/15 dark:text-secondary dark:hover:bg-secondary/25 transition-colors duration-150 cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-semibold bg-secondary-light text-primary hover:bg-secondary/70 dark:bg-secondary/15 dark:text-secondary dark:hover:bg-secondary/25 transition-colors duration-150 cursor-pointer disabled:opacity-50"
         >
           <ImagePlus size={14} strokeWidth={1.75} />
           <span>{isUploadingImage ? 'Đang tải...' : 'Chèn ảnh'}</span>
@@ -644,10 +644,10 @@ export function TipTapRichEditor({
       </div>
 
       {/* Scrollable Editor Content Area (fixed max-height with vertical scrollbar for long articles) */}
-      <div className="max-h-[540px] overflow-y-auto overscroll-contain">
+      <div className="max-h-135 overflow-y-auto overscroll-contain">
         <EditorContent
           editor={editor}
-          className="nh-tiptap-editor nh-article-prose px-5 py-4 min-h-[380px] focus-within:outline-none"
+          className="nh-tiptap-editor nh-article-prose px-5 py-4 min-h-95 focus-within:outline-none"
         />
       </div>
 

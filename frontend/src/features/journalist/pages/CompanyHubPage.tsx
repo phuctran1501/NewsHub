@@ -110,7 +110,7 @@ export function CompanyHubPage() {
         </Badge>
       </div>
 
-      <div className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface overflow-hidden">
+      <div className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface overflow-hidden">
         <div
           role="tablist"
           aria-label="Phân mục kết nối tòa soạn"
@@ -126,7 +126,7 @@ export function CompanyHubPage() {
                 aria-selected={isActive}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  'px-3 py-1.5 rounded-[8px] text-xs font-semibold border transition-colors duration-150 cursor-pointer',
+                  'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors duration-150 cursor-pointer',
                   isActive
                     ? 'bg-primary text-white border-primary dark:bg-secondary dark:text-dark-bg dark:border-secondary'
                     : 'bg-neutral-surface dark:bg-dark-surface text-neutral-text-muted dark:text-dark-text-muted border-neutral-border dark:border-dark-border hover:text-neutral-text-main dark:hover:text-dark-text-main',
@@ -144,8 +144,8 @@ export function CompanyHubPage() {
             <>
               {isLoadingMine ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="h-32 rounded-[12px] bg-neutral-bg dark:bg-dark-bg animate-pulse" />
-                  <div className="h-32 rounded-[12px] bg-neutral-bg dark:bg-dark-bg animate-pulse" />
+                  <div className="h-32 rounded-xl bg-neutral-bg dark:bg-dark-bg animate-pulse" />
+                  <div className="h-32 rounded-xl bg-neutral-bg dark:bg-dark-bg animate-pulse" />
                 </div>
               ) : myCompanies.length === 0 ? (
                 <EmptyState
@@ -161,7 +161,7 @@ export function CompanyHubPage() {
                     return (
                       <article
                         key={company.id}
-                        className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-bg/40 dark:bg-dark-bg/50 p-4 flex flex-col justify-between gap-3"
+                        className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-bg/40 dark:bg-dark-bg/50 p-4 flex flex-col justify-between gap-3"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1 min-w-0">
@@ -169,7 +169,7 @@ export function CompanyHubPage() {
                               {company.name}
                             </h2>
                             <div className="flex flex-wrap items-center gap-2 text-xs">
-                              <span className="font-mono px-2 py-0.5 rounded-[6px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface text-neutral-text-main dark:text-dark-text-main">
+                              <span className="font-mono px-2 py-0.5 rounded-md border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface text-neutral-text-main dark:text-dark-text-main">
                                 {company.code}
                               </span>
                               <Badge variant={isOwner ? 'published' : 'category'}>
@@ -248,7 +248,7 @@ export function CompanyHubPage() {
                   {Array.from({ length: 4 }).map((_, idx) => (
                     <div
                       key={idx}
-                      className="h-32 rounded-[12px] bg-neutral-bg dark:bg-dark-bg animate-pulse"
+                      className="h-32 rounded-xl bg-neutral-bg dark:bg-dark-bg animate-pulse"
                     />
                   ))}
                 </div>
@@ -265,7 +265,7 @@ export function CompanyHubPage() {
                       return (
                         <article
                           key={company.id}
-                          className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-4 flex flex-col justify-between gap-3"
+                          className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-4 flex flex-col justify-between gap-3"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="space-y-1 min-w-0">
@@ -273,7 +273,7 @@ export function CompanyHubPage() {
                                 {company.name}
                               </h3>
                               <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-text-muted dark:text-dark-text-muted">
-                                <span className="font-mono px-2 py-0.5 rounded-[6px] border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg text-neutral-text-main dark:text-dark-text-main">
+                                <span className="font-mono px-2 py-0.5 rounded-md border border-neutral-border dark:border-dark-border bg-neutral-bg dark:bg-dark-bg text-neutral-text-main dark:text-dark-text-main">
                                   {company.code}
                                 </span>
                                 {company.ownerName && <span>Sáng lập: {company.ownerName}</span>}
@@ -345,8 +345,8 @@ export function CompanyHubPage() {
             <>
               {isLoadingInvites ? (
                 <div className="space-y-3">
-                  <div className="h-20 rounded-[12px] bg-neutral-bg dark:bg-dark-bg animate-pulse" />
-                  <div className="h-20 rounded-[12px] bg-neutral-bg dark:bg-dark-bg animate-pulse" />
+                  <div className="h-20 rounded-xl bg-neutral-bg dark:bg-dark-bg animate-pulse" />
+                  <div className="h-20 rounded-xl bg-neutral-bg dark:bg-dark-bg animate-pulse" />
                 </div>
               ) : invitations.length === 0 ? (
                 <EmptyState
@@ -358,7 +358,7 @@ export function CompanyHubPage() {
                   {invitations.map((invite) => (
                     <div
                       key={invite.id}
-                      className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-bg/40 dark:bg-dark-bg/50 p-4 flex flex-wrap items-center justify-between gap-3"
+                      className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-bg/40 dark:bg-dark-bg/50 p-4 flex flex-wrap items-center justify-between gap-3"
                     >
                       <div className="space-y-1">
                         <p className="text-sm font-bold text-neutral-text-main dark:text-dark-text-main">

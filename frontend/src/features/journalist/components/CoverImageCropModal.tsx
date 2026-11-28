@@ -68,7 +68,7 @@ export function CoverImageCropModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="relative h-72 w-full overflow-hidden rounded-[12px] border border-neutral-border dark:border-dark-border bg-dark-bg">
+          <div className="relative h-72 w-full overflow-hidden rounded-xl border border-neutral-border dark:border-dark-border bg-dark-bg">
             <Cropper
               image={imageSrc}
               crop={crop}

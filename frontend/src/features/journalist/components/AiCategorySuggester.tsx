@@ -1,8 +1,22 @@
+import { Search, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/common/Button'
 import { toast } from '@/components/ui/toastManager'
 import type { CategorySuggestionDto } from '@/types/article'
 import type { CategoryResponseDto } from '@/types/category'
 import { cn } from '@/utils/cn'
+
+const INITIAL_VISIBLE_COUNT = 8
+
+function normalizeVietnamese(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .trim()
+}
 
 interface AiCategorySuggesterProps {
   allCategories: CategoryResponseDto[]
@@ -23,6 +37,31 @@ export function AiCategorySuggester({
   onRequestSuggest,
   canSuggest,
 }: AiCategorySuggesterProps) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  const selectedCategories = useMemo(
+    () => allCategories.filter((cat) => selectedIds.includes(cat.id)),
+    [allCategories, selectedIds],
+  )
+
+  const filteredCategories = useMemo(() => {
+    const cleanQuery = normalizeVietnamese(searchQuery)
+    if (!cleanQuery) return allCategories
+    return allCategories.filter(
+      (cat) =>
+        normalizeVietnamese(cat.name).includes(cleanQuery) ||
+        cat.slug.toLowerCase().includes(cleanQuery),
+    )
+  }, [allCategories, searchQuery])
+
+  const isSearching = searchQuery.trim().length > 0
+  const visibleCategories =
+    isSearching || isExpanded
+      ? filteredCategories
+      : filteredCategories.slice(0, INITIAL_VISIBLE_COUNT)
+  const hiddenCount = Math.max(0, filteredCategories.length - visibleCategories.length)
+
   const handleSuggestClick = () => {
     if (!canSuggest) {
       toast.info(
@@ -36,13 +75,13 @@ export function AiCategorySuggester({
 
   return (
     <section className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-4 space-y-3.5">
-      <div className="flex items-start justify-between gap-2">
-        <div className="space-y-0.5">
+      <div className="flex items-start justify-between gap-2.5">
+        <div className="space-y-0.5 min-w-0">
           <h2 className="text-sm font-semibold text-neutral-text-main dark:text-dark-text-main">
             Chuyên mục bài viết
           </h2>
           <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
-            Chọn thủ công hoặc để NewsHub AI gợi ý theo nội dung.
+            Tìm nhanh, chọn thủ công hoặc dùng AI gợi ý.
           </p>
         </div>
 
@@ -50,12 +89,36 @@ export function AiCategorySuggester({
           type="button"
           variant="secondary"
           size="sm"
+          className="shrink-0 whitespace-nowrap"
           isLoading={isSuggesting}
           onClick={handleSuggestClick}
         >
           Gợi ý AI
         </Button>
       </div>
+
+      {/* Selected categories chips */}
+      {selectedCategories.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold text-neutral-text-muted dark:text-dark-text-muted">
+            Đã chọn ({selectedCategories.length})
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {selectedCategories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => onToggleCategory(cat.id)}
+                aria-label={`Bỏ chọn chuyên mục ${cat.name}`}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary text-white dark:bg-secondary dark:text-dark-bg transition-colors cursor-pointer"
+              >
+                <span>{cat.name}</span>
+                <X size={12} strokeWidth={2} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {isSuggesting && (
         <div
@@ -111,31 +174,78 @@ export function AiCategorySuggester({
         </div>
       )}
 
-      <div className="space-y-2">
-        <p className="text-[11px] font-semibold text-neutral-text-muted dark:text-dark-text-muted">
-          Tất cả chuyên mục ({selectedIds.length} đã chọn)
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {allCategories.map((category) => {
-            const isSelected = selectedIds.includes(category.id)
-            return (
-              <button
-                key={category.id}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => onToggleCategory(category.id)}
-                className={cn(
-                  'px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors duration-150 cursor-pointer',
-                  isSelected
-                    ? 'bg-primary text-white border-primary dark:bg-secondary dark:text-dark-bg dark:border-secondary'
-                    : 'bg-neutral-surface dark:bg-dark-surface text-neutral-text-main dark:text-dark-text-main border-neutral-border dark:border-dark-border hover:border-primary dark:hover:border-secondary',
-                )}
-              >
-                {category.name}
-              </button>
-            )
-          })}
+      {/* Search + Compact scrollable category selector */}
+      <div className="space-y-2.5">
+        <div className="relative">
+          <Search
+            size={14}
+            strokeWidth={1.75}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-text-muted dark:text-dark-text-muted pointer-events-none"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder={`Tìm trong ${allCategories.length} chuyên mục...`}
+            aria-label="Tìm chuyên mục"
+            className="w-full rounded-[9px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-bg pl-8 pr-7 py-1.5 text-xs text-neutral-text-main dark:text-dark-text-main placeholder:text-neutral-text-muted/75 focus:outline-none focus:border-primary dark:focus:border-secondary"
+          />
+          {isSearching && (
+            <button
+              type="button"
+              aria-label="Xóa từ khóa tìm chuyên mục"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-text-muted hover:text-neutral-text-main dark:text-dark-text-muted dark:hover:text-dark-text-main cursor-pointer"
+            >
+              <X size={13} strokeWidth={1.75} />
+            </button>
+          )}
         </div>
+
+        {filteredCategories.length === 0 ? (
+          <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted py-2 text-center">
+            Không tìm thấy chuyên mục phù hợp.
+          </p>
+        ) : (
+          <div
+            className={cn(
+              'flex flex-wrap gap-1.5',
+              (isExpanded || isSearching) && 'max-h-44 overflow-y-auto pr-1',
+            )}
+          >
+            {visibleCategories.map((category) => {
+              const isSelected = selectedIds.includes(category.id)
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => onToggleCategory(category.id)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors duration-150 cursor-pointer',
+                    isSelected
+                      ? 'bg-primary text-white border-primary dark:bg-secondary dark:text-dark-bg dark:border-secondary'
+                      : 'bg-neutral-surface dark:bg-dark-surface text-neutral-text-main dark:text-dark-text-main border-neutral-border dark:border-dark-border hover:border-primary dark:hover:border-secondary',
+                  )}
+                >
+                  {category.name}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {!isSearching && allCategories.length > INITIAL_VISIBLE_COUNT && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            fullWidth
+            onClick={() => setIsExpanded((prev) => !prev)}
+          >
+            {isExpanded ? 'Thu gọn danh sách' : `Xem thêm ${hiddenCount} chuyên mục`}
+          </Button>
+        )}
       </div>
     </section>
   )

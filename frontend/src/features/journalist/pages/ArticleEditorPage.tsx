@@ -416,7 +416,7 @@ function ArticleEditorForm({
       {willRevertPublishedCompanyArticle && (
         <div
           role="status"
-          className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-4 py-3 text-xs text-neutral-text-main dark:text-dark-text-main"
+          className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface px-4 py-3 text-xs text-neutral-text-main dark:text-dark-text-main"
         >
           <span className="font-semibold">Lưu ý kiểm duyệt Tòa soạn:</span> Bài viết này đã được Tòa
           soạn duyệt xuất bản. Khi bạn lưu chỉnh sửa, hệ thống sẽ tự động chuyển bài về trạng thái{' '}
@@ -427,7 +427,7 @@ function ArticleEditorForm({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         <div className="lg:col-span-8 space-y-5">
-          <div className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-5 space-y-4">
+          <div className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-5 space-y-4">
             <CoverImageUploader
               value={coverImage}
               disabled={isBusy}
@@ -503,7 +503,7 @@ function ArticleEditorForm({
             canSuggest={canSuggestAi}
           />
 
-          <section className="rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-4 space-y-3">
+          <section className="rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface p-4 space-y-3">
             <div className="space-y-0.5">
               <h2 className="text-sm font-semibold text-neutral-text-main dark:text-dark-text-main">
                 Nguồn trích dẫn (Tùy chọn)
@@ -542,7 +542,7 @@ function ArticleEditorForm({
       </div>
 
       {/* Sticky Bottom Dynamic Action Footer — adapts automatically to Sidebar collapse/expand */}
-      <div className="sticky bottom-3 z-30 rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md px-4 py-3">
+      <div className="sticky bottom-3 z-30 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface/95 dark:bg-dark-surface/95 backdrop-blur-md px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-neutral-text-muted dark:text-dark-text-muted">
             Ngữ cảnh:{' '}
@@ -644,10 +644,10 @@ export function ArticleEditorPage() {
   if (id && isLoadingArticle) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-56 rounded-[8px] bg-neutral-surface dark:bg-dark-surface animate-pulse" />
+        <div className="h-8 w-56 rounded-lg bg-neutral-surface dark:bg-dark-surface animate-pulse" />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className="lg:col-span-8 h-[520px] rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface animate-pulse" />
-          <div className="lg:col-span-4 h-[400px] rounded-[12px] border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface animate-pulse" />
+          <div className="lg:col-span-8 h-130 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface animate-pulse" />
+          <div className="lg:col-span-4 h-100 rounded-xl border border-neutral-border dark:border-dark-border bg-neutral-surface dark:bg-dark-surface animate-pulse" />
         </div>
       </div>
     )

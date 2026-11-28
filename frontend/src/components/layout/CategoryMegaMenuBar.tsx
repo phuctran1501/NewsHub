@@ -43,10 +43,13 @@ interface MegaCategoryGroup {
 }
 
 const MEGA_CATEGORY_GROUPS: MegaCategoryGroup[] = [
-  { title: 'Thời sự & Xã hội', slugs: ['thoi-su', 'the-gioi', 'phap-luat', 'ban-doc'] },
-  { title: 'Kinh tế & Công nghệ', slugs: ['kinh-te', 'kinh-doanh', 'cong-nghe', 'khoa-hoc', 'xe'] },
-  { title: 'Đời sống & Tri thức', slugs: ['giao-duc', 'suc-khoe', 'doi-song', 'du-lich'] },
-  { title: 'Văn hóa & Thể thao', slugs: ['van-hoa', 'giai-tri', 'the-thao'] },
+  { title: 'Thời sự & Xã hội', slugs: ['thoi-su', 'the-gioi', 'phap-luat', 'moi-truong', 'ban-doc'] },
+  {
+    title: 'Kinh tế & Công nghệ',
+    slugs: ['kinh-te', 'kinh-doanh', 'nha-dat', 'khoi-nghiep', 'nong-nghiep', 'cong-nghe', 'khoa-hoc', 'xe'],
+  },
+  { title: 'Đời sống & Tri thức', slugs: ['giao-duc', 'suc-khoe', 'doi-song', 'nhip-song-tre', 'du-lich'] },
+  { title: 'Văn hóa & Thể thao', slugs: ['van-hoa', 'sach-tri-thuc', 'giai-tri', 'the-thao'] },
 ]
 
 export function CategoryMegaMenuBar() {

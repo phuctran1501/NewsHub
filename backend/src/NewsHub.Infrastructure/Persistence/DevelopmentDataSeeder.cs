@@ -89,6 +89,12 @@ public static class DevelopmentDataSeeder
             (Name: "Giải trí", Slug: "giai-tri", Desc: "Điện ảnh, âm nhạc, sân khấu và sự kiện giải trí nổi bật."),
             (Name: "Thể thao", Slug: "the-thao", Desc: "Bóng đá trong nước và quốc tế, điền kinh và các giải đấu đỉnh cao."),
             (Name: "Bạn đọc", Slug: "ban-doc", Desc: "Phản ánh dân sinh, đường dây nóng tòa soạn và đối thoại cùng bạn đọc."),
+            (Name: "Nhà đất", Slug: "nha-dat", Desc: "Thị trường bất động sản, quy hoạch đô thị, nhà ở và kiến trúc."),
+            (Name: "Nhịp sống trẻ", Slug: "nhip-song-tre", Desc: "Xu hướng thế hệ trẻ, việc làm mới, sáng tạo và hoạt động cộng đồng."),
+            (Name: "Khởi nghiệp", Slug: "khoi-nghiep", Desc: "Hệ sinh thái startup, gọi vốn đầu tư và đổi mới sáng tạo doanh nghiệp."),
+            (Name: "Nông nghiệp", Slug: "nong-nghiep", Desc: "Nông nghiệp công nghệ cao, nông sản xuất khẩu và kinh tế xanh nông thôn."),
+            (Name: "Môi trường", Slug: "moi-truong", Desc: "Biến đổi khí hậu, bảo tồn thiên nhiên, giảm rác thải nhựa và năng lượng sạch."),
+            (Name: "Sách & Tri thức", Slug: "sach-tri-thuc", Desc: "Điểm sách hay, tác giả, xuất bản và văn hóa đọc chuyên sâu."),
         };
 
         var categoryBySlug = new Dictionary<string, Category>(StringComparer.OrdinalIgnoreCase);
@@ -506,6 +512,78 @@ public static class DevelopmentDataSeeder
                 HoursAgo: 7,
                 CoverUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1280&q=80",
                 Body: "<p>Chuyên mục Đường dây nóng và Diễn đàn Bạn đọc tuần qua ghi nhận hàng trăm ý kiến đóng góp tâm huyết từ người dân Hà Nội và TP.HCM xoay quanh việc tối ưu chu kỳ đèn tín hiệu thông minh, lệch giờ học – giờ làm và quản lý trật tự vỉa hè minh bạch.</p><h2>Những đề xuất thiết thực từ thực tế đời sống</h2><ul><li>Tăng cường camera phạt nguội kết hợp biển báo điện tử cập nhật mật độ giao thông trước các nút giao lớn.</li><li>Quy hoạch bãi gửi xe kết nối trực tiếp nhà ga metro và trạm xe buýt để khuyến khích người dân bỏ xe cá nhân.</li><li>Công khai bản đồ các tuyến vỉa hè đủ điều kiện sử dụng tạm một phần và xử lý nghiêm tình trạng lấn chiếm lối đi bộ.</li></ul><p>Tòa soạn tiếp tục tổng hợp các góp ý xác đáng để chuyển tới cơ quan quản lý đô thị xem xét và phản hồi trực tiếp tới bạn đọc trong các bản tin tiếp theo.</p>"
+            ),
+            (
+                Slug: "thi-truong-nha-dat-do-thi-ve-tinh-don-song-ha-tang-vanh-dai-va-metro",
+                Title: "Thị trường nhà đất đô thị vệ tinh đón sóng hạ tầng đường vành đai và tuyến metro mới",
+                CategorySlug: "nha-dat",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)1,
+                ReadMin: 5,
+                Views: 2840L,
+                HoursAgo: 4,
+                CoverUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Khi các tuyến đường vành đai liên vùng và nhà ga đường sắt đô thị đồng loạt tăng tốc thi công, dòng tiền mua ở thực đang dịch chuyển mạnh về các khu đô thị vệ tinh có quy hoạch bài bản, pháp lý minh bạch và đầy đủ tiện ích trường học, bệnh viện.</p><h2>Tiêu chí pháp lý và giá trị sử dụng thực lên ngôi</h2><p>Khác với giai đoạn sốt đất nền phân lô trước đây, người mua nhà năm 2026 ưu tiên các dự án đã có sổ hồng hoặc hoàn thiện hạ tầng giao thông kết nối công cộng, giúp rút ngắn thời gian di chuyển vào trung tâm dưới 35 phút.</p>"
+            ),
+            (
+                Slug: "nhip-song-tre-xu-huong-nghe-nghiep-linh-hoat-va-tinh-nguyen-xanh-cuoi-tuan",
+                Title: "Nhịp sống trẻ: Từ xu hướng nghề nghiệp số linh hoạt đến phong trào tình nguyện xanh cuối tuần",
+                CategorySlug: "nhip-song-tre",
+                AuthorIdx: 0,
+                CompanyIdx: null,
+                ReadMin: 4,
+                Views: 2150L,
+                HoursAgo: 6,
+                CoverUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Thế hệ Gen Z tại các thành phố lớn đang định hình phong cách sống cân bằng mới: chủ động nâng cao kỹ năng số để làm việc xuyên biên giới vào các ngày trong tuần, đồng thời tham gia các câu lạc bộ chạy bộ, dọn rác kênh rạch và trồng cây xanh vào mỗi sáng cuối tuần.</p><h2>Lan tỏa giá trị tích cực qua cộng đồng số</h2><p>Nhiều dự án cộng đồng do sinh viên và nhân sự trẻ khởi xướng đã kêu gọi được hàng nghìn tình nguyện viên chỉ qua vài chiến dịch truyền thông sáng tạo, minh bạch tài chính và đo lường rõ tác động xã hội.</p>"
+            ),
+            (
+                Slug: "startup-ai-va-cong-nghe-khi-hau-viet-nam-hut-von-quy-dau-tu-khu-vuc",
+                Title: "Startup AI ứng dụng và công nghệ khí hậu Việt Nam thu hút mạnh dòng vốn quỹ đầu tư Đông Nam Á",
+                CategorySlug: "khoi-nghiep",
+                AuthorIdx: 0,
+                CompanyIdx: (int?)2,
+                ReadMin: 5,
+                Views: 2510L,
+                HoursAgo: 5,
+                CoverUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Thay vì đốt tiền mở rộng quy mô bằng mọi giá, các startup Việt Nam giai đoạn 2026 chinh phục nhà đầu tư khu vực nhờ mô hình kinh doanh tinh gọn, tập trung giải quyết bài toán thực tiễn về tự động hóa doanh nghiệp, nông nghiệp thông minh và đo lường tín chỉ carbon.</p><h2>Lợi thế đội ngũ kỹ sư công nghệ bản địa</h2><p>Các quỹ đầu tư mạo hiểm đánh giá cao năng lực tối ưu chi phí vận hành hạ tầng AI và khả năng đưa sản phẩm ra thị trường khu vực ASEAN ngay từ vòng gọi vốn Seed và Series A.</p>"
+            ),
+            (
+                Slug: "nong-nghiep-cong-nghe-cao-dong-bang-song-cuu-long-chinh-phuc-thi-truong-nhat-eu",
+                Title: "Nông nghiệp công nghệ cao ĐBSCL: Truy xuất nguồn gốc số giúp trái cây Việt chinh phục thị trường Nhật và EU",
+                CategorySlug: "nong-nghiep",
+                AuthorIdx: 1,
+                CompanyIdx: (int?)1,
+                ReadMin: 5,
+                Views: 2320L,
+                HoursAgo: 8,
+                CoverUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Ứng dụng cảm biến độ ẩm đất, tưới nhỏ giọt tự động và nhật ký canh tác điện tử gắn mã QR trên từng vùng trồng đang giúp hợp tác xã tại Đồng bằng sông Cửu Long đáp ứng tiêu chuẩn dư lượng khắt khe của thị trường Nhật Bản, Hàn Quốc và châu Âu.</p><h2>Nâng cao giá trị nông sản nhờ chế biến sâu</h2><p>Kết hợp vùng nguyên liệu đạt chuẩn GlobalGAP với dây chuyền cấp đông nhanh và chế biến sâu giúp nông dân giảm phụ thuộc vào xuất khẩu tiểu ngạch và nâng biên lợi nhuận lên 25–35%.</p>"
+            ),
+            (
+                Slug: "phuc-hoi-rung-ngap-man-ven-bien-va-lo-trinh-giam-rac-thai-nhua-do-thi",
+                Title: "Phục hồi rừng ngập mặn ven biển và lộ trình giảm 50% rác thải nhựa dùng một lần tại đô thị",
+                CategorySlug: "moi-truong",
+                AuthorIdx: 2,
+                CompanyIdx: (int?)0,
+                ReadMin: 5,
+                Views: 2080L,
+                HoursAgo: 9,
+                CoverUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Các dự án trồng mới hàng nghìn hecta rừng ngập mặn ven biển kết hợp chính sách phân loại rác tại nguồn và mở rộng hệ thống tái chế bao bì đang tạo chuyển biến rõ rệt trong nỗ lực ứng phó biến đổi khí hậu và bảo vệ hệ sinh thái biển Việt Nam.</p><h2>Trách nhiệm mở rộng của nhà sản xuất (EPR)</h2><p>Quy định EPR buộc các doanh nghiệp đồ uống, bán lẻ và thực phẩm đóng gói đầu tư trực tiếp vào chuỗi thu gom, tái chế bao bì, thúc đẩy kinh tế tuần hoàn đi vào thực chất.</p>"
+            ),
+            (
+                Slug: "van-hoa-doc-thoi-dai-so-sach-giay-tinh-tuyen-song-hanh-cung-sach-noi-va-ebook",
+                Title: "Văn hóa đọc thời đại số: Sách giấy tinh tuyển song hành cùng sách nói và kho tri thức mở",
+                CategorySlug: "sach-tri-thuc",
+                AuthorIdx: 0,
+                CompanyIdx: null,
+                ReadMin: 4,
+                Views: 1890L,
+                HoursAgo: 11,
+                CoverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1280&q=80",
+                Body: "<p>Dù video ngắn chiếm nhiều thời gian giải trí, thị trường xuất bản ghi nhận lượng độc giả tìm đến các đầu sách khoa học phổ thông, lịch sử, quản trị và văn học kinh điển vẫn tăng trưởng đều đặn nhờ mô hình kết hợp sách giấy ấn bản đẹp với sách nói chất lượng cao.</p><h2>Xây dựng thói quen đọc sâu mỗi ngày</h2><p>Nhiều câu lạc bộ đọc sách tại doanh nghiệp và trường đại học tổ chức thảo luận chuyên đề định kỳ, giúp người đọc chuyển hóa tri thức từ trang sách thành tư duy phản biện sắc bén trong công việc và cuộc sống.</p>"
             ),
         };
 

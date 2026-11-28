@@ -77,8 +77,8 @@ export function CoverImageUploader({
       />
 
       {value ? (
-        <div className="rounded-[12px] border border-neutral-border dark:border-dark-border overflow-hidden bg-neutral-bg dark:bg-dark-bg">
-          <div className="relative aspect-16/9 w-full overflow-hidden">
+        <div className="rounded-xl border border-neutral-border dark:border-dark-border overflow-hidden bg-neutral-bg dark:bg-dark-bg">
+          <div className="relative aspect-video w-full overflow-hidden">
             <img
               src={value.url}
               alt="Ảnh bìa bài viết"
@@ -117,7 +117,7 @@ export function CoverImageUploader({
           type="button"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
-          className="w-full rounded-[12px] border border-dashed border-neutral-border dark:border-dark-border bg-neutral-bg/70 dark:bg-dark-bg hover:border-primary dark:hover:border-secondary px-5 py-8 flex flex-col items-center justify-center gap-2 text-center transition-colors duration-150 cursor-pointer disabled:opacity-50"
+          className="w-full rounded-xl border border-dashed border-neutral-border dark:border-dark-border bg-neutral-bg/70 dark:bg-dark-bg hover:border-primary dark:hover:border-secondary px-5 py-8 flex flex-col items-center justify-center gap-2 text-center transition-colors duration-150 cursor-pointer disabled:opacity-50"
         >
           <ImagePlus
             size={22}
