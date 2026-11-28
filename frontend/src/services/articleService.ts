@@ -75,6 +75,19 @@ export const articleService = {
     )
   },
 
+  async generateArticleAiSummaryOnDemand(
+    articleId: string,
+    signal?: AbortSignal,
+  ): Promise<ArticleAiSummaryDto> {
+    return unwrapData(
+      apiClient.post<ApiResponse<ArticleAiSummaryDto>>(
+        `/api/v1/articles/${encodeURIComponent(articleId)}/ai-summary/generate`,
+        undefined,
+        { signal },
+      ),
+    )
+  },
+
   async regenerateArticleAiSummary(
     articleId: string,
   ): Promise<{ message: string; articleId: string }> {

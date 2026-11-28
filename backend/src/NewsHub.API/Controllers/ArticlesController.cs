@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using NewsHub.API.Extensions;
 using NewsHub.Application.Common.Interfaces;
 using NewsHub.Application.Common.Models;
+using NewsHub.Application.Features.Ai.Commands.GenerateArticleAiSummaryOnDemand;
 using NewsHub.Application.Features.Ai.Commands.RegenerateArticleAiSummary;
 using NewsHub.Application.Features.Ai.Queries.GetArticleAiSummary;
 using NewsHub.Application.Features.Articles.Commands.ArchiveArticle;
@@ -268,6 +269,22 @@ public class ArticlesController(
     {
         var correlationId = correlationIdProvider.GetCorrelationId();
         var result = await mediator.Send(new GetArticleAiSummaryQuery(id), cancellationToken);
+
+        return Ok(ApiResponseFactory.Success(result, correlationId));
+    }
+
+    /// <summary>
+    /// Tóm tắt bài viết bằng AI theo yêu cầu người dùng đã đăng nhập (trả ngay nếu đã có trong DB, hoặc gọi Gemini sinh mới & lưu DB).
+    /// </summary>
+    [HttpPost("{id:guid}/ai-summary/generate")]
+    [Authorize]
+    [EnableRateLimiting(RateLimitingExtensions.AiRegenerateSummaryPolicy)]
+    public async Task<IActionResult> GenerateArticleAiSummaryOnDemand(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var correlationId = correlationIdProvider.GetCorrelationId();
+        var result = await mediator.Send(new GenerateArticleAiSummaryOnDemandCommand(id), cancellationToken);
 
         return Ok(ApiResponseFactory.Success(result, correlationId));
     }

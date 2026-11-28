@@ -24,9 +24,9 @@ export function useArticleBySlug(slug: string | undefined) {
 export function useArticleAiSummary(articleId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: queryKeys.articles.aiSummary(articleId ?? ''),
-    queryFn: ({ signal }) => articleService.getArticleAiSummary(articleId ?? '', signal),
+    queryFn: ({ signal }) => articleService.generateArticleAiSummaryOnDemand(articleId ?? '', signal),
     enabled: Boolean(articleId) && enabled,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
     refetchInterval: (query) => {
       return query.state.data?.status === 'Processing' ? 6000 : false
     },
